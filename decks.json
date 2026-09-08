@@ -1,21 +1,53 @@
 {
   "version": 1,
-  "updated": "2026-09-03",
+  "updated": "2026-09-08",
   "decks": [
     {
       "id": "dexample01",
-      "name": "Example — First Amendment Basics",
+      "name": "Mechanics II",
       "subject": "Delete this deck once you've added your own",
       "createdAt": 1000,
       "cards": [
-        { "id": "x01", "term": "Strict scrutiny", "def": "The government must show the law serves a compelling interest and is narrowly tailored to achieve it by the least restrictive means. Applied to content-based speech restrictions." },
-        { "id": "x02", "term": "Content-based restriction", "def": "A law that regulates speech because of the subject matter or viewpoint expressed. Presumptively unconstitutional and reviewed under strict scrutiny." },
-        { "id": "x03", "term": "Time, place, and manner restriction", "def": "A content-neutral rule on when, where, or how speech happens. Valid if narrowly tailored to a significant government interest and leaving open ample alternative channels." },
-        { "id": "x04", "term": "Brandenburg test", "def": "Advocacy of illegal action is protected unless it is directed to inciting imminent lawless action and is likely to produce it." },
-        { "id": "x05", "term": "Prior restraint", "def": "Government action barring speech before it occurs. Carries a heavy presumption against constitutional validity." },
-        { "id": "x06", "term": "Public forum", "def": "Government property historically open to expressive activity, such as streets and parks. Content-based restrictions there face strict scrutiny." },
-        { "id": "x07", "term": "Overbreadth doctrine", "def": "A law is facially invalid if it prohibits a substantial amount of protected speech relative to its legitimate sweep, even as applied to this speaker's unprotected conduct." },
-        { "id": "x08", "term": "Tinker standard", "def": "Public schools may restrict student speech only when it would materially and substantially disrupt schoolwork or discipline, or invade the rights of others." }
+        {
+          "id": "x01",
+          "term": "bigotry",
+          "def": "noun\n\ncomplete intolerance for beliefs and ideas different from one's own"
+        },
+        {
+          "id": "x02",
+          "term": "derogatory",
+          "def": "adjective\n\nlessening the merit or reputation of someone or something especially in a disparaging way"
+        },
+        {
+          "id": "x03",
+          "term": "dismal",
+          "def": "adjective\n\ngloomy; cheerless; melancholy"
+        },
+        {
+          "id": "x04",
+          "term": "grim",
+          "def": "adjective\n\nstern; unyielding; unpleasant"
+        },
+        {
+          "id": "x05",
+          "term": "impeccable",
+          "def": "adjective \n\nflawless; faultless"
+        },
+        {
+          "id": "x06",
+          "term": "merely",
+          "def": "adverb.\n\nonly a matter of; simply"
+        },
+        {
+          "id": "x07",
+          "term": "ornate",
+          "def": "adjective\n\nelaborately decorated or embellished"
+        },
+        {
+          "id": "x08",
+          "term": "pundit",
+          "def": "noun\n\nan authority or expert; someone who gives opinions"
+        }
       ]
     }
   ]
