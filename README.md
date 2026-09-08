@@ -1,4 +1,4 @@
-# Recall Desk
+# Quizletish
 
 A study site for course terms — flashcards, multiple choice, typed recall, and a timed
 matching drill. Static: no build step, no server, no database. It runs on GitHub Pages
