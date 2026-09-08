@@ -4,7 +4,8 @@ A study site for course terms — flashcards, multiple choice, typed recall, and
 matching drill. Static: no build step, no server, no database. It runs on GitHub Pages
 straight out of this repo.
 
-**Live:** https://homejeopardy.github.io/recall-desk/
+**Live:** https://quizletish.catherine-crump.com — served from this repo by GitHub Pages
+(the `CNAME` file is what points the domain here; don't delete it).
 
 ## The two files that matter
 
