@@ -15,22 +15,39 @@ straight out of this repo.
 
 `.nojekyll` just tells GitHub Pages to serve the files as-is.
 
-## Adding or changing cards
+## Adding cards
 
-Two routes to the same place. Either way, **students see the change only once the new
-`decks.json` is committed** — that commit is what publishing means here.
+Open the site, click the bar at the bottom of the deck list, and unlock the editor under
+*Course editor*. Add decks and cards, or use **Paste a list** to dump in a spreadsheet
+column pair at once. Edits are held in your own browser and flagged *Unpublished
+changes* until you hit **Publish to everyone**.
 
-**In the browser (easier).** Open the site, click the bar at the bottom of the deck
-list, and unlock the editor under *Course editor* with the username and password. Add
-decks and cards, or use **Paste a list** to dump in a spreadsheet column pair at once.
-Your edits are held in your own browser and marked *Unpublished changes*. When you're
-done, hit **Download decks.json**, drop the file over the one in this repo, and commit:
+Publish writes `decks.json` to this repo over the GitHub API and commits it for you.
+Students see it once Pages rebuilds — usually under a minute — and tabs already open
+pick it up on their own without a reload.
 
-```bash
-git add decks.json && git commit -m "Update decks" && git push
-```
+### One-time setup for publishing
 
-**By hand.** Edit `decks.json` directly and push. The shape:
+Publishing needs a token, because writing to the repo means being you. The app walks you
+through it under **Set up publishing**; the short version:
+
+1. Go to `github.com/settings/personal-access-tokens/new` — the **fine-grained** token
+   page, not the classic one.
+2. Resource owner `homejeopardy`. Under **Repository access** pick **Only select
+   repositories** → `recall-desk`.
+3. Under **Repository permissions** set **Contents** to **Read and write**. Leave
+   everything else alone.
+4. Generate, copy, paste it into the app.
+
+Scoped that way the token can change **one file in one repo** and nothing else. It's
+stored in that browser and never written into the site's code, so it isn't in this repo
+and students never see it. Treat it like a signed-in session: don't set it up on a
+shared machine, and use **Disconnect** if you ever do. If it leaks, revoke it at
+`github.com/settings/tokens` — nothing else needs changing.
+
+### Editing by hand
+
+You can still edit `decks.json` directly and push; the app picks up either. The shape:
 
 ```json
 {
@@ -55,20 +72,22 @@ filed against the card id, so renaming an id resets that card for everyone. `cre
 only sets the order decks appear in the rail. In a definition, alternate accepted
 answers can be separated with `/`; typed answers also forgive spelling slips.
 
-## What the editor password does, and what it doesn't
+If you edit both by hand and in the browser, the browser publishes whatever it has and
+the app will tell you when the file changed underneath it. Reload before a big edit.
 
-The password gate is a **mode switch, not security**. This is a public repo and the
-check runs in JavaScript in the browser, so anyone determined enough can read
-`index.html`, find the hash, and turn the editor on for themselves. That was a known
-trade of going fully static — a real check needs a server.
+## Who can actually change the cards
 
-It matters less than it sounds, because **unlocking the editor doesn't let anyone change
-what other people see.** Edits live in that one browser until someone with push access
-commits a new `decks.json`. The worst a student can do is rearrange their own copy.
+Two separate things, worth keeping straight:
 
-Never reuse a password here that you use anywhere else.
+**The `ADMIN` password unlocks the editor UI, and that's all it does.** This is a public
+repo and the check runs in the browser, so a determined student can read `index.html`,
+find the hash, and turn the editor on for themselves. It's a mode switch, not a lock.
 
-To change it, hash the new one and replace `ADMIN_HASH` in `index.html`:
+**The token is what publishes**, and it isn't in the code — it's in your browser. So a
+student who gets past the password can rearrange their own copy and nothing more. That
+separation is the real protection. Don't reuse a password here that you use elsewhere.
+
+To change the password, hash the new one and replace `ADMIN_HASH` in `index.html`:
 
 ```bash
 node -e "console.log(require('crypto').createHash('sha256').update('recalldesk.v1.'+process.argv[1]).digest('hex'))" 'your-new-password'

@@ -119,6 +119,12 @@ kbd{font-family:var(--mono);font-size:11px;background:var(--surface-2);border:1p
 .hr::before,.hr::after{content:"";flex:1;height:1px;background:var(--rule-soft)}
 .pubbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:12px 15px;border:1px solid var(--brass);background:var(--brass-wash);border-radius:9px;margin-bottom:16px;font-size:13px;color:var(--brass)}
 .pubbar b{font-weight:600}
+.pubbar.busy{border-color:var(--rule);background:var(--surface-2);color:var(--ink-soft)}
+.pubbar.fail{border-color:var(--bad);background:var(--bad-wash);color:var(--bad)}
+.pubbar code{font-family:var(--mono);font-size:12px}
+.steps{margin:0 0 14px;padding-left:20px;font-size:13px;color:var(--ink-soft);line-height:1.65}
+.steps li{margin-bottom:4px}
+.steps code{font-family:var(--mono);font-size:12px;background:var(--surface-2);border:1px solid var(--rule-soft);border-radius:4px;padding:1px 5px}
 .dot{width:7px;height:7px;border-radius:50%;background:var(--good);flex:none}
 .dot.off{background:var(--ink-faint)}
 
@@ -356,7 +362,7 @@ function uid(p){ return (p||"c") + Date.now().toString(36).slice(-5) + Math.rand
 
 /* ============================ state ============================ */
 var S = {
-  canEdit:false, ready:false, who:null, published:null, draft:false,
+  canEdit:false, ready:false, who:null, published:null, draft:false, token:null, busy:false, incoming:null,
   decks:[], deckId:null, view:"home",
   dir:"t2d",        // t2d = term -> definition, d2t = definition -> term
   filter:"all",     // all | starred | missed
@@ -367,7 +373,7 @@ var S = {
 };
 
 /* -------- per-viewer progress: browser-local, never sent anywhere -------- */
-var WHO_KEY = "recalldesk.who.v1", DRAFT_KEY = "recalldesk.draft.v1";
+var WHO_KEY = "recalldesk.who.v1", DRAFT_KEY = "recalldesk.draft.v1", TOKEN_KEY = "recalldesk.gh.v1";
 // Scores are filed under whichever name is signed in, so a shared classroom machine
 // keeps them apart. Still browser-local: nothing about a score leaves the device.
 function slug(n){ return String(n||"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"") || "guest"; }
@@ -459,7 +465,7 @@ function setSync(state, msg){
   $("syncmsg").textContent = msg;
 }
 function whoLine(){
-  if(S.canEdit) return "Editing as ADMIN";
+  if(S.canEdit) return "Editing as ADMIN" + (S.token ? " · can publish" : " · publishing not set up");
   return S.who ? "Studying as " + S.who : "Not signed in — scores won't be kept";
 }
 function refreshFoot(){ setSync(S.canEdit ? "edit" : !!S.who, whoLine()); }
@@ -480,7 +486,7 @@ function deckPayload(){
 function saveDraft(){
   S.draft = true;
   try{ localStorage.setItem(DRAFT_KEY, JSON.stringify(deckPayload())); }catch(e){}
-  var pb = $("pubbar"); if(pb) pb.hidden = false;
+  if($("pubbar") && !S.busy) pubState("", unpublishedMsg(), S.token ? "Publish to everyone" : "Set up publishing");
   delete S.pendingDeck;
   S.dirtyDecks = {};
   var f = $("saveflag"); if(f) f.textContent = "Draft saved on this device";
@@ -505,7 +511,97 @@ function discardDraft(){
   if(!deck() && S.decks.length) S.deckId = S.decks[0].id;
   renderRail(); render(); toast("Back to the published decks");
 }
+/* ---------------- publishing straight to the repo ----------------
+   The editor commits decks.json through the GitHub API with a fine-grained token
+   that lives only in this browser. Unlocking the editor is therefore no longer
+   enough to publish — you also need the token, which is never in the code. */
+var GH_OWNER = "homejeopardy", GH_REPO = "recall-desk", GH_BRANCH = "main", GH_FILE = "decks.json";
+var GH_API = "https://api.github.com/repos/" + GH_OWNER + "/" + GH_REPO + "/contents/" + GH_FILE;
+
+function b64utf8(str){
+  var bytes = new TextEncoder().encode(str), out = "";
+  for(var i = 0; i < bytes.length; i += 0x8000){
+    out += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  }
+  return btoa(out);
+}
+function ghFetch(url, opts){
+  opts = opts || {};
+  opts.headers = {
+    "Authorization": "Bearer " + S.token,
+    "Accept": "application/vnd.github+json",
+    "X-GitHub-Api-Version": "2022-11-28"
+  };
+  opts.cache = "no-store";
+  return fetch(url, opts);
+}
+function ghError(res){
+  if(res.status === 401) return "GitHub rejected the token. It may have expired — connect a new one.";
+  if(res.status === 403) return "That token isn't allowed to write to this repo. It needs Contents: Read and write on recall-desk.";
+  if(res.status === 404) return "GitHub can't see " + GH_OWNER + "/" + GH_REPO + ". Either the repo doesn't exist yet or the token wasn't given access to it.";
+  if(res.status === 409 || res.status === 422) return "The file changed on GitHub while you were editing. Reload the page, then redo this change.";
+  return "GitHub returned " + res.status + ". Try again in a moment.";
+}
+function setToken(t){
+  S.token = t || null;
+  try{ t ? localStorage.setItem(TOKEN_KEY, t) : localStorage.removeItem(TOKEN_KEY); }catch(e){}
+  refreshFoot();
+}
+function pubState(cls, msg, btnLabel){
+  var bar = $("pubbar"); if(!bar) return;
+  bar.hidden = false;
+  bar.className = "pubbar" + (cls ? " " + cls : "");
+  var m = $("pubmsg"); if(m){ m.textContent = ""; m.appendChild(msg); }
+  var b = $("pubbtn");
+  if(b){
+    b.disabled = S.busy ? "disabled" : null;
+    if(S.busy) b.setAttribute("disabled","disabled"); else b.removeAttribute("disabled");
+    if(btnLabel){ b.textContent = ""; b.appendChild(icon(I.upload,14)); b.appendChild(document.createTextNode(btnLabel)); }
+  }
+}
+function unpublishedMsg(){
+  return el("span",{},[el("b",{text:"Unpublished changes."})," Students still see the last published decks."]);
+}
+
 function publish(){
+  if(!S.token){ return go("connect"); }
+  if(S.busy) return;
+  var payload = deckPayload();
+  var json = JSON.stringify(payload, null, 2) + "\n";
+  S.busy = true;
+  pubState("busy", el("span",{text:"Publishing to GitHub…"}));
+
+  ghFetch(GH_API + "?ref=" + GH_BRANCH).then(function(res){
+    if(res.status === 404) return null;              // first publish, file not there yet
+    if(!res.ok) throw new Error(ghError(res));
+    return res.json();
+  }).then(function(existing){
+    var body = {
+      message: "Update decks (" + payload.decks.length + " deck" + (payload.decks.length === 1 ? "" : "s") + ", " +
+               payload.decks.reduce(function(n,d){ return n + d.cards.length; }, 0) + " cards)",
+      content: b64utf8(json),
+      branch: GH_BRANCH
+    };
+    if(existing && existing.sha) body.sha = existing.sha;
+    return ghFetch(GH_API, {method:"PUT", body: JSON.stringify(body)});
+  }).then(function(res){
+    if(!res.ok) throw new Error(ghError(res));
+    return res.json();
+  }).then(function(){
+    S.busy = false;
+    S.published = JSON.parse(JSON.stringify(S.decks));
+    S.draft = false;
+    try{ localStorage.removeItem(DRAFT_KEY); }catch(e){}
+    var bar = $("pubbar"); if(bar) bar.hidden = true;
+    var f = $("saveflag"); if(f) f.textContent = "Matches what's published";
+    toast("Published — students see it in about a minute");
+  }).catch(function(err){
+    S.busy = false;
+    pubState("fail", el("span",{},[el("b",{text:"Didn't publish. "}), String(err && err.message || err)]), "Try again");
+  });
+}
+
+function downloadJSON(){
   var json = JSON.stringify(deckPayload(), null, 2) + "\n";
   var blob = new Blob([json], {type:"application/json"});
   var url = URL.createObjectURL(blob);
@@ -514,14 +610,6 @@ function publish(){
   setTimeout(function(){ URL.revokeObjectURL(url); }, 4000);
   toast("decks.json downloaded — commit it to publish");
 }
-function copyJSON(){
-  var json = JSON.stringify(deckPayload(), null, 2) + "\n";
-  if(navigator.clipboard && navigator.clipboard.writeText){
-    navigator.clipboard.writeText(json).then(function(){ toast("decks.json copied"); },
-                                             function(){ toast("Couldn't reach the clipboard"); });
-  } else toast("Couldn't reach the clipboard");
-}
-
 /* ============================ rail ============================ */
 function renderRail(){
   var list = $("decks"); list.textContent = "";
@@ -540,13 +628,17 @@ function renderRail(){
 }
 
 /* ============================ views ============================ */
-function go(view){ S.view = view; render(); window.scrollTo(0,0); }
+function go(view){
+  if(view === "home" && !S.session && S.incoming) applyIncoming();
+  S.view = view; render(); window.scrollTo(0,0);
+}
 function openDeck(id){ S.deckId = id; S.session = null; S.view = "home"; renderRail(); render(); }
 
 function render(){
   stage.textContent = "";
   if(!S.ready){ stage.appendChild(el("div",{class:"empty",html:"<h3>Loading decks…</h3><p>Fetching the shared card store.</p>"})); return; }
   if(S.view === "who") return renderWho();
+  if(S.view === "connect") return renderConnect();
   if(S.loadError){
     stage.appendChild(el("div",{class:"empty"},[
       el("h3",{text:"Couldn't load the decks"}),
@@ -565,6 +657,7 @@ function render(){
   if(v === "match") return renderMatch();
   if(v === "edit") return renderEdit();
   if(v === "who") return renderWho();
+  if(v === "connect") return renderConnect();
   renderHome();
 }
 
@@ -1010,6 +1103,7 @@ function renderEdit(){
     bar.appendChild(el("button",{class:"btn",onclick:function(){ var p = $("pastepanel"); p.hidden = !p.hidden; if(!p.hidden) $("pastebox").focus(); }},["Paste a list"]));
   }
   bar.appendChild(el("button",{class:"btn ghost",onclick:function(){ copyDeck(d); }},[icon(I.copy,15),"Copy as text"]));
+  if(!ro) bar.appendChild(el("button",{class:"btn ghost",onclick:function(){ go("connect"); }},[icon(I.upload,15), S.token ? "Publishing" : "Set up publishing"]));
   if(!ro){
     bar.appendChild(el("div",{style:"flex:1"}));
     bar.appendChild(el("span",{class:"saveflag",id:"saveflag",text: S.dirtyDecks[d.id] ? "Saving…" : (S.draft ? "Draft saved on this device" : "Matches what's published")}));
@@ -1020,11 +1114,10 @@ function renderEdit(){
   if(!ro){
     stage.appendChild(el("div",{class:"pubbar",id:"pubbar",hidden: S.draft ? null : "hidden"},[
       icon(I.upload,15),
-      el("span",{},[el("b",{text:"Unpublished changes."})," Students still see the last published decks until you commit a new ",el("code",{text:"decks.json"}),"."]),
+      el("span",{id:"pubmsg"},[unpublishedMsg()]),
       el("div",{style:"flex:1"}),
-      el("button",{class:"btn sm",onclick:copyJSON},[icon(I.copy,14),"Copy JSON"]),
       el("button",{class:"btn sm",onclick:discardDraft},["Discard"]),
-      el("button",{class:"btn primary sm",onclick:publish},[icon(I.upload,14),"Download decks.json"])
+      el("button",{class:"btn primary sm",id:"pubbtn",onclick:publish},[icon(I.upload,14), S.token ? "Publish to everyone" : "Set up publishing"])
     ]));
   }
 
@@ -1228,6 +1321,87 @@ function renderWho(){
   setTimeout(function(){ (S.canEdit ? nameIn : nameIn).focus(); }, 0);
 }
 
+/* ============================ connect to GitHub ============================ */
+function renderConnect(){
+  var errBox, tokIn;
+  function fail(msg){ errBox.textContent = msg; errBox.hidden = false; }
+
+  stage.appendChild(el("div",{class:"stage-head"},[
+    el("div",{},[
+      el("h2",{text:"Publishing"}),
+      el("div",{class:"sub",text:"One-time setup. After this, Publish sends your cards to everyone by itself."})
+    ]),
+    el("button",{class:"btn ghost",onclick:function(){ go(S.decks.length ? "edit" : "home"); }},[icon(I.back,15),"Back"])
+  ]));
+
+  var wrap = el("div",{class:"signin"});
+
+  if(S.token){
+    wrap.appendChild(el("div",{class:"panel"},[
+      el("h3",{text:"Connected"}),
+      el("p",{text:"This browser can publish to " + GH_OWNER + "/" + GH_REPO + ". The token is stored here and nowhere else — it isn't in the site's code and never goes to anyone but GitHub."}),
+      el("div",{class:"rowctl",style:"justify-content:flex-start"},[
+        el("button",{class:"btn",onclick:function(){ setToken(null); toast("Token removed from this browser"); render(); }},["Disconnect"]),
+        el("button",{class:"btn ghost",onclick:downloadJSON},[icon(I.upload,15),"Download decks.json instead"])
+      ])
+    ]));
+    stage.appendChild(wrap);
+    return;
+  }
+
+  tokIn = el("input",{class:"text",type:"password",placeholder:"github_pat_…",autocomplete:"off",spellcheck:"false"});
+  tokIn.addEventListener("keydown", function(ev){ if(ev.key === "Enter"){ ev.preventDefault(); connect(); } });
+
+  function connect(){
+    var t = tokIn.value.trim();
+    if(!t) return fail("Paste the token first.");
+    errBox.hidden = true;
+    var was = S.token; S.token = t;
+    ghFetch(GH_API + "?ref=" + GH_BRANCH).then(function(res){
+      if(res.status === 404){
+        // 404 also means "repo exists but token can't see it" — either way, same fix.
+        throw new Error("GitHub can't see " + GH_OWNER + "/" + GH_REPO + " with this token. Check the repo exists and that the token lists it under Repository access.");
+      }
+      if(res.status === 401) throw new Error("GitHub rejected that token. Copy it again — it's only shown once.");
+      if(!res.ok) throw new Error(ghError(res));
+      return res.json();
+    }).then(function(){
+      setToken(t);
+      toast("Connected to GitHub");
+      go(S.decks.length ? "edit" : "home");
+    }).catch(function(err){
+      S.token = was;
+      fail(String(err && err.message || err));
+    });
+  }
+
+  wrap.appendChild(el("div",{class:"panel"},[
+    el("h3",{text:"Let this browser publish for you"}),
+    el("p",{text:"Publishing means writing decks.json to the repo. Give this browser a token that can do only that, and the Publish button does the rest — no terminal, no commit."}),
+    el("ol",{class:"steps"},[
+      el("li",{html:'Open <code>github.com/settings/personal-access-tokens/new</code> — this is the <b>fine-grained</b> token page, not the classic one.'}),
+      el("li",{html:'Resource owner <code>' + GH_OWNER + '</code>. Under <b>Repository access</b> choose <b>Only select repositories</b> and pick <code>' + GH_REPO + '</code>.'}),
+      el("li",{html:'Under <b>Repository permissions</b> set <b>Contents</b> to <b>Read and write</b>. Leave every other permission alone.'}),
+      el("li",{html:'Set an expiry you can live with, generate it, and copy the token — GitHub shows it once.'})
+    ]),
+    el("div",{class:"field"},[ el("label",{text:"Paste the token"}), tokIn ]),
+    el("div",{class:"rowctl",style:"justify-content:flex-start"},[
+      el("button",{class:"btn primary",onclick:connect},["Connect"]),
+      el("button",{class:"btn ghost",onclick:downloadJSON},[icon(I.upload,15),"Download decks.json instead"])
+    ])
+  ]));
+
+  wrap.appendChild(el("div",{class:"panel"},[
+    el("h3",{text:"What the token can and can't do"}),
+    el("p",{html:"Scoped that way it can change <b>one file in one repo</b> and nothing else — not your other repos, not your account, not your other GitHub data. It lives in this browser\'s storage, so treat this like a signed-in session: don\'t set it up on a shared or classroom machine, and hit Disconnect if you ever do. If it leaks, revoke it at <code>github.com/settings/tokens</code> and make a new one — nothing else needs changing."})
+  ]));
+
+  errBox = el("p",{class:"err",hidden:"hidden"});
+  wrap.appendChild(errBox);
+  stage.appendChild(wrap);
+  setTimeout(function(){ tokIn.focus(); }, 0);
+}
+
 /* ============================ keyboard ============================ */
 document.addEventListener("keydown", function(ev){
   var tag = (ev.target.tagName || "").toLowerCase();
@@ -1253,6 +1427,7 @@ document.addEventListener("keydown", function(ev){
 
 /* ============================ boot ============================ */
 try{ S.who = localStorage.getItem(WHO_KEY) || null; }catch(e){ S.who = null; }
+try{ S.token = localStorage.getItem(TOKEN_KEY) || null; }catch(e){ S.token = null; }
 loadLocal();
 $("whobtn").addEventListener("click", function(){ go("who"); });
 refreshFoot();
@@ -1295,6 +1470,40 @@ fetch("decks.json", {cache:"no-store"})
     setSync(false, "Couldn't load decks");
     render();
   });
+
+/* -------- pick up newly published decks without a reload --------
+   Students leave this open; a publish should reach them on its own. Nothing is
+   swapped out from under an editor with unsaved work or a student mid-session. */
+function applyIncoming(){
+  if(!S.incoming) return false;
+  S.published = S.incoming; S.incoming = null;
+  S.decks = JSON.parse(JSON.stringify(S.published));
+  if(!deck() && S.decks.length) S.deckId = S.decks[0].id;
+  renderRail();
+  return true;
+}
+function pollPublished(){
+  if(document.hidden || !S.ready || S.loadError) return;
+  fetch("decks.json", {cache:"no-store"})
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(raw){
+      if(!raw) return;
+      var next = normalizeDecks(raw);
+      if(JSON.stringify(next) === JSON.stringify(S.published)) return;
+      S.incoming = next;
+      if(S.draft){                      // the editor's own unpublished work wins
+        S.published = next; S.incoming = null;
+        return toast("The published decks changed somewhere else");
+      }
+      if(S.session || S.view === "edit") return toast("New cards — they'll appear when you're done");
+      applyIncoming();
+      if(S.view === "home") render();
+      toast("Decks updated");
+    })
+    .catch(function(){});
+}
+setInterval(pollPublished, 60000);
+document.addEventListener("visibilitychange", function(){ if(!document.hidden) pollPublished(); });
 })();
 </script>
 
