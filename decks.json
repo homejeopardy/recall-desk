@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated": "2026-09-08",
+  "updated": "2026-09-09",
   "decks": [
     {
       "id": "dexample01",
@@ -47,6 +47,16 @@
           "id": "x08",
           "term": "pundit",
           "def": "noun\n\nan authority or expert; someone who gives opinions"
+        },
+        {
+          "id": "cgb1zy7j8g",
+          "term": "solitude",
+          "def": "noun\n\nthe state of being alone; seclusion"
+        },
+        {
+          "id": "cgbpf03o8k",
+          "term": "wary",
+          "def": "adjective\n\nbeing on guard or watchful"
         }
       ]
     }
