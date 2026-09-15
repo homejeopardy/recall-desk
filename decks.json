@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated": "2026-09-09",
+  "updated": "2026-09-15",
   "decks": [
     {
       "id": "dexample01",
@@ -57,6 +57,64 @@
           "id": "cgbpf03o8k",
           "term": "wary",
           "def": "adjective\n\nbeing on guard or watchful"
+        }
+      ]
+    },
+    {
+      "id": "dz4r18spjq",
+      "name": "Mechanics III",
+      "subject": "",
+      "createdAt": 1789495020764,
+      "cards": [
+        {
+          "id": "cz4r18j4q3",
+          "term": "abysmal",
+          "def": "adjective. extremely bad; appalling"
+        },
+        {
+          "id": "cz6pz5t2iz",
+          "term": "calamaty",
+          "def": "noun. a disaster or great misfortune"
+        },
+        {
+          "id": "cz6qchx38b",
+          "term": "coalesce",
+          "def": "verb. to come together as one"
+        },
+        {
+          "id": "cz6qpap7cu",
+          "term": "finiky",
+          "def": "adjective. fussy; difficult to please"
+        },
+        {
+          "id": "cz6r9hq7p4",
+          "term": "indiscretion",
+          "def": "noun. behavior or speech that shows a lack of judgement"
+        },
+        {
+          "id": "cz6rl33sru",
+          "term": "innumendo",
+          "def": "noun. an indirect expression or comment, often disparaging"
+        },
+        {
+          "id": "cz6rx3lok8",
+          "term": "lull",
+          "def": "verb. to calm or soothe"
+        },
+        {
+          "id": "cz6suc9i4b",
+          "term": "preemptive",
+          "def": "adjective. intended to prevent an attack"
+        },
+        {
+          "id": "cz6tet5nfv",
+          "term": "resonant",
+          "def": "adjective. deep, clear, and continuing to ring"
+        },
+        {
+          "id": "cz6utr55ac",
+          "term": "unassailable",
+          "def": "adjective. not open to dispute or denial"
         }
       ]
     }
