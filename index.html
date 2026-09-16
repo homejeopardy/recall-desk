@@ -149,8 +149,6 @@ kbd{font-family:var(--mono);font-size:11px;background:var(--surface-2);border:1p
 .stat .v.brass{color:var(--brass)}
 .stat .v.bad{color:var(--bad)}
 .summary .note{padding:13px 20px;font-size:11.5px;color:var(--ink-faint);max-width:27ch;line-height:1.45;display:flex;align-items:center}
-.meter{flex-basis:100%;height:5px;background:var(--surface-2);border-top:1px solid var(--rule-soft);display:flex}
-.meter i{display:block;height:100%;background:var(--ink)}
 
 /* ---- options bar ---- */
 .opts{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:18px}
@@ -286,6 +284,65 @@ input.text:focus{border-color:var(--ink);outline:none}
 .steps li{margin-bottom:5px}
 .steps code{font-family:var(--mono);font-size:12px;background:var(--surface-2);border:1px solid var(--rule-soft);border-radius:2px;padding:1px 5px}
 
+/* ---- folders: drawer dividers in the rail ---- */
+#newdeckslot{display:flex;gap:2px}
+.fgroup{list-style:none}
+.folder{display:flex;align-items:stretch;border-radius:2px}
+.folder:hover{background:var(--surface-2)}
+.folder.on{background:var(--surface-2);box-shadow:inset 3px 0 0 var(--bad)}
+.fold-tog{width:24px;display:grid;place-items:center;color:var(--ink-faint);flex:none}
+.fold-tog:hover{color:var(--ink)}
+.fold-tog svg{transition:transform .15s}
+.fold-tog[aria-expanded="true"] svg{transform:rotate(90deg)}
+.fold-nm{flex:1;min-width:0;display:flex;align-items:center;gap:7px;padding:9px 10px 9px 0;text-align:left;font-weight:600;color:var(--ink)}
+.fold-nm svg{color:var(--ink-soft);flex:none}
+.fold-nm .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fold-nm .ct{font-family:var(--mono);font-size:11px;color:var(--ink-faint);font-weight:400}
+.fdecks{list-style:none;margin:1px 0 5px 16px;padding:0 0 0 5px;border-left:1px solid var(--rule);display:flex;flex-direction:column;gap:1px}
+.fdecks .deck-btn{padding:7px 9px;font-size:14px}
+.fempty{padding:6px 9px;font-size:12.5px;color:var(--ink-faint);font-style:italic}
+.loose{padding:12px 10px 4px}
+.crumb{color:var(--ink-soft);text-decoration:underline;text-decoration-color:var(--rule);text-underline-offset:3px}
+.crumb:hover{color:var(--ink);text-decoration-color:var(--ink)}
+.flist{border:1px solid var(--rule);background:var(--surface);margin-bottom:18px}
+.frow{width:100%;display:grid;grid-template-columns:1fr 150px 70px;gap:20px;align-items:center;padding:14px 18px;border-bottom:1px solid var(--rule-soft);text-align:left}
+.frow:last-child{border-bottom:0}
+.frow:hover{background:var(--surface-2)}
+.frow .t{font-family:var(--read);font-size:19px;font-weight:600;letter-spacing:-.01em;display:block;line-height:1.25}
+.frow .s{font-size:12.5px;color:var(--ink-soft);display:block;margin-top:2px}
+.frow .ct{font-family:var(--mono);font-size:12px;color:var(--ink-soft);text-align:right}
+.fpick{display:inline-flex;align-items:center;gap:7px;color:var(--ink-soft);font-size:13px}
+.fpick select{font-size:13px;padding:5px 8px}
+.editmeta{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:8px}
+.foldfoot{display:flex;justify-content:flex-end}
+
+/* ---- learn: the three piles, drawn like a ledger ---- */
+.learn{display:grid;grid-template-columns:1fr auto;gap:24px;align-items:center;padding:20px 22px;border:1px solid var(--ink);background:var(--surface);box-shadow:var(--lift);margin-bottom:18px}
+.learn h3{font-family:var(--read);font-size:23px;font-weight:600;display:flex;align-items:center;gap:9px;margin-bottom:4px;letter-spacing:-.015em}
+.learn h3 svg{color:var(--bad)}
+.learn p{margin:0 0 14px;font-size:13.5px;color:var(--ink-soft);max-width:62ch;line-height:1.55}
+.learn > .btn{padding:11px 24px;font-size:15px}
+.lbar{display:flex;height:9px;border:1px solid var(--ink);background:var(--surface)}
+.lbar i{display:block;height:100%;transition:width .3s ease}
+.lbar .lm-m,.sw.m{background:var(--ink)}
+.lbar .lm-l,.sw.l{background:repeating-linear-gradient(135deg,var(--brass) 0 2px,transparent 2px 5px)}
+.sw.f{background:var(--surface)}
+.llegend{display:flex;gap:18px;flex-wrap:wrap;margin-top:7px;font-family:var(--mono);font-size:11px;color:var(--ink-soft)}
+.sw{display:inline-block;width:10px;height:10px;border:1px solid var(--ink);margin-right:6px;vertical-align:-1px}
+.lmeter{margin-bottom:18px}
+.result .lmeter{max-width:440px;margin:4px auto 0}
+.result .llegend{justify-content:center}
+.minibar{display:flex;height:7px;border:1px solid var(--rule);background:var(--surface)}
+.minibar i{display:block;height:100%}
+.kind{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);border:1px solid var(--rule);padding:2px 7px}
+.linkbtn{font-size:13px;color:var(--ink-soft);text-decoration:underline;text-decoration-color:var(--rule);text-underline-offset:3px;padding:6px 2px}
+.linkbtn:hover{color:var(--ink);text-decoration-color:var(--ink)}
+.missed.lround li{grid-template-columns:minmax(120px,1fr) 1.4fr 92px}
+.st{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;text-align:right;white-space:nowrap}
+.st.m{color:var(--good)}
+.st.l{color:var(--brass)}
+.st.f{color:var(--bad)}
+
 .railtoggle{display:none}
 @media (max-width:860px){
   .app{grid-template-columns:1fr}
@@ -303,6 +360,11 @@ input.text:focus{border-color:var(--ink);outline:none}
   .missed li{grid-template-columns:1fr}
   .stat{min-width:50%;flex:none}
   .summary .note{display:none}
+  .frow{grid-template-columns:1fr 60px}
+  .frow .minibar{display:none}
+  .learn{grid-template-columns:1fr}
+  .missed.lround li{grid-template-columns:1fr}
+  .st{text-align:left}
 }
 </style>
 
@@ -359,7 +421,10 @@ var I = {
   copy:"M9 9h11v11H9zM5 15H4V4h11v1",
   shuffle:"M17 4l3 3-3 3M17 14l3 3-3 3M4 7h4l8 10h4M4 17h4l2-2.5M14.5 9L16 7h4",
   upload:"M12 16V4M8 8l4-4 4 4M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3",
-  user:"M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8M4.5 20a7.5 7.5 0 0 1 15 0"
+  user:"M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8M4.5 20a7.5 7.5 0 0 1 15 0",
+  learn:"M3 20h5v-5h5v-5h5V5h3",
+  folder:"M3 7.5A1.5 1.5 0 0 1 4.5 6H9l2 2h8.5A1.5 1.5 0 0 1 21 9.5v8a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5z",
+  chev:"M9 6l6 6-6 6"
 };
 function starIcon(on){
   var s = icon(I.star, 15);
@@ -382,6 +447,7 @@ function uid(p){ return (p||"c") + Date.now().toString(36).slice(-5) + Math.rand
 var S = {
   canEdit:false, ready:false, who:null, published:null, draft:false, token:null, busy:false, incoming:null,
   decks:[], deckId:null, view:"home",
+  folders:[], folderId:null, open:{}, learn:{},
   dir:"t2d",        // t2d = term -> definition, d2t = definition -> term
   filter:"all",     // all | starred | missed
   shuffle:true,
@@ -391,25 +457,29 @@ var S = {
 };
 
 /* -------- per-viewer progress: browser-local, never sent anywhere -------- */
-var WHO_KEY = "recalldesk.who.v1", DRAFT_KEY = "recalldesk.draft.v1", TOKEN_KEY = "recalldesk.gh.v1";
+var WHO_KEY = "recalldesk.who.v1", DRAFT_KEY = "recalldesk.draft.v1", TOKEN_KEY = "recalldesk.gh.v1", FOLD_KEY = "recalldesk.folders-open.v1";
 // Scores are filed under whichever name is signed in, so a shared classroom machine
 // keeps them apart. Still browser-local: nothing about a score leaves the device.
 function slug(n){ return String(n||"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"") || "guest"; }
 function PKEY(){ return "recalldesk.progress.v1." + slug(S.who); }
 function BKEY(){ return "recalldesk.bests.v1." + slug(S.who); }
+function LKEY(){ return "recalldesk.learn.v1." + slug(S.who); }
 function ls(k, fallback){
   try{ return JSON.parse(localStorage.getItem(k) || "null") || fallback; }catch(e){ return fallback; }
 }
 function loadLocal(){
   S.progress = ls(PKEY(), {});
   S.bests = ls(BKEY(), {});
+  S.learn = ls(LKEY(), {});
 }
 function saveLocal(){
   try{
     localStorage.setItem(PKEY(), JSON.stringify(S.progress));
     localStorage.setItem(BKEY(), JSON.stringify(S.bests));
+    localStorage.setItem(LKEY(), JSON.stringify(S.learn));
   }catch(e){}
 }
+function saveFolds(){ try{ localStorage.setItem(FOLD_KEY, JSON.stringify(S.open)); }catch(e){} }
 function prog(deckId, cardId){
   var d = S.progress[deckId] || (S.progress[deckId] = {});
   return d[cardId] || (d[cardId] = {seen:0, right:0, wrong:0, star:false, last:null});
@@ -422,9 +492,18 @@ function record(cardId, ok){
 function toggleStar(cardId){
   var p = prog(S.deckId, cardId); p.star = !p.star; saveLocal(); return p.star;
 }
+// Learn rung per card: 0 new, 1 learning (next asked typed), 2 mastered.
+function lstage(deckId, cardId){ var m = S.learn[deckId]; return (m && m[cardId]) || 0; }
+function setStage(deckId, cardId, st){
+  var m = S.learn[deckId] || (S.learn[deckId] = {});
+  if(st > 0) m[cardId] = st; else delete m[cardId];
+  saveLocal();
+}
 
 /* ============================ deck helpers ============================ */
 function deck(){ for(var i=0;i<S.decks.length;i++) if(S.decks[i].id === S.deckId) return S.decks[i]; return null; }
+function folderById(id){ for(var i=0;i<S.folders.length;i++) if(S.folders[i].id === id) return S.folders[i]; return null; }
+function decksIn(folderId){ return S.decks.filter(function(d){ return (d.folder || "") === folderId; }); }
 function cardsOf(d){ return (d && Array.isArray(d.cards)) ? d.cards.filter(function(c){ return (c.term||"").trim() || (c.def||"").trim(); }) : []; }
 function pool(){
   var d = deck(); if(!d) return [];
@@ -492,9 +571,11 @@ function deckPayload(){
   return {
     version: 1,
     updated: new Date().toISOString().slice(0,10),
+    folders: S.folders.map(function(f){ return {id: f.id, name: f.name || "Untitled folder"}; }),
     decks: S.decks.map(function(d){
       return {
         id: d.id, name: d.name || "Untitled deck", subject: d.subject || "",
+        folder: d.folder || undefined,      // dropped from the JSON when a deck isn't filed
         createdAt: d.createdAt || 0,
         cards: cardsOf(d).map(function(c){ return {id: c.id, term: c.term || "", def: c.def || ""}; })
       };
@@ -524,7 +605,7 @@ function queueSave(d){
 function discardDraft(){
   if(!confirm("Throw away every change made since the last publish, and go back to the decks in the repo?")) return;
   try{ localStorage.removeItem(DRAFT_KEY); }catch(e){}
-  S.decks = JSON.parse(JSON.stringify(S.published || []));
+  useStore(S.published);
   S.draft = false;
   if(!deck() && S.decks.length) S.deckId = S.decks[0].id;
   renderRail(); render(); toast("Back to the published decks");
@@ -577,6 +658,16 @@ function pubState(cls, msg, btnLabel){
     if(btnLabel){ b.textContent = ""; b.appendChild(icon(I.upload,14)); b.appendChild(document.createTextNode(btnLabel)); }
   }
 }
+// Shown on every editing surface, hidden until there's something to publish.
+function pubBar(){
+  return el("div",{class:"pubbar",id:"pubbar",hidden: S.draft ? null : "hidden"},[
+    icon(I.upload,15),
+    el("span",{id:"pubmsg"},[unpublishedMsg()]),
+    el("div",{style:"flex:1"}),
+    el("button",{class:"btn sm",onclick:discardDraft},["Discard"]),
+    el("button",{class:"btn primary sm",id:"pubbtn",onclick:publish},[icon(I.upload,14), S.token ? "Publish to everyone" : "Set up publishing"])
+  ]);
+}
 function unpublishedMsg(){
   return el("span",{},[el("b",{text:"Unpublished changes."})," Students still see the last published decks."]);
 }
@@ -607,7 +698,7 @@ function publish(){
     return res.json();
   }).then(function(){
     S.busy = false;
-    S.published = JSON.parse(JSON.stringify(S.decks));
+    S.published = copy(currentStore());
     S.draft = false;
     try{ localStorage.removeItem(DRAFT_KEY); }catch(e){}
     var bar = $("pubbar"); if(bar) bar.hidden = true;
@@ -631,26 +722,63 @@ function downloadJSON(){
 /* ============================ rail ============================ */
 function renderRail(){
   var list = $("decks"); list.textContent = "";
-  if(!S.decks.length){
+  if(!S.decks.length && !S.folders.length){
     list.appendChild(el("li",{class:"deck-btn",style:"color:var(--ink-faint);font-size:13px",text: S.ready ? "No decks yet" : "Loading…"}));
   }
-  S.decks.forEach(function(d){
-    var b = el("button",{class:"deck-btn","aria-current": d.id === S.deckId ? "true" : "false", onclick:function(){ openDeck(d.id); }},[
+  function deckItem(d){
+    return el("li",{},[ el("button",{class:"deck-btn","aria-current": d.id === S.deckId && S.view !== "folder" ? "true" : "false", onclick:function(){ openDeck(d.id); }},[
       el("span",{class:"nm",text:d.name || "Untitled deck"}),
       el("span",{class:"ct",text:String(cardsOf(d).length)})
+    ]) ]);
+  }
+  var cur = deck();
+  S.folders.forEach(function(f){
+    var inside = decksIn(f.id);
+    // Closed by default so a long list stays scannable — except the drawer you're working in.
+    var open = f.id in S.open ? S.open[f.id] : !!(cur && cur.folder === f.id);
+    var group = el("li",{class:"fgroup"},[
+      el("div",{class:"folder" + (S.view === "folder" && S.folderId === f.id ? " on" : "")},[
+        el("button",{class:"fold-tog","aria-expanded": open ? "true" : "false","aria-label":(open ? "Collapse " : "Expand ") + (f.name || "folder"),
+          onclick:function(){ S.open[f.id] = !open; saveFolds(); renderRail(); }},[icon(I.chev,13)]),
+        el("button",{class:"fold-nm",onclick:function(){ openFolder(f.id); }},[
+          icon(I.folder,15), el("span",{class:"nm",text:f.name || "Untitled folder"}), el("span",{class:"ct",text:String(inside.length)})
+        ])
+      ])
     ]);
-    list.appendChild(el("li",{},[b]));
+    if(open){
+      var ul = el("ul",{class:"fdecks"});
+      if(!inside.length) ul.appendChild(el("li",{class:"fempty",text:"Empty"}));
+      inside.forEach(function(d){ ul.appendChild(deckItem(d)); });
+      group.appendChild(ul);
+    }
+    list.appendChild(group);
   });
+  var loose = decksIn("");
+  if(S.folders.length && loose.length) list.appendChild(el("li",{class:"eyebrow loose",text:"Not in a folder"}));
+  loose.forEach(function(d){ list.appendChild(deckItem(d)); });
+
   var slot = $("newdeckslot"); slot.textContent = "";
-  if(S.canEdit) slot.appendChild(el("button",{class:"btn ghost sm",onclick:newDeck},[icon(I.plus,14),"New"]));
+  if(S.canEdit){
+    slot.appendChild(el("button",{class:"btn ghost sm",onclick:newFolder,title:"New folder"},[icon(I.folder,14),"Folder"]));
+    slot.appendChild(el("button",{class:"btn ghost sm",onclick:function(){ newDeck(""); },title:"New deck"},[icon(I.plus,14),"Deck"]));
+  }
 }
 
 /* ============================ views ============================ */
 function go(view){
-  if(view === "home" && !S.session && S.incoming) applyIncoming();
+  if((view === "home" || view === "folder") && !S.session && S.incoming) applyIncoming();
   S.view = view; render(); window.scrollTo(0,0);
 }
-function openDeck(id){ S.deckId = id; S.session = null; S.view = "home"; renderRail(); render(); }
+function openDeck(id){
+  S.deckId = id; S.session = null; S.view = "home";
+  var d = deck(); if(d && d.folder && !S.open[d.folder]){ S.open[d.folder] = true; saveFolds(); }
+  renderRail(); render(); window.scrollTo(0,0);
+}
+function openFolder(id){
+  S.folderId = id; S.session = null; S.view = "folder";
+  S.open[id] = true; saveFolds();
+  renderRail(); render(); window.scrollTo(0,0);
+}
 
 function render(){
   stage.textContent = "";
@@ -665,10 +793,12 @@ function render(){
     ]));
     return;
   }
+  if(S.view === "folder") return renderFolder();
   if(!S.decks.length){ return renderNoDecks(); }
   if(!deck()){ S.deckId = S.decks[0].id; renderRail(); }
   var v = S.view;
   if(v === "home") return renderHome();
+  if(v === "learn") return renderLearn();
   if(v === "flash") return renderFlash();
   if(v === "quiz") return renderQuiz();
   if(v === "write") return renderWrite();
@@ -684,7 +814,7 @@ function renderNoDecks(){
     stage.appendChild(el("div",{class:"empty"},[
       el("h3",{text:"No decks yet"}),
       el("p",{text:"Make a deck, then paste your terms and definitions in one go. Publish when you're ready and everyone gets them."}),
-      el("button",{class:"btn primary",onclick:newDeck},[icon(I.plus,15),"New deck"])
+      el("button",{class:"btn primary",onclick:function(){ newDeck(""); }},[icon(I.plus,15),"New deck"])
     ]));
   } else {
     stage.appendChild(el("div",{class:"empty"},[
@@ -703,14 +833,18 @@ function renderHome(){
     if(p.star) starred++;
     if(p.seen) touched++;
     if(p.wrong > 0 && p.last !== "right") missed++;
-    if(p.last === "right" && p.right >= 2) mastered++;
+    if(lstage(d.id, c.id) >= 2) mastered++;      // mastery is earned in Learn, by typing it
   });
-  var pct = n ? Math.round(mastered / n * 100) : 0;
+  var fold = folderById(d.folder);
 
   var head = el("div",{class:"stage-head"},[
     el("div",{},[
       el("h2",{text:d.name || "Untitled deck"}),
-      el("div",{class:"sub",text:(d.subject ? d.subject + " · " : "") + n + (n === 1 ? " card" : " cards") + ""})
+      el("div",{class:"sub"},[
+        fold ? el("button",{class:"crumb",onclick:function(){ openFolder(fold.id); }},[fold.name || "Untitled folder"]) : null,
+        fold ? " / " : null,
+        (d.subject ? d.subject + " · " : "") + n + (n === 1 ? " card" : " cards")
+      ])
     ]),
     el("div",{class:"rowctl"},[
       S.canEdit ? el("button",{class:"btn",onclick:function(){ go("edit"); }},[icon(I.edit,15),"Edit cards"]) : el("button",{class:"btn",onclick:function(){ go("edit"); }},[icon(I.cards,15),"Browse all cards"]),
@@ -725,13 +859,23 @@ function renderHome(){
     el("div",{class:"stat"},[el("span",{class:"v bad",text:String(missed)}),el("span",{class:"l",text:"Still missing"})]),
     el("div",{class:"stat"},[el("span",{class:"v brass",text:String(starred)}),el("span",{class:"l",text:"Starred"})]),
     el("div",{class:"stat"},[el("span",{class:"v",text:String(touched)}),el("span",{class:"l",text:"Seen"})]),
-    el("div",{class:"note",text:"Your scores stay in this browser. Nobody else can see them."}),
-    el("div",{class:"meter","aria-hidden":"true"},[ el("i",{style:"width:" + pct + "%"}) ])
+    el("div",{class:"note",text:"Your scores stay in this browser. Nobody else can see them."})
   ]));
 
   stage.appendChild(optsBar(true));
 
   var np = pool().length;
+  var lp = pool(), lk = learnCounts(d, lp), allDone = lp.length && lk.mastered === lp.length;
+  stage.appendChild(el("div",{class:"learn"},[
+    el("div",{},[
+      el("h3",{},[icon(I.learn,19),"Learn"]),
+      el("p",{text:"Short rounds that adapt to you. Each card starts as multiple choice, and only counts as mastered once you can see the definition and type the term. Misses come straight back."}),
+      learnMeter(d, lp)
+    ]),
+    el("button",{class:"btn primary",disabled: np ? null : "disabled",
+      onclick: allDone ? function(){ learnReset(lp); } : startLearn},
+      [ allDone ? "Start over" : (lk.mastered || lk.learning) ? "Keep going" : "Start learning" ])
+  ]));
   var tiles = [
     ["flash","Flashcards", I.cards, "Flip through at your own pace. Star the ones that keep slipping.", np >= 1, np ? null : "No cards in this filter"],
     ["quiz","Multiple choice", I.quiz, "Four options drawn from the deck's own answers. Scored at the end.", np >= 2, np < 2 ? "Needs 2+ cards" : null],
@@ -787,6 +931,254 @@ function startMode(mode){
   if(mode === "write") S.session = {mode:"write", cards:order, i:0, state:null, correct:0, missed:[]};
   if(mode === "match") S.session = null, startMatch(order);
   go(mode);
+}
+
+/* ---------------- learn ----------------
+   Quizlet-style adaptive rounds. Every card climbs two rungs:
+     0 new       asked as multiple choice
+     1 learning  asked as a typed answer
+     2 mastered  retired from Learn
+   A miss at either rung drops the card to 0 and requeues it once in the same round,
+   so the right answer comes back while it's still fresh. Rungs are saved per answer,
+   so walking away mid-round loses nothing but the round's order. */
+var ROUND_SIZE = 7, learnTimer = null;
+
+function learnCounts(d, cards){
+  var k = {fresh:0, learning:0, mastered:0};
+  cards.forEach(function(c){ var st = lstage(d.id, c.id); if(st >= 2) k.mastered++; else if(st === 1) k.learning++; else k.fresh++; });
+  return k;
+}
+function learnMeter(d, cards){
+  var k = learnCounts(d, cards), n = cards.length || 1;
+  return el("div",{class:"lmeter"},[
+    el("div",{class:"lbar","aria-hidden":"true"},[
+      el("i",{class:"lm-m",style:"width:" + (k.mastered/n*100) + "%"}),
+      el("i",{class:"lm-l",style:"width:" + (k.learning/n*100) + "%"})
+    ]),
+    el("div",{class:"llegend"},[
+      el("span",{},[el("b",{class:"sw m"}), k.mastered + " mastered"]),
+      el("span",{},[el("b",{class:"sw l"}), k.learning + " learning"]),
+      el("span",{},[el("b",{class:"sw f"}), k.fresh + " new"])
+    ])
+  ]);
+}
+// Multiple choice needs at least one wrong option that reads differently from the answer.
+function canChoose(cards){
+  var seen = {}, n = 0;
+  cards.forEach(function(c){ var a = norm(ans(c)); if(a && !seen[a]){ seen[a] = true; n++; } });
+  return n >= 2;
+}
+// The typed rung shows the definition and asks for the term, whichever way the deck is
+// being drilled. Typing a whole definition back verbatim is a transcription test, and a
+// definition carrying a part-of-speech line ("noun …") would fail a correct answer.
+function typesTerm(c){ return !!(c.term || "").trim() && !!(c.def || "").trim(); }
+function lask(c, kind){ return kind === "type" && typesTerm(c) ? c.def : ask(c); }
+function lans(c, kind){ return kind === "type" && typesTerm(c) ? c.term : ans(c); }
+
+function buildLearnRound(cards){
+  var d = deck();
+  var learning = cards.filter(function(c){ return lstage(d.id, c.id) === 1; });
+  var fresh = cards.filter(function(c){ return lstage(d.id, c.id) === 0; });
+  if(S.shuffle){ learning = shuffled(learning); fresh = shuffled(fresh); }
+  // Carry half-learned cards forward, but keep room to introduce a couple of new ones.
+  var take = Math.min(learning.length, ROUND_SIZE - Math.min(2, fresh.length));
+  var pick = learning.slice(0, take);
+  pick = pick.concat(fresh.slice(0, ROUND_SIZE - pick.length));
+  pick = pick.concat(learning.slice(take, take + ROUND_SIZE - pick.length));
+  if(S.shuffle) return shuffled(pick);
+  return pick.sort(function(a,b){ return cards.indexOf(a) - cards.indexOf(b); });
+}
+function startLearn(){
+  S.session = {mode:"learn", all:pool(), round:0};
+  nextLearnRound();
+  go("learn");
+}
+function nextLearnRound(){
+  var s = S.session;
+  s.round++; s.queue = buildLearnRound(s.all); s.i = 0;
+  s.requeued = {}; s.answer = null; s.kind = null; s.kindFor = null; s.choices = null;
+}
+function learnContinueRound(){
+  var s = S.session;
+  if(!s || s.mode !== "learn" || s.i < s.queue.length) return;   // guards a double Enter+click
+  nextLearnRound(); render(); window.scrollTo(0,0);
+}
+function learnReset(cards){
+  if(!confirm("Reset Learn for these " + cards.length + " cards and start from scratch? Stars and your other scores stay.")) return;
+  var d = deck();
+  cards.forEach(function(c){ setStage(d.id, c.id, 0); });
+  startLearn();
+}
+
+function renderLearn(){
+  var s = S.session; if(!s || s.mode !== "learn") return go("home");
+  var d = deck(), all = cardsOf(d);
+  if(!s.queue.length) return renderLearnDone(s);
+  if(s.i >= s.queue.length){
+    return learnCounts(d, s.all).mastered >= s.all.length ? renderLearnDone(s) : renderLearnRound(s);
+  }
+  var c = s.queue[s.i];
+  if(s.kindFor !== s.i){
+    s.kind = (lstage(d.id, c.id) === 0 && canChoose(all)) ? "choice" : "type";
+    s.choices = s.kind === "choice" ? buildChoices(c, all) : null;
+    s.kindFor = s.i;
+  }
+  var a = s.answer, typed = s.kind === "type", right = lans(c, s.kind);
+
+  stage.appendChild(modeHead("Learn"));
+  stage.appendChild(learnMeter(d, s.all));
+  stage.appendChild(el("div",{class:"deskrow"},[
+    el("span",{class:"counter",text:"Round " + s.round + " · " + (s.i+1) + " / " + s.queue.length}),
+    el("span",{class:"kind",text: !typed ? "Pick one" : typesTerm(c) ? "Type the term" : "Type it"})
+  ]));
+  var tr = el("div",{class:"track"}); tr.appendChild(el("i",{style:"width:" + (s.i/s.queue.length*100) + "%"})); stage.appendChild(tr);
+  stage.appendChild(el("div",{class:"prompt"},[
+    el("div",{class:"role",text: typed && typesTerm(c) ? "Definition" : ASK_LABEL()}),
+    el("div",{class:"q",text:lask(c, s.kind) || "—"})
+  ]));
+
+  var input = null;
+  if(s.kind === "choice"){
+    var wrap = el("div",{class:"choices"});
+    s.choices.forEach(function(opt, idx){
+      var cls = "choice";
+      if(a){ if(opt === right) cls += " right"; else if(idx === a.picked) cls += " wrong"; }
+      wrap.appendChild(el("button",{class:cls, disabled: a ? "disabled" : null, onclick:function(){ learnPick(idx); }},[
+        el("span",{class:"key",text:String(idx+1)}), el("span",{text:opt})
+      ]));
+    });
+    stage.appendChild(wrap);
+  } else {
+    input = el("input",{class:"answer",type:"text",placeholder:"Type the " + (typesTerm(c) ? "term" : ANS_LABEL().toLowerCase()) + "…","aria-label":"Your answer",autocomplete:"off",autocapitalize:"off",spellcheck:"false"});
+    if(a){ input.value = a.given; input.disabled = true; }
+    else {
+      input.addEventListener("keydown", function(ev){ if(ev.key === "Enter"){ ev.preventDefault(); learnType(input.value); } });
+      setTimeout(function(){ input.focus(); }, 0);
+    }
+    stage.appendChild(input);
+  }
+
+  if(!a){
+    stage.appendChild(el("div",{class:"rowctl",style:"margin-top:12px;justify-content:space-between"},[
+      el("span",{style:"font-size:11.5px;color:var(--ink-faint)",
+        html: s.kind === "choice" ? 'Press <kbd>1</kbd>–<kbd>' + s.choices.length + '</kbd>' : 'Press <kbd>Enter</kbd> to check'}),
+      el("span",{class:"rowctl"},[
+        el("button",{class:"linkbtn",onclick:learnDontKnow},["Don't know?"]),
+        s.kind === "type" ? el("button",{class:"btn primary",onclick:function(){ learnType(input.value); }},["Check"]) : null
+      ])
+    ]));
+    return;
+  }
+
+  var note = a.to >= 2 && a.from < 2 ? " Mastered." : (a.to === 1 && a.from === 0 ? " Next time, type it." : "");
+  var cls = a.result === "no" ? "no" : a.result === "near" ? "near" : "ok", msg;
+  if(a.result === "no"){
+    msg = [ a.skipped ? "The answer is " : "Not quite — the answer is ", el("b",{text:right}), ". ",
+            a.requeued ? "It comes back later this round." : "You'll see it again next round." ];
+  } else if(a.result === "near"){
+    msg = [ "Close enough — the exact wording is ", el("b",{text:right}), "." + note ];
+  } else {
+    msg = [ (a.overridden ? "Counted as correct." : "Correct.") + note ];
+  }
+  stage.appendChild(el("div",{class:"verdict " + cls},[
+    el("span",{},msg),
+    el("span",{class:"rowctl"},[
+      a.result === "no" && a.kind === "type" && !a.skipped ? el("button",{class:"btn sm",onclick:learnOverride},["I was right"]) : null,
+      el("button",{class:"btn sm",onclick:learnNext},[ s.i + 1 >= s.queue.length ? "Finish round" : "Continue", icon(I.chev,14) ])
+    ])
+  ]));
+}
+
+function learnAnswer(c, ok, a){
+  var s = S.session, d = deck();
+  a.from = lstage(d.id, c.id);
+  a.requeued = false;
+  if(ok) setStage(d.id, c.id, Math.min(2, a.from + 1));
+  else {
+    setStage(d.id, c.id, 0);
+    if(!s.requeued[c.id]){ s.requeued[c.id] = true; s.queue.push(c); a.requeued = true; }
+  }
+  a.to = lstage(d.id, c.id);
+  record(c.id, ok);
+  s.answer = a;
+  render();
+  // A clean right answer moves on by itself; anything worth reading waits for you.
+  if(ok && a.result === "exact"){
+    clearTimeout(learnTimer);
+    learnTimer = setTimeout(function(){ if(S.session === s && s.answer === a) learnNext(); }, 950);
+  }
+}
+function learnPick(idx){
+  var s = S.session; if(!s || s.answer || s.kind !== "choice") return;
+  var c = s.queue[s.i], ok = s.choices[idx] === ans(c);
+  learnAnswer(c, ok, {kind:"choice", picked:idx, result: ok ? "exact" : "no"});
+}
+function learnType(given){
+  var s = S.session; if(!s || s.answer || s.kind !== "type") return;
+  var c = s.queue[s.i], r = String(given || "").trim() ? grade(given, lans(c, "type")) : "no";
+  learnAnswer(c, r !== "no", {kind:"type", given:given, result:r});
+}
+function learnDontKnow(){
+  var s = S.session; if(!s || s.answer) return;
+  learnAnswer(s.queue[s.i], false, {kind:s.kind, picked:null, given:"", result:"no", skipped:true});
+}
+function learnOverride(){
+  var s = S.session, a = s && s.answer;
+  if(!a || a.result !== "no" || a.kind !== "type" || a.skipped) return;
+  var c = s.queue[s.i], d = deck();
+  setStage(d.id, c.id, Math.min(2, a.from + 1));
+  if(a.requeued && s.queue[s.queue.length - 1] === c){ s.queue.pop(); delete s.requeued[c.id]; a.requeued = false; }
+  var p = prog(d.id, c.id); p.wrong = Math.max(0, p.wrong - 1); p.right++; p.last = "right"; saveLocal();
+  a.result = "exact"; a.overridden = true; a.to = lstage(d.id, c.id);
+  render();
+}
+function learnNext(){
+  clearTimeout(learnTimer);
+  var s = S.session; if(!s || s.mode !== "learn" || !s.answer) return;   // guards a double Enter+click
+  s.i++; s.answer = null; render();
+}
+
+function renderLearnRound(s){
+  var d = deck(), seen = [], ids = {};
+  s.queue.forEach(function(c){ if(!ids[c.id]){ ids[c.id] = true; seen.push(c); } });
+  var k = learnCounts(d, s.all);
+  var ul = el("ul",{class:"missed lround"});
+  seen.forEach(function(c){
+    var st = lstage(d.id, c.id);
+    ul.appendChild(el("li",{},[
+      el("span",{class:"t",text:ask(c)}), el("span",{class:"d",text:ans(c)}),
+      el("span",{class:"st " + (st >= 2 ? "m" : st === 1 ? "l" : "f"), text: st >= 2 ? "Mastered" : st === 1 ? "Type it next" : "Needs work"})
+    ]));
+  });
+  stage.appendChild(modeHead("Learn"));
+  stage.appendChild(el("div",{class:"result"},[
+    el("div",{class:"eyebrow",text:"Round " + s.round + " done"}),
+    el("div",{class:"score",text:k.mastered + "/" + s.all.length}),
+    el("p",{style:"margin:2px 0 16px;color:var(--ink-soft);font-size:14px",text:"cards mastered so far"}),
+    learnMeter(d, s.all),
+    el("div",{class:"rowctl",style:"margin-top:22px"},[
+      el("button",{class:"btn primary",onclick:learnContinueRound},["Continue to round " + (s.round + 1)]),
+      el("button",{class:"btn ghost",onclick:function(){ S.session = null; go("home"); }},["Back to deck"])
+    ]),
+    el("div",{style:"margin-top:12px;font-size:11.5px;color:var(--ink-faint)",html:'Press <kbd>Enter</kbd> to keep going'}),
+    el("div",{class:"eyebrow",style:"margin-top:26px;text-align:left",text:"This round"}),
+    ul
+  ]));
+}
+function renderLearnDone(s){
+  var d = deck();
+  stage.appendChild(modeHead("Learn"));
+  stage.appendChild(el("div",{class:"result"},[
+    el("div",{class:"eyebrow",text:"Learn complete"}),
+    el("div",{class:"score",text:s.all.length + "/" + s.all.length}),
+    el("p",{style:"margin:2px 0 16px;color:var(--ink-soft);font-size:14px",text:"Every card mastered — picked out of a lineup, then named from its definition."}),
+    learnMeter(d, s.all),
+    el("div",{class:"rowctl",style:"margin-top:22px"},[
+      el("button",{class:"btn primary",onclick:function(){ S.session = null; startMode("match"); }, disabled: s.all.length >= 3 ? null : "disabled"},["Test it with matching"]),
+      el("button",{class:"btn",onclick:function(){ learnReset(s.all); }},["Start Learn over"]),
+      el("button",{class:"btn ghost",onclick:function(){ S.session = null; go("home"); }},["Back to deck"])
+    ])
+  ]));
 }
 
 /* ---------------- flashcards ---------------- */
@@ -1079,9 +1471,10 @@ function tapTile(idx){
 }
 
 /* ============================ editor / browser ============================ */
-function newDeck(){
+function newDeck(folderId){
   if(!S.canEdit) return;
-  var d = {id:uid("d"), name:"Untitled deck", subject:"", cards:[{id:uid(), term:"", def:""}], createdAt:Date.now()};
+  var d = {id:uid("d"), name:"Untitled deck", subject:"", folder: folderById(folderId) ? folderId : "", cards:[{id:uid(), term:"", def:""}], createdAt:Date.now()};
+  if(d.folder){ S.open[d.folder] = true; saveFolds(); }
   S.decks.push(d); S.deckId = d.id; S.view = "edit";
   pushDeck(d); renderRail(); render();
 }
@@ -1091,7 +1484,8 @@ function renderEdit(){
     el("div",{},[
       ro ? el("h2",{text:d.name || "Untitled deck"})
          : el("input",{class:"text",style:"font-size:24px;font-weight:600;padding:6px 10px;letter-spacing:-.02em;min-width:min(420px,100%)",value:d.name || "",placeholder:"Deck name","aria-label":"Deck name",oninput:function(ev){ d.name = ev.target.value; S.lastKeystroke = Date.now(); renderRail(); queueSave(d); }}),
-      el("div",{class:"sub",text: ro ? "All " + cardsOf(d).length + " cards, read-only." : "Edits are kept on this device until you publish."})
+      ro ? el("div",{class:"sub",text:"All " + cardsOf(d).length + " cards, read-only."})
+         : el("div",{class:"editmeta"},[ folderPicker(d), el("span",{class:"sub",style:"margin:0",text:"Edits are kept on this device until you publish."}) ])
     ]),
     el("button",{class:"btn ghost",onclick:function(){ go("home"); }},[icon(I.back,15),"Deck"])
   ]));
@@ -1110,15 +1504,7 @@ function renderEdit(){
   }
   stage.appendChild(bar);
 
-  if(!ro){
-    stage.appendChild(el("div",{class:"pubbar",id:"pubbar",hidden: S.draft ? null : "hidden"},[
-      icon(I.upload,15),
-      el("span",{id:"pubmsg"},[unpublishedMsg()]),
-      el("div",{style:"flex:1"}),
-      el("button",{class:"btn sm",onclick:discardDraft},["Discard"]),
-      el("button",{class:"btn primary sm",id:"pubbtn",onclick:publish},[icon(I.upload,14), S.token ? "Publish to everyone" : "Set up publishing"])
-    ]));
-  }
+  if(!ro) stage.appendChild(pubBar());
 
   if(!ro) stage.appendChild(pastePanel(d));
 
@@ -1163,6 +1549,102 @@ function addRow(d){
     if(tas.length) tas[tas.length-1].focus();
   }, 0);
 }
+/* ---------------- folders ---------------- */
+function folderPicker(d){
+  var sel = el("select",{"aria-label":"Folder"});
+  sel.appendChild(el("option",{value:"",text:"Not in a folder"}));
+  S.folders.forEach(function(f){ sel.appendChild(el("option",{value:f.id,text:f.name || "Untitled folder"})); });
+  sel.appendChild(el("option",{value:"__new",text:"New folder…"}));
+  sel.value = d.folder || "";
+  sel.addEventListener("change", function(){
+    if(sel.value === "__new"){
+      var name = (prompt("Name the new folder") || "").trim();
+      if(!name){ sel.value = d.folder || ""; return; }
+      var f = {id:uid("f"), name:name};
+      S.folders.push(f); d.folder = f.id;
+    } else {
+      d.folder = sel.value;
+    }
+    if(d.folder){ S.open[d.folder] = true; saveFolds(); }
+    saveDraft(); renderRail(); render();
+    toast(d.folder ? "Moved to " + (folderById(d.folder).name || "folder") : "Taken out of its folder");
+  });
+  return el("label",{class:"fpick"},[icon(I.folder,15), sel]);
+}
+function newFolder(){
+  if(!S.canEdit) return;
+  var f = {id:uid("f"), name:"Untitled folder"};
+  S.folders.push(f);
+  saveDraft();
+  openFolder(f.id);
+  setTimeout(function(){ var n = $("foldername"); if(n){ n.focus(); n.select(); } }, 0);
+}
+function removeFolder(f){
+  var inside = decksIn(f.id);
+  var msg = "Delete the folder “" + (f.name || "Untitled folder") + "”?" +
+    (inside.length ? " Its " + inside.length + " deck" + (inside.length === 1 ? " isn't" : "s aren't") + " deleted — " + (inside.length === 1 ? "it moves" : "they move") + " out to the main list." : "");
+  if(!confirm(msg)) return;
+  inside.forEach(function(d){ d.folder = ""; });
+  S.folders = S.folders.filter(function(x){ return x.id !== f.id; });
+  delete S.open[f.id]; saveFolds();
+  saveDraft();
+  S.folderId = null; S.view = "home";
+  renderRail(); render();
+  toast("Folder deleted");
+}
+function renderFolder(){
+  var f = folderById(S.folderId);
+  if(!f){ S.view = "home"; return render(); }
+  var ro = !S.canEdit, inside = decksIn(f.id);
+  var total = inside.reduce(function(n, d){ return n + cardsOf(d).length; }, 0);
+
+  stage.appendChild(el("div",{class:"stage-head"},[
+    el("div",{},[
+      ro ? el("h2",{text:f.name || "Untitled folder"})
+         : el("input",{class:"text",id:"foldername",style:"font-size:24px;font-weight:600;padding:6px 10px;letter-spacing:-.02em;min-width:min(420px,100%)",value:f.name || "",placeholder:"Folder name","aria-label":"Folder name",
+             oninput:function(ev){ f.name = ev.target.value; S.lastKeystroke = Date.now(); renderRail(); queueSave(f); }}),
+      el("div",{class:"sub",text: inside.length + (inside.length === 1 ? " deck · " : " decks · ") + total + (total === 1 ? " card" : " cards")})
+    ]),
+    el("div",{class:"rowctl"},[
+      ro ? null : el("button",{class:"btn",onclick:function(){ newDeck(f.id); }},[icon(I.plus,15),"New deck here"]),
+      el("button",{class:"btn ghost railtoggle",onclick:function(){ var r = $("rail"); r.hidden = !r.hidden; }},["Decks"])
+    ])
+  ]));
+
+  if(!ro) stage.appendChild(pubBar());
+
+  if(!inside.length){
+    stage.appendChild(el("div",{class:"empty"},[
+      el("h3",{text:"Nothing in this folder yet"}),
+      el("p",{text: ro ? "Decks will show up here once they're filed in it." : "Make a deck here, or open any deck's editor and pick this folder to move it in."})
+    ]));
+  } else {
+    var listEl = el("div",{class:"flist"});
+    inside.forEach(function(d){
+      var cards = cardsOf(d), k = learnCounts(d, cards), n = cards.length || 1;
+      listEl.appendChild(el("button",{class:"frow",onclick:function(){ openDeck(d.id); }},[
+        el("span",{},[
+          el("span",{class:"t",text:d.name || "Untitled deck"}),
+          el("span",{class:"s",text:(d.subject ? d.subject + " · " : "") + cards.length + (cards.length === 1 ? " card" : " cards")})
+        ]),
+        el("span",{class:"minibar","aria-hidden":"true"},[
+          el("i",{class:"lm-m",style:"background:var(--ink);width:" + (k.mastered/n*100) + "%"}),
+          el("i",{class:"lm-l",style:"background:repeating-linear-gradient(135deg,var(--brass) 0 2px,transparent 2px 5px);width:" + (k.learning/n*100) + "%"})
+        ]),
+        el("span",{class:"ct",title:"Mastered in Learn",text:k.mastered + "/" + cards.length})
+      ]));
+    });
+    stage.appendChild(listEl);
+  }
+
+  if(!ro){
+    stage.appendChild(el("div",{class:"foldfoot"},[
+      el("span",{class:"saveflag",id:"saveflag",style:"margin-right:auto",text: S.draft ? "Draft saved on this device" : "Matches what's published"}),
+      el("button",{class:"btn danger sm",onclick:function(){ removeFolder(f); }},[icon(I.trash,14),"Delete folder"])
+    ]));
+  }
+}
+
 function removeDeck(d){
   if(!confirm("Delete “" + (d.name || "Untitled deck") + "” and all " + cardsOf(d).length + " of its cards? It goes for everyone once you publish.")) return;
   S.decks = S.decks.filter(function(x){ return x.id !== d.id; });
@@ -1419,6 +1901,14 @@ document.addEventListener("keydown", function(ev){
     } else if((k === "Enter" || k === " ") && s.picked !== null){ ev.preventDefault(); nextQuiz(); }
   } else if(S.view === "write" && s && s.state && (k === "Enter" || k === " ")){
     ev.preventDefault(); nextWrite();
+  } else if(S.view === "learn" && s && s.mode === "learn"){
+    if(s.i >= s.queue.length){
+      if(k === "Enter"){ ev.preventDefault(); learnContinueRound(); }
+    } else if(!s.answer && s.kind === "choice" && /^[1-4]$/.test(k)){
+      var li = parseInt(k,10) - 1;
+      if(s.choices && li < s.choices.length){ ev.preventDefault(); learnPick(li); }
+    } else if(s.answer && (k === "Enter" || k === " ")){ ev.preventDefault(); learnNext(); }
+    if(k === "Escape"){ S.session = null; go("home"); }
   } else if(S.view !== "home" && k === "Escape"){
     S.session = null; go("home");
   }
@@ -1427,37 +1917,48 @@ document.addEventListener("keydown", function(ev){
 /* ============================ boot ============================ */
 try{ S.who = localStorage.getItem(WHO_KEY) || null; }catch(e){ S.who = null; }
 try{ S.token = localStorage.getItem(TOKEN_KEY) || null; }catch(e){ S.token = null; }
+S.open = ls(FOLD_KEY, {});
 loadLocal();
 $("whobtn").addEventListener("click", function(){ go("who"); });
 refreshFoot();
 renderRail();
 render();
 
-function normalizeDecks(raw){
+function copy(x){ return JSON.parse(JSON.stringify(x)); }
+function currentStore(){ return {folders:S.folders, decks:S.decks}; }
+function useStore(st){ st = copy(st || {folders:[], decks:[]}); S.folders = st.folders; S.decks = st.decks; }
+// Accepts decks.json with or without folders, and drops a deck's folder if it points nowhere.
+function normalizeStore(raw){
+  var folders = (raw && Array.isArray(raw.folders) ? raw.folders : []).map(function(f){
+    return {id: String(f.id || uid("f")), name: f.name || "Untitled folder"};
+  });
+  var ids = {}; folders.forEach(function(f){ ids[f.id] = true; });
   var list = Array.isArray(raw) ? raw : (raw && Array.isArray(raw.decks) ? raw.decks : []);
-  return list.map(function(v, n){
+  var decks = list.map(function(v, n){
     return {
       id: v.id || uid("d"),
       name: v.name || "Untitled deck",
       subject: v.subject || "",
+      folder: ids[v.folder] ? v.folder : "",
       cards: (Array.isArray(v.cards) ? v.cards : []).map(function(c){
         return {id: c.id || uid(), term: c.term || "", def: c.def || ""};
       }),
       createdAt: v.createdAt || n
     };
   }).sort(function(a,b){ return (a.createdAt||0) - (b.createdAt||0); });
+  return {folders:folders, decks:decks};
 }
 
 fetch("decks.json", {cache:"no-store"})
   .then(function(r){ if(!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
   .then(function(raw){
-    S.published = normalizeDecks(raw);
+    S.published = normalizeStore(raw);
     var draft = ls(DRAFT_KEY, null);
     if(draft){
-      S.decks = normalizeDecks(draft);
+      useStore(normalizeStore(draft));
       S.draft = true;
     } else {
-      S.decks = JSON.parse(JSON.stringify(S.published));
+      useStore(S.published);
     }
     S.ready = true;
     if(!S.deckId && S.decks.length) S.deckId = S.decks[0].id;
@@ -1476,7 +1977,7 @@ fetch("decks.json", {cache:"no-store"})
 function applyIncoming(){
   if(!S.incoming) return false;
   S.published = S.incoming; S.incoming = null;
-  S.decks = JSON.parse(JSON.stringify(S.published));
+  useStore(S.published);
   if(!deck() && S.decks.length) S.deckId = S.decks[0].id;
   renderRail();
   return true;
@@ -1487,7 +1988,7 @@ function pollPublished(){
     .then(function(r){ return r.ok ? r.json() : null; })
     .then(function(raw){
       if(!raw) return;
-      var next = normalizeDecks(raw);
+      var next = normalizeStore(raw);
       if(JSON.stringify(next) === JSON.stringify(S.published)) return;
       S.incoming = next;
       if(S.draft){                      // the editor's own unpublished work wins
@@ -1496,7 +1997,7 @@ function pollPublished(){
       }
       if(S.session || S.view === "edit") return toast("New cards — they'll appear when you're done");
       applyIncoming();
-      if(S.view === "home") render();
+      if(S.view === "home" || S.view === "folder") render();
       toast("Decks updated");
     })
     .catch(function(){});
