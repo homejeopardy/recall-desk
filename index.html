@@ -312,6 +312,8 @@ input.text:focus{border-color:var(--ink);outline:none}
 .frow .s{font-size:12.5px;color:var(--ink-soft);display:block;margin-top:2px}
 .frow .ct{font-family:var(--mono);font-size:12px;color:var(--ink-soft);text-align:right}
 .fpick{display:inline-flex;align-items:center;gap:7px;color:var(--ink-soft);font-size:13px}
+.deskdesc{font-family:var(--read);font-size:17px;line-height:1.45;color:var(--ink-soft);margin-top:6px;max-width:62ch}
+.descin{display:block;width:100%;max-width:560px;margin-top:8px;font-family:var(--read);font-size:16px}
 .fpick select{font-size:13px;padding:5px 8px}
 .editmeta{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:8px}
 .foldfoot{display:flex;justify-content:flex-end}
@@ -840,10 +842,11 @@ function renderHome(){
   var head = el("div",{class:"stage-head"},[
     el("div",{},[
       el("h2",{text:d.name || "Untitled deck"}),
+      d.subject ? el("p",{class:"deskdesc",style:"margin-bottom:0",text:d.subject}) : null,
       el("div",{class:"sub"},[
         fold ? el("button",{class:"crumb",onclick:function(){ openFolder(fold.id); }},[fold.name || "Untitled folder"]) : null,
         fold ? " / " : null,
-        (d.subject ? d.subject + " · " : "") + n + (n === 1 ? " card" : " cards")
+        n + (n === 1 ? " card" : " cards")
       ])
     ]),
     el("div",{class:"rowctl"},[
@@ -1484,6 +1487,9 @@ function renderEdit(){
     el("div",{},[
       ro ? el("h2",{text:d.name || "Untitled deck"})
          : el("input",{class:"text",style:"font-size:24px;font-weight:600;padding:6px 10px;letter-spacing:-.02em;min-width:min(420px,100%)",value:d.name || "",placeholder:"Deck name","aria-label":"Deck name",oninput:function(ev){ d.name = ev.target.value; S.lastKeystroke = Date.now(); renderRail(); queueSave(d); }}),
+      ro ? (d.subject ? el("p",{class:"deskdesc",style:"margin-bottom:0",text:d.subject}) : null)
+         : el("input",{class:"text descin",type:"text",maxlength:"140",value:d.subject || "",placeholder:"Short description (optional) — shown under the title","aria-label":"Deck description",
+             oninput:function(ev){ d.subject = ev.target.value; S.lastKeystroke = Date.now(); queueSave(d); }}),
       ro ? el("div",{class:"sub",text:"All " + cardsOf(d).length + " cards, read-only."})
          : el("div",{class:"editmeta"},[ folderPicker(d), el("span",{class:"sub",style:"margin:0",text:"Edits are kept on this device until you publish."}) ])
     ]),
@@ -1569,7 +1575,7 @@ function folderPicker(d){
     saveDraft(); renderRail(); render();
     toast(d.folder ? "Moved to " + (folderById(d.folder).name || "folder") : "Taken out of its folder");
   });
-  return el("label",{class:"fpick"},[icon(I.folder,15), sel]);
+  return el("label",{class:"fpick"},[icon(I.folder,15), "Folder", sel]);
 }
 function newFolder(){
   if(!S.canEdit) return;
