@@ -300,6 +300,10 @@ input.text:focus{border-color:var(--ink);outline:none}
 .fold-nm .ct{font-family:var(--mono);font-size:11px;color:var(--ink-faint);font-weight:400}
 .fdecks{list-style:none;margin:1px 0 5px 16px;padding:0 0 0 5px;border-left:1px solid var(--rule);display:flex;flex-direction:column;gap:1px}
 .fdecks .deck-btn{padding:7px 9px;font-size:14px}
+.fdecks .fdecks{margin-left:12px}
+.fdecks .fold-nm{font-weight:500;font-size:14px;padding-top:7px;padding-bottom:7px}
+.frow-f{display:flex;gap:11px;align-items:flex-start;min-width:0}
+.frow-f svg{color:var(--ink-soft);margin-top:4px;flex:none}
 .fempty{padding:6px 9px;font-size:12.5px;color:var(--ink-faint);font-style:italic}
 .loose{padding:12px 10px 4px}
 .crumb{color:var(--ink-soft);text-decoration:underline;text-decoration-color:var(--rule);text-underline-offset:3px}
@@ -506,6 +510,44 @@ function setStage(deckId, cardId, st){
 function deck(){ for(var i=0;i<S.decks.length;i++) if(S.decks[i].id === S.deckId) return S.decks[i]; return null; }
 function folderById(id){ for(var i=0;i<S.folders.length;i++) if(S.folders[i].id === id) return S.folders[i]; return null; }
 function decksIn(folderId){ return S.decks.filter(function(d){ return (d.folder || "") === folderId; }); }
+// Folders nest through an optional parent id. Three levels is the ceiling: past that the
+// rail is too narrow to read, and a course doesn't need deeper filing than unit › week › topic.
+var MAX_DEPTH = 2;
+function childFolders(parentId){ return S.folders.filter(function(f){ return (f.parent || "") === parentId; }); }
+function folderPath(id){                       // root first, ending with the folder itself
+  var out = [], f = folderById(id), seen = {};
+  while(f && !seen[f.id]){ seen[f.id] = true; out.unshift(f); f = folderById(f.parent); }
+  return out;
+}
+function folderDepth(id){ return Math.max(0, folderPath(id).length - 1); }
+function descendantIds(id){
+  var out = [], stack = [id], seen = {};
+  while(stack.length){
+    var cur = stack.pop();
+    childFolders(cur).forEach(function(c){ if(!seen[c.id]){ seen[c.id] = true; out.push(c.id); stack.push(c.id); } });
+  }
+  return out;
+}
+function folderHeight(id){                     // how many levels sit below this folder
+  var h = 0;
+  childFolders(id).forEach(function(c){ h = Math.max(h, 1 + folderHeight(c.id)); });
+  return h;
+}
+function decksUnder(id){
+  var ids = {}; ids[id] = true; descendantIds(id).forEach(function(x){ ids[x] = true; });
+  return S.decks.filter(function(d){ return ids[d.folder]; });
+}
+function folderTree(){                         // depth-first, for indented menus
+  var out = [], seen = {};
+  (function walk(pid, depth){
+    childFolders(pid).forEach(function(f){
+      if(seen[f.id]) return; seen[f.id] = true;
+      out.push({f:f, depth:depth}); walk(f.id, depth + 1);
+    });
+  })("", 0);
+  return out;
+}
+function indent(depth){ return new Array(depth + 1).join("\u2003"); }
 function cardsOf(d){ return (d && Array.isArray(d.cards)) ? d.cards.filter(function(c){ return (c.term||"").trim() || (c.def||"").trim(); }) : []; }
 function pool(){
   var d = deck(); if(!d) return [];
@@ -573,7 +615,7 @@ function deckPayload(){
   return {
     version: 1,
     updated: new Date().toISOString().slice(0,10),
-    folders: S.folders.map(function(f){ return {id: f.id, name: f.name || "Untitled folder"}; }),
+    folders: S.folders.map(function(f){ return {id: f.id, name: f.name || "Untitled folder", parent: f.parent || undefined}; }),
     decks: S.decks.map(function(d){
       return {
         id: d.id, name: d.name || "Untitled deck", subject: d.subject || "",
@@ -733,35 +775,39 @@ function renderRail(){
       el("span",{class:"ct",text:String(cardsOf(d).length)})
     ]) ]);
   }
-  var cur = deck();
-  S.folders.forEach(function(f){
-    var inside = decksIn(f.id);
-    // Closed by default so a long list stays scannable — except the drawer you're working in.
-    var open = f.id in S.open ? S.open[f.id] : !!(cur && cur.folder === f.id);
+  var cur = deck(), curPath = {};
+  if(cur) folderPath(cur.folder).forEach(function(a){ curPath[a.id] = true; });
+  function folderGroup(f){
+    var inside = decksIn(f.id), kids = childFolders(f.id);
+    // Closed by default so a long list stays scannable — except the drawers you're working in.
+    var open = f.id in S.open ? S.open[f.id] : !!curPath[f.id];
     var group = el("li",{class:"fgroup"},[
       el("div",{class:"folder" + (S.view === "folder" && S.folderId === f.id ? " on" : "")},[
         el("button",{class:"fold-tog","aria-expanded": open ? "true" : "false","aria-label":(open ? "Collapse " : "Expand ") + (f.name || "folder"),
           onclick:function(){ S.open[f.id] = !open; saveFolds(); renderRail(); }},[icon(I.chev,13)]),
         el("button",{class:"fold-nm",onclick:function(){ openFolder(f.id); }},[
-          icon(I.folder,15), el("span",{class:"nm",text:f.name || "Untitled folder"}), el("span",{class:"ct",text:String(inside.length)})
+          icon(I.folder,15), el("span",{class:"nm",text:f.name || "Untitled folder"}),
+          el("span",{class:"ct",title:"Decks inside, including subfolders",text:String(decksUnder(f.id).length)})
         ])
       ])
     ]);
     if(open){
       var ul = el("ul",{class:"fdecks"});
-      if(!inside.length) ul.appendChild(el("li",{class:"fempty",text:"Empty"}));
+      if(!inside.length && !kids.length) ul.appendChild(el("li",{class:"fempty",text:"Empty"}));
+      kids.forEach(function(k){ ul.appendChild(folderGroup(k)); });
       inside.forEach(function(d){ ul.appendChild(deckItem(d)); });
       group.appendChild(ul);
     }
-    list.appendChild(group);
-  });
+    return group;
+  }
+  childFolders("").forEach(function(f){ list.appendChild(folderGroup(f)); });
   var loose = decksIn("");
   if(S.folders.length && loose.length) list.appendChild(el("li",{class:"eyebrow loose",text:"Not in a folder"}));
   loose.forEach(function(d){ list.appendChild(deckItem(d)); });
 
   var slot = $("newdeckslot"); slot.textContent = "";
   if(S.canEdit){
-    slot.appendChild(el("button",{class:"btn ghost sm",onclick:newFolder,title:"New folder"},[icon(I.folder,14),"Folder"]));
+    slot.appendChild(el("button",{class:"btn ghost sm",onclick:function(){ newFolder(""); },title:"New folder"},[icon(I.folder,14),"Folder"]));
     slot.appendChild(el("button",{class:"btn ghost sm",onclick:function(){ newDeck(""); },title:"New deck"},[icon(I.plus,14),"Deck"]));
   }
 }
@@ -773,12 +819,17 @@ function go(view){
 }
 function openDeck(id){
   S.deckId = id; S.session = null; S.view = "home";
-  var d = deck(); if(d && d.folder && !S.open[d.folder]){ S.open[d.folder] = true; saveFolds(); }
+  var d = deck(); if(d && d.folder) openPath(d.folder);
   renderRail(); render(); window.scrollTo(0,0);
+}
+function openPath(folderId){
+  var changed = false;
+  folderPath(folderId).forEach(function(a){ if(!S.open[a.id]){ S.open[a.id] = true; changed = true; } });
+  if(changed) saveFolds();
 }
 function openFolder(id){
   S.folderId = id; S.session = null; S.view = "folder";
-  S.open[id] = true; saveFolds();
+  openPath(id);
   renderRail(); render(); window.scrollTo(0,0);
 }
 
@@ -837,17 +888,16 @@ function renderHome(){
     if(p.wrong > 0 && p.last !== "right") missed++;
     if(lstage(d.id, c.id) >= 2) mastered++;      // mastery is earned in Learn, by typing it
   });
-  var fold = folderById(d.folder);
+  var crumbs = [];
+  folderPath(d.folder).forEach(function(a){
+    crumbs.push(el("button",{class:"crumb",onclick:function(){ openFolder(a.id); }},[a.name || "Untitled folder"]), " / ");
+  });
 
   var head = el("div",{class:"stage-head"},[
     el("div",{},[
       el("h2",{text:d.name || "Untitled deck"}),
       d.subject ? el("p",{class:"deskdesc",style:"margin-bottom:0",text:d.subject}) : null,
-      el("div",{class:"sub"},[
-        fold ? el("button",{class:"crumb",onclick:function(){ openFolder(fold.id); }},[fold.name || "Untitled folder"]) : null,
-        fold ? " / " : null,
-        n + (n === 1 ? " card" : " cards")
-      ])
+      el("div",{class:"sub"}, crumbs.concat([ n + (n === 1 ? " card" : " cards") ]))
     ]),
     el("div",{class:"rowctl"},[
       S.canEdit ? el("button",{class:"btn",onclick:function(){ go("edit"); }},[icon(I.edit,15),"Edit cards"]) : el("button",{class:"btn",onclick:function(){ go("edit"); }},[icon(I.cards,15),"Browse all cards"]),
@@ -1559,59 +1609,113 @@ function addRow(d){
 function folderPicker(d){
   var sel = el("select",{"aria-label":"Folder"});
   sel.appendChild(el("option",{value:"",text:"Not in a folder"}));
-  S.folders.forEach(function(f){ sel.appendChild(el("option",{value:f.id,text:f.name || "Untitled folder"})); });
+  folderTree().forEach(function(row){
+    sel.appendChild(el("option",{value:row.f.id,text:indent(row.depth) + (row.f.name || "Untitled folder")}));
+  });
   sel.appendChild(el("option",{value:"__new",text:"New folder…"}));
   sel.value = d.folder || "";
   sel.addEventListener("change", function(){
     if(sel.value === "__new"){
       var name = (prompt("Name the new folder") || "").trim();
       if(!name){ sel.value = d.folder || ""; return; }
-      var f = {id:uid("f"), name:name};
+      var f = {id:uid("f"), name:name, parent:""};
       S.folders.push(f); d.folder = f.id;
     } else {
       d.folder = sel.value;
     }
-    if(d.folder){ S.open[d.folder] = true; saveFolds(); }
+    if(d.folder) openPath(d.folder);
     saveDraft(); renderRail(); render();
     toast(d.folder ? "Moved to " + (folderById(d.folder).name || "folder") : "Taken out of its folder");
   });
   return el("label",{class:"fpick"},[icon(I.folder,15), "Folder", sel]);
 }
-function newFolder(){
+// Where a folder sits. Offers only places it can go: never inside itself or its own
+// subfolders, and never so deep that its subfolders would pass the three-level ceiling.
+function parentPicker(f){
+  var blocked = {}; blocked[f.id] = true;
+  descendantIds(f.id).forEach(function(id){ blocked[id] = true; });
+  var h = folderHeight(f.id);
+  var sel = el("select",{"aria-label":"Inside folder"});
+  sel.appendChild(el("option",{value:"",text:"Top level"}));
+  folderTree().forEach(function(row){
+    if(blocked[row.f.id]) return;
+    if(row.depth + 1 + h > MAX_DEPTH && row.f.id !== f.parent) return;
+    sel.appendChild(el("option",{value:row.f.id,text:indent(row.depth) + (row.f.name || "Untitled folder")}));
+  });
+  sel.value = f.parent || "";
+  sel.addEventListener("change", function(){
+    f.parent = sel.value;
+    openPath(f.id);
+    saveDraft(); renderRail(); render();
+    toast(f.parent ? "Moved into " + (folderById(f.parent).name || "folder") : "Moved to the top level");
+  });
+  return el("label",{class:"fpick"},[icon(I.folder,15), "Inside", sel]);
+}
+function newFolder(parentId){
   if(!S.canEdit) return;
-  var f = {id:uid("f"), name:"Untitled folder"};
+  var parent = typeof parentId === "string" && parentId ? folderById(parentId) : null;
+  if(parent && folderDepth(parent.id) >= MAX_DEPTH) return toast("Folders go three levels deep");
+  var f = {id:uid("f"), name: parent ? "Untitled subfolder" : "Untitled folder", parent: parent ? parent.id : ""};
   S.folders.push(f);
   saveDraft();
   openFolder(f.id);
   setTimeout(function(){ var n = $("foldername"); if(n){ n.focus(); n.select(); } }, 0);
 }
 function removeFolder(f){
-  var inside = decksIn(f.id);
-  var msg = "Delete the folder “" + (f.name || "Untitled folder") + "”?" +
-    (inside.length ? " Its " + inside.length + " deck" + (inside.length === 1 ? " isn't" : "s aren't") + " deleted — " + (inside.length === 1 ? "it moves" : "they move") + " out to the main list." : "");
+  var up = f.parent || "", parent = folderById(up), decks = decksIn(f.id), kids = childFolders(f.id);
+  var items = [];
+  if(decks.length) items.push(decks.length + (decks.length === 1 ? " deck" : " decks"));
+  if(kids.length) items.push(kids.length + (kids.length === 1 ? " folder" : " folders"));
+  var one = decks.length + kids.length === 1;
+  var msg = "Delete the folder “" + (f.name || "Untitled folder") + "”?" + (items.length
+    ? " Nothing inside is deleted — its " + items.join(" and ") + (one ? " moves " : " move ") +
+      (parent ? "up into “" + (parent.name || "Untitled folder") + "”." : "out to the main list.")
+    : "");
   if(!confirm(msg)) return;
-  inside.forEach(function(d){ d.folder = ""; });
+  decks.forEach(function(d){ d.folder = up; });
+  kids.forEach(function(k){ k.parent = up; });
   S.folders = S.folders.filter(function(x){ return x.id !== f.id; });
   delete S.open[f.id]; saveFolds();
   saveDraft();
+  toast("Folder deleted");
+  if(parent) return openFolder(parent.id);
   S.folderId = null; S.view = "home";
   renderRail(); render();
-  toast("Folder deleted");
+}
+function minibar(k, n){
+  n = n || 1;
+  return el("span",{class:"minibar","aria-hidden":"true"},[
+    el("i",{style:"background:var(--ink);width:" + (k.mastered/n*100) + "%"}),
+    el("i",{style:"background:repeating-linear-gradient(135deg,var(--brass) 0 2px,transparent 2px 5px);width:" + (k.learning/n*100) + "%"})
+  ]);
 }
 function renderFolder(){
   var f = folderById(S.folderId);
   if(!f){ S.view = "home"; return render(); }
-  var ro = !S.canEdit, inside = decksIn(f.id);
-  var total = inside.reduce(function(n, d){ return n + cardsOf(d).length; }, 0);
+  var ro = !S.canEdit, inside = decksIn(f.id), kids = childFolders(f.id), under = decksUnder(f.id);
+  var total = under.reduce(function(n, d){ return n + cardsOf(d).length; }, 0);
+
+  var sub = [];
+  folderPath(f.id).slice(0, -1).forEach(function(a){
+    sub.push(el("button",{class:"crumb",onclick:function(){ openFolder(a.id); }},[a.name || "Untitled folder"]), " / ");
+  });
+  var bits = [];
+  if(kids.length) bits.push(kids.length + (kids.length === 1 ? " folder" : " folders"));
+  bits.push(under.length + (under.length === 1 ? " deck" : " decks"));
+  bits.push(total + (total === 1 ? " card" : " cards"));
+  sub.push(bits.join(" · "));
+  var canNest = folderDepth(f.id) < MAX_DEPTH;
 
   stage.appendChild(el("div",{class:"stage-head"},[
     el("div",{},[
       ro ? el("h2",{text:f.name || "Untitled folder"})
          : el("input",{class:"text",id:"foldername",style:"font-size:24px;font-weight:600;padding:6px 10px;letter-spacing:-.02em;min-width:min(420px,100%)",value:f.name || "",placeholder:"Folder name","aria-label":"Folder name",
              oninput:function(ev){ f.name = ev.target.value; S.lastKeystroke = Date.now(); renderRail(); queueSave(f); }}),
-      el("div",{class:"sub",text: inside.length + (inside.length === 1 ? " deck · " : " decks · ") + total + (total === 1 ? " card" : " cards")})
+      ro ? null : el("div",{class:"editmeta"},[ parentPicker(f) ]),
+      el("div",{class:"sub"}, sub)
     ]),
     el("div",{class:"rowctl"},[
+      ro || !canNest ? null : el("button",{class:"btn",onclick:function(){ newFolder(f.id); }},[icon(I.folder,15),"New subfolder"]),
       ro ? null : el("button",{class:"btn",onclick:function(){ newDeck(f.id); }},[icon(I.plus,15),"New deck here"]),
       el("button",{class:"btn ghost railtoggle",onclick:function(){ var r = $("rail"); r.hidden = !r.hidden; }},["Decks"])
     ])
@@ -1619,24 +1723,34 @@ function renderFolder(){
 
   if(!ro) stage.appendChild(pubBar());
 
-  if(!inside.length){
+  if(!inside.length && !kids.length){
     stage.appendChild(el("div",{class:"empty"},[
       el("h3",{text:"Nothing in this folder yet"}),
-      el("p",{text: ro ? "Decks will show up here once they're filed in it." : "Make a deck here, or open any deck's editor and pick this folder to move it in."})
+      el("p",{text: ro ? "Decks will show up here once they're filed in it."
+        : "Make a deck" + (canNest ? " or a subfolder" : "") + " here, or open any deck's editor and pick this folder to move it in."})
     ]));
   } else {
     var listEl = el("div",{class:"flist"});
+    kids.forEach(function(c){
+      var ds = decksUnder(c.id), k = {mastered:0, learning:0}, n = 0, nk = childFolders(c.id).length;
+      ds.forEach(function(d){ var cards = cardsOf(d), kk = learnCounts(d, cards); k.mastered += kk.mastered; k.learning += kk.learning; n += cards.length; });
+      listEl.appendChild(el("button",{class:"frow",onclick:function(){ openFolder(c.id); }},[
+        el("span",{class:"frow-f"},[ icon(I.folder,18), el("span",{},[
+          el("span",{class:"t",text:c.name || "Untitled folder"}),
+          el("span",{class:"s",text:(nk ? nk + (nk === 1 ? " folder · " : " folders · ") : "") + ds.length + (ds.length === 1 ? " deck · " : " decks · ") + n + (n === 1 ? " card" : " cards")})
+        ]) ]),
+        minibar(k, n),
+        el("span",{class:"ct",title:"Mastered in Learn",text:k.mastered + "/" + n})
+      ]));
+    });
     inside.forEach(function(d){
-      var cards = cardsOf(d), k = learnCounts(d, cards), n = cards.length || 1;
+      var cards = cardsOf(d), k = learnCounts(d, cards);
       listEl.appendChild(el("button",{class:"frow",onclick:function(){ openDeck(d.id); }},[
         el("span",{},[
           el("span",{class:"t",text:d.name || "Untitled deck"}),
           el("span",{class:"s",text:(d.subject ? d.subject + " · " : "") + cards.length + (cards.length === 1 ? " card" : " cards")})
         ]),
-        el("span",{class:"minibar","aria-hidden":"true"},[
-          el("i",{class:"lm-m",style:"background:var(--ink);width:" + (k.mastered/n*100) + "%"}),
-          el("i",{class:"lm-l",style:"background:repeating-linear-gradient(135deg,var(--brass) 0 2px,transparent 2px 5px);width:" + (k.learning/n*100) + "%"})
-        ]),
+        minibar(k, cards.length),
         el("span",{class:"ct",title:"Mastered in Learn",text:k.mastered + "/" + cards.length})
       ]));
     });
@@ -1936,9 +2050,19 @@ function useStore(st){ st = copy(st || {folders:[], decks:[]}); S.folders = st.f
 // Accepts decks.json with or without folders, and drops a deck's folder if it points nowhere.
 function normalizeStore(raw){
   var folders = (raw && Array.isArray(raw.folders) ? raw.folders : []).map(function(f){
-    return {id: String(f.id || uid("f")), name: f.name || "Untitled folder"};
+    return {id: String(f.id || uid("f")), name: f.name || "Untitled folder", parent: f.parent ? String(f.parent) : ""};
   });
-  var ids = {}; folders.forEach(function(f){ ids[f.id] = true; });
+  var ids = {}, byId = {};
+  folders.forEach(function(f){ ids[f.id] = true; byId[f.id] = f; });
+  // A parent that doesn't exist puts the folder at the top level; a loop is cut where it closes.
+  folders.forEach(function(f){ if(!ids[f.parent] || f.parent === f.id) f.parent = ""; });
+  folders.forEach(function(f){
+    var p = f.parent, steps = 0;
+    while(p && steps++ <= folders.length){
+      if(p === f.id){ f.parent = ""; break; }
+      p = byId[p] ? byId[p].parent : "";
+    }
+  });
   var list = Array.isArray(raw) ? raw : (raw && Array.isArray(raw.decks) ? raw.decks : []);
   var decks = list.map(function(v, n){
     return {

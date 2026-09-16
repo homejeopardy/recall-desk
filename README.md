@@ -38,14 +38,24 @@ mid-round loses nothing. The deck page's **Mastered** count is Learn's.
 
 ## Folders
 
-Folders group decks in the sidebar. They start collapsed, except the one holding the
-deck you're on, and remember being opened or closed. Clicking a folder's name opens a
-page listing its decks with each one's Learn progress.
+Folders group decks in the sidebar, and can hold subfolders up to three levels deep
+(say, unit › week › topic). They start collapsed, except the ones leading to the deck
+you're on, and remember being opened or closed. A folder's count includes everything in
+its subfolders. Clicking a folder's name opens a page listing its subfolders and decks
+with Learn progress for each.
 
-As the editor: **Folder** in the sidebar makes one; rename it on its page. Move a deck
-in or out with the folder menu under its name in the deck editor, which can also make a
-new folder on the spot. Deleting a folder never deletes decks — they move out to the
-main list. Folder changes publish like any other edit.
+As the editor:
+
+- **Folder** in the sidebar makes a top-level folder; **New subfolder** on a folder's
+  page makes one inside it. Rename a folder on its page.
+- Move a **deck** with the **Folder** menu under its name in the deck editor.
+- Move a **folder** with the **Inside** menu under its name on its page. It only offers
+  places the folder can actually go — never inside itself, and never deep enough to
+  push its own subfolders past three levels.
+- Deleting a folder never deletes what's in it: its decks and subfolders move up one
+  level.
+
+Folder changes publish like any other edit.
 
 ## Adding cards
 
@@ -86,14 +96,15 @@ You can still edit `decks.json` directly and push; the app picks up either. The 
   "version": 1,
   "updated": "2026-09-16",
   "folders": [
-    { "id": "f1", "name": "Week 3" }
+    { "id": "f1", "name": "Unit 1" },
+    { "id": "f2", "name": "Week 3", "parent": "f1" }
   ],
   "decks": [
     {
       "id": "d1",
       "name": "First Amendment Basics",
       "subject": "Con Law II",
-      "folder": "f1",
+      "folder": "f2",
       "createdAt": 1000,
       "cards": [
         { "id": "c1", "term": "Prior restraint", "def": "Government action barring speech before it occurs." }
@@ -104,8 +115,8 @@ You can still edit `decks.json` directly and push; the app picks up either. The 
 ```
 
 Every `id` needs to be unique and should stay stable — student progress and stars are
-filed against the card id, so renaming an id resets that card for everyone. `folders`
-and a deck's `folder` are both optional — leave `folder` off and the deck sits outside any
+filed against the card id, so renaming an id resets that card for everyone. `folders`, a
+folder's `parent`, and a deck's `folder` are all optional — leave `folder` off and the deck sits outside any
 folder, and a `folder` that doesn't match a listed id is ignored. `createdAt` only sets
 the order decks appear in the rail. In a definition, alternate accepted
 answers can be separated with `/`; typed answers also forgive spelling slips.
