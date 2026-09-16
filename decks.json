@@ -5,6 +5,10 @@
     {
       "id": "f56mcnn0z5",
       "name": "English"
+    },
+    {
+      "id": "f5dsm3kqj3",
+      "name": "Science"
     }
   ],
   "decks": [
@@ -130,6 +134,7 @@
       "id": "d6xunlo8e7",
       "name": "Science Pendulums",
       "subject": "",
+      "folder": "f5dsm3kqj3",
       "createdAt": 1789508135793,
       "cards": []
     }
