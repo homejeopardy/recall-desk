@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated": "2026-09-16",
+  "updated": "2026-09-17",
   "folders": [
     {
       "id": "f56mcnn0z5",
@@ -133,10 +133,56 @@
     {
       "id": "d6xunlo8e7",
       "name": "Science Pendulums",
-      "subject": "",
+      "subject": "Quiz 9/22",
       "folder": "f5dsm3kqj3",
       "createdAt": 1789508135793,
-      "cards": []
+      "cards": [
+        {
+          "id": "c2awao4zz9",
+          "term": "Scientific Consensus",
+          "def": "the point when an idea with a strong base of evidence gains broad acceptance by scientific experts."
+        },
+        {
+          "id": "c2bj2cxyra",
+          "term": "Oscillation",
+          "def": "A movement back and forth between two or more states."
+        },
+        {
+          "id": "c2bjnyqdfi",
+          "term": "Cycle",
+          "def": " In a pendulum a movement back and forth    and back to the starting point is a cycle."
+        },
+        {
+          "id": "c2bo2qcrne",
+          "term": "Frequency",
+          "def": "The number of cycles an oscillating system makes in a period of time is the frequency"
+        },
+        {
+          "id": "c2di62b0q4",
+          "term": "Accuracy",
+          "def": "How close something is to the truth. a measure of how close a measurement is to the correct or accepted value of the quantity being measured."
+        },
+        {
+          "id": "c2dj5vykvi",
+          "term": "Precision",
+          "def": "a measure of how close a series of measurements are to one another."
+        },
+        {
+          "id": "c2djtzn9sf",
+          "term": "Resonance",
+          "def": "The phenomenon of a small force, applied just at the right time, adding up to a large motion is resonance"
+        },
+        {
+          "id": "c2dkjb7tig",
+          "term": "Natural Frequency",
+          "def": "In an oscillating system, this is the frequency at which it vibrates or oscillates, if you start it in motion and let it go."
+        },
+        {
+          "id": "c2dl5il8nk",
+          "term": "Sympathetic Vibration",
+          "def": "where a string or another object starts vibrating in response to an external sound wave or another vibration that matches its natural resonant frequency"
+        }
+      ]
     }
   ]
 }
