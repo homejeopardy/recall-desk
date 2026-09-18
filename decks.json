@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated": "2026-09-17",
+  "updated": "2026-09-18",
   "folders": [
     {
       "id": "f56mcnn0z5",
@@ -9,6 +9,10 @@
     {
       "id": "f5dsm3kqj3",
       "name": "Science"
+    },
+    {
+      "id": "f9tuc8lobh",
+      "name": "Spanish"
     }
   ],
   "decks": [
@@ -181,6 +185,165 @@
           "id": "c2dl5il8nk",
           "term": "Sympathetic Vibration",
           "def": "where a string or another object starts vibrating in response to an external sound wave or another vibration that matches its natural resonant frequency"
+        }
+      ]
+    },
+    {
+      "id": "d9u5bgwlx6",
+      "name": "Verbos Irregulares",
+      "subject": "",
+      "folder": "f9tuc8lobh",
+      "createdAt": 1789754866540,
+      "cards": [
+        {
+          "id": "c9u5bgv25h",
+          "term": "recordar",
+          "def": "O -> UE. to remember"
+        },
+        {
+          "id": "c9u9dp8d0k",
+          "term": "encontrar",
+          "def": "O -> UE. to find"
+        },
+        {
+          "id": "c9u9o28287",
+          "term": "probar",
+          "def": "O -> UE. to try / to taste"
+        },
+        {
+          "id": "c9u9uq8kb9",
+          "term": "resolar",
+          "def": "O -> UE. to resolve"
+        },
+        {
+          "id": "c9u9zmghe7",
+          "term": "almorzar",
+          "def": "O -> UE. to have lunch"
+        },
+        {
+          "id": "c9ua6shjn4",
+          "term": "poder",
+          "def": "O -> UE. to be able to / to can"
+        },
+        {
+          "id": "c9ubed108b",
+          "term": "volver",
+          "def": "O -> UE. to return"
+        },
+        {
+          "id": "c9uc1znbx6",
+          "term": "oler",
+          "def": "O -> UE. to smell"
+        },
+        {
+          "id": "c9xn3krtdh",
+          "term": "morir",
+          "def": "O -> UE. to die"
+        },
+        {
+          "id": "c9xnozdrms",
+          "term": "dormir",
+          "def": "O -> UE. to sleep"
+        },
+        {
+          "id": "c9xo80dzoe",
+          "term": "contar",
+          "def": "O -> UE. to  tell / to count"
+        },
+        {
+          "id": "c9xoq9nz4t",
+          "term": "volar",
+          "def": "O -> UE. to fly"
+        },
+        {
+          "id": "c9xpjqoose",
+          "term": "soñar",
+          "def": "O -> UE. to dream"
+        },
+        {
+          "id": "c9xq27hsyy",
+          "term": "costar",
+          "def": "O -> UE. to cost"
+        },
+        {
+          "id": "c9xqkgwtdv",
+          "term": "devolvar",
+          "def": "O -> UE. to return"
+        },
+        {
+          "id": "c9xr2vvjll",
+          "term": "jugar",
+          "def": "O -> UE. to play"
+        },
+        {
+          "id": "c9xrojq4l2",
+          "term": "cerrar",
+          "def": "E -> IE. to close"
+        },
+        {
+          "id": "c9xsczmoy8",
+          "term": "pensar",
+          "def": "E -> IE. to think"
+        },
+        {
+          "id": "c9xswm3uzt",
+          "term": "perder",
+          "def": "E -> IE. to lose"
+        },
+        {
+          "id": "c9xteuccb5",
+          "term": "querer",
+          "def": "E -> IE. to want"
+        },
+        {
+          "id": "c9xu2iychm",
+          "term": "mentir",
+          "def": "E -> IE. to lie"
+        },
+        {
+          "id": "c9xun7wb8t",
+          "term": "comenzar",
+          "def": "E -> IE. to start / to begin"
+        },
+        {
+          "id": "c9xv6ldugm",
+          "term": "empezar",
+          "def": "E -> IE. to start / to begin"
+        },
+        {
+          "id": "c9xvr1pbq7",
+          "term": "entender",
+          "def": "E -> IE. to understand"
+        },
+        {
+          "id": "c9xwpjqctj",
+          "term": "prefeir",
+          "def": "E -> IE. to prefer"
+        },
+        {
+          "id": "c9xx9h4bar",
+          "term": "despertar",
+          "def": "E -> IE. to wake up"
+        },
+        {
+          "id": "c9xxwb9p0p",
+          "term": "pedir",
+          "def": "E -> I. to order"
+        },
+        {
+          "id": "c9xyh9d6py",
+          "term": "servir",
+          "def": "E -> I. to serve"
+        },
+        {
+          "id": "ca5vef2or4",
+          "term": "reír",
+          "def": "E -> I. to laugh"
+        },
+        {
+          "id": "ca5vwvg18g",
+          "term": "repetir",
+          "def": "E -> I. to repeat"
         }
       ]
     }
