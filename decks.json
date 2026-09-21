@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated": "2026-09-18",
+  "updated": "2026-09-21",
   "folders": [
     {
       "id": "f56mcnn0z5",
@@ -13,6 +13,10 @@
     {
       "id": "f9tuc8lobh",
       "name": "Spanish / Español"
+    },
+    {
+      "id": "fsl8hrvote",
+      "name": "Mandarin"
     }
   ],
   "decks": [
@@ -346,6 +350,14 @@
           "def": "E -> I. to repeat"
         }
       ]
+    },
+    {
+      "id": "dsm6ru29l9",
+      "name": "if someone wants, email me",
+      "subject": "",
+      "folder": "fsl8hrvote",
+      "createdAt": 1790028272586,
+      "cards": []
     }
   ]
 }
