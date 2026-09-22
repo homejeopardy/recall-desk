@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated": "2026-09-21",
+  "updated": "2026-09-22",
   "folders": [
     {
       "id": "f56mcnn0z5",
@@ -158,12 +158,12 @@
         {
           "id": "c2bjnyqdfi",
           "term": "Cycle",
-          "def": " In a pendulum a movement back and forth    and back to the starting point is a cycle."
+          "def": " In a pendulum a movement back and forth    and back to the starting point"
         },
         {
           "id": "c2bo2qcrne",
           "term": "Frequency",
-          "def": "The number of cycles an oscillating system makes in a period of time is the frequency"
+          "def": "The number of cycles an oscillating system makes in a period of time"
         },
         {
           "id": "c2di62b0q4",
@@ -178,7 +178,7 @@
         {
           "id": "c2djtzn9sf",
           "term": "Resonance",
-          "def": "The phenomenon of a small force, applied just at the right time, adding up to a large motion is resonance"
+          "def": "The phenomenon of a small force, applied just at the right time, adding up to a large motion"
         },
         {
           "id": "c2dkjb7tig",
