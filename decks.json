@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated": "2026-09-22",
+  "updated": "2026-09-24",
   "folders": [
     {
       "id": "f56mcnn0z5",
@@ -358,6 +358,65 @@
       "folder": "fsl8hrvote",
       "createdAt": 1790028272586,
       "cards": []
+    },
+    {
+      "id": "d5udigaqiw",
+      "name": "Mechanics IV",
+      "subject": "",
+      "folder": "f56mcnn0z5",
+      "createdAt": 1790292354280,
+      "cards": [
+        {
+          "id": "c5udig74fd",
+          "term": "comorbid",
+          "def": "adjective. relating to the simultaneous existence of two or more diseases or medical conditions in a person"
+        },
+        {
+          "id": "c5urcfschg",
+          "term": "emit",
+          "def": "verb. to give off sound, smell, light, gas, etc"
+        },
+        {
+          "id": "c5uryt26s8",
+          "term": "haphazard",
+          "def": "adjective. marked by a lack of plan or chaos"
+        },
+        {
+          "id": "c5uu1ytkvb",
+          "term": "hyperbole",
+          "def": "noun. extravagant exaggeration"
+        },
+        {
+          "id": "c5uuzcy5ms",
+          "term": "inadequate",
+          "def": "adjective. not enough or not good enough"
+        },
+        {
+          "id": "c5uvqw1djy",
+          "term": "impotent",
+          "def": "adjective.  lacking in strength, power, or energy"
+        },
+        {
+          "id": "c5uwbs63u1",
+          "term": "ominous",
+          "def": "adjective. giving off the feeling that something is bad is going to happen"
+        },
+        {
+          "id": "c5uwwqbftw",
+          "term": "tantamount",
+          "def": "adjective. equivalent in value or importance"
+        },
+        {
+          "id": "c5uxgw2pln",
+          "term": "ubiquitous",
+          "def": "adjective. being everywhere at the same time"
+        },
+        {
+          "id": "c5uy2zflrj",
+          "term": "vendetta",
+          "def": "noun. a prolonged series of vengeful, retaliatory acts"
+        }
+      ]
     }
   ]
 }
