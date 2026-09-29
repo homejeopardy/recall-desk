@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated": "2026-09-24",
+  "updated": "2026-09-29",
   "folders": [
     {
       "id": "f56mcnn0z5",
@@ -415,6 +415,54 @@
           "id": "c5uy2zflrj",
           "term": "vendetta",
           "def": "noun. a prolonged series of vengeful, retaliatory acts"
+        }
+      ]
+    },
+    {
+      "id": "dlig1kdcci",
+      "name": "Longitude & Latitude",
+      "subject": "The History Longitude & Latitude test.  Note: Not all of the questions could be entered",
+      "createdAt": 1790621002424,
+      "cards": [
+        {
+          "id": "clig1kfdeq",
+          "term": "Define latitude and longitude",
+          "def": " Latitude and longitude form a geographic coordinate system that lets you find the exact location of any place on Earth.\n"
+        },
+        {
+          "id": "cll4qg4hxf",
+          "term": " the other names for lines of latitude and longitude",
+          "def": "parallels as and meridians\n"
+        },
+        {
+          "id": "cwuove5i8v",
+          "term": "identify the four hemispheres",
+          "def": "Northern, Western, Southern, Eastern \n"
+        },
+        {
+          "id": "cwv8i7bwml",
+          "term": "why do we sometimes need to use minutes and seconds for finding locations?",
+          "def": "to find a more precise location"
+        },
+        {
+          "id": "cww9ltwrmd",
+          "term": "why is the international date line not straight?",
+          "def": "because a rigid line would split countries and island nations into two different calendar days at the same time\n"
+        },
+        {
+          "id": "cwx908kpme",
+          "term": "How much does the  earth rotate in a hour and a day?",
+          "def": " the earth rotates 15 degrees each hour and therefore 360 degrees in one day. "
+        },
+        {
+          "id": "cwxzvtf4a0",
+          "term": "what does GPS stands for?",
+          "def": "GPS stands for Global Positioning System\n"
+        },
+        {
+          "id": "cwyq2sh26y",
+          "term": "What's the difference between a physical and political map? ",
+          "def": "The main difference is that a physical map shows what nature built, while a political map shows what humans decided.\n"
         }
       ]
     }
