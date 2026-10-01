@@ -478,6 +478,65 @@
       "folder": "fsl8hrvote",
       "createdAt": 1790708616494,
       "cards": []
+    },
+    {
+      "id": "d2vzqpl6hb",
+      "name": "Mechanics V",
+      "subject": "Quiz 10/7",
+      "folder": "f56mcnn0z5",
+      "createdAt": 1790892052657,
+      "cards": [
+        {
+          "id": "c2vzqpahmc",
+          "term": "churn",
+          "def": "verb. to move or to cause to move vigorously"
+        },
+        {
+          "id": "c2wprbcydb",
+          "term": "cinch",
+          "def": "noun. an extremely easy task"
+        },
+        {
+          "id": "c2wr133jqj",
+          "term": "ebb",
+          "def": "verb. to gradually lessen; to move away from land"
+        },
+        {
+          "id": "c2wtf9gsy6",
+          "term": "inexplicable",
+          "def": "adjective. unable to be explained"
+        },
+        {
+          "id": "c2wufvgsx4",
+          "term": "minaret",
+          "def": "noun. a tall, slender tower (often a part of a mosque)"
+        },
+        {
+          "id": "c2wv5gmp23",
+          "term": "mull",
+          "def": "verb. to think about deeply"
+        },
+        {
+          "id": "c2wvpozbjv",
+          "term": "redundant",
+          "def": "adjective. not needed or no longer useful"
+        },
+        {
+          "id": "c2ww9ba3yi",
+          "term": "sentinel",
+          "def": "noun. a soldier or guard who stands watch"
+        },
+        {
+          "id": "c2wwrjmjpe",
+          "term": "surreptitious",
+          "def": "adjective. secretive or attempting to avoid being noticed."
+        },
+        {
+          "id": "c2wx9zpfb5",
+          "term": "undulate",
+          "def": "verb. to move with a smooth up and down motion"
+        }
+      ]
     }
   ]
 }
