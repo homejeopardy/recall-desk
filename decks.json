@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated": "2026-10-01",
+  "updated": "2026-10-05",
   "folders": [
     {
       "id": "f56mcnn0z5",
@@ -281,7 +281,7 @@
         {
           "id": "c9xr2vvjll",
           "term": "jugar",
-          "def": "O -> UE. to play"
+          "def": "U -> UE. to play"
         },
         {
           "id": "c9xrojq4l2",
