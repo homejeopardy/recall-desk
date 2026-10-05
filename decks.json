@@ -542,6 +542,165 @@
           "def": "verb. to move with a smooth up and down motion"
         }
       ]
+    },
+    {
+      "id": "dlcdmc2qby",
+      "name": "Meaning",
+      "subject": "",
+      "folder": "fl7824f3tz",
+      "createdAt": 1791225381108,
+      "cards": [
+        {
+          "id": "clcmwf3anm",
+          "term": "recordar",
+          "def": "O to UE"
+        },
+        {
+          "id": "clcmwfh01f",
+          "term": "encontrar",
+          "def": "O to UE"
+        },
+        {
+          "id": "clcmwfqcct",
+          "term": "probar",
+          "def": "O to UE"
+        },
+        {
+          "id": "clcmwfvm5w",
+          "term": "resolar",
+          "def": "O to UE"
+        },
+        {
+          "id": "clcmwfpvhh",
+          "term": "almorzar",
+          "def": "O to UE"
+        },
+        {
+          "id": "clcmwfckma",
+          "term": "poder",
+          "def": "O to UE"
+        },
+        {
+          "id": "clcmwf6i1j",
+          "term": "volver",
+          "def": "O to UE"
+        },
+        {
+          "id": "clcmwfpzxw",
+          "term": "oler",
+          "def": "O to UE"
+        },
+        {
+          "id": "clcmwf4mp4",
+          "term": "morir",
+          "def": "O to UE"
+        },
+        {
+          "id": "clcmwff36m",
+          "term": "dormir",
+          "def": "O to UE"
+        },
+        {
+          "id": "clcmwfj19f",
+          "term": "contar",
+          "def": "O to UE"
+        },
+        {
+          "id": "clcmwfpago",
+          "term": "volar",
+          "def": "O to UE"
+        },
+        {
+          "id": "clcmwfu56v",
+          "term": "soñar",
+          "def": "O to UE"
+        },
+        {
+          "id": "clcmwf9xjn",
+          "term": "costar",
+          "def": "O to UE"
+        },
+        {
+          "id": "clcmwfld6m",
+          "term": "devolvar",
+          "def": "O to UE"
+        },
+        {
+          "id": "clcmwf6wwd",
+          "term": "jugar",
+          "def": "O to UE"
+        },
+        {
+          "id": "clcmwfo49a",
+          "term": "cerrar",
+          "def": "E to IE"
+        },
+        {
+          "id": "clcmwfnblk",
+          "term": "pensar",
+          "def": "E to IE"
+        },
+        {
+          "id": "clcmwf0uv0",
+          "term": "perder",
+          "def": "E to IE"
+        },
+        {
+          "id": "clcmwfsot3",
+          "term": "querer",
+          "def": "E to IE"
+        },
+        {
+          "id": "clcmwfxhul",
+          "term": "mentir",
+          "def": "E to IE"
+        },
+        {
+          "id": "clcmwfpxt4",
+          "term": "comenzar",
+          "def": "E to IE"
+        },
+        {
+          "id": "clcmwfe7oq",
+          "term": "empezar",
+          "def": "E to IE"
+        },
+        {
+          "id": "clcmwfncj3",
+          "term": "entender",
+          "def": "E to IE"
+        },
+        {
+          "id": "clcmwfdx7k",
+          "term": "prefeir",
+          "def": "E to IE"
+        },
+        {
+          "id": "clcmwfz9c0",
+          "term": "despertar",
+          "def": "E to IE"
+        },
+        {
+          "id": "clcmwfbr0k",
+          "term": "pedir",
+          "def": "E to I"
+        },
+        {
+          "id": "clcmwfbl33",
+          "term": "servir",
+          "def": "E to I"
+        },
+        {
+          "id": "clcmwfh8q2",
+          "term": "reír",
+          "def": "E to I"
+        },
+        {
+          "id": "clcmwfdjc6",
+          "term": "repetir",
+          "def": "E to I"
+        }
+      ]
     }
   ]
 }
