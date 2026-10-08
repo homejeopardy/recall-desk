@@ -701,6 +701,65 @@
           "def": "E to I"
         }
       ]
+    },
+    {
+      "id": "d2lb9kn84s",
+      "name": "Mechanics VI",
+      "subject": "Quiz 10/14",
+      "folder": "f56mcnn0z5",
+      "createdAt": 1791496216136,
+      "cards": [
+        {
+          "id": "c2lb9kx6cx",
+          "term": "dapple",
+          "def": "verb. to mark with spots"
+        },
+        {
+          "id": "c2mgdqnbbo",
+          "term": "epitome",
+          "def": "noun. a perfect example of a quality or type"
+        },
+        {
+          "id": "c2mgvyjchx",
+          "term": "fury",
+          "def": "noun. wild or violent anger"
+        },
+        {
+          "id": "c2miiinwud",
+          "term": "incapacitate ",
+          "def": "verb. to prevent from functioning in a normal way"
+        },
+        {
+          "id": "c2mj1p6gbf",
+          "term": "futile",
+          "def": "adjective. pointless; incapable of producing a result"
+        },
+        {
+          "id": "c2mjkn6fc4",
+          "term": "insinuate",
+          "def": "verb. to suggest or hint something bad in an indirect way"
+        },
+        {
+          "id": "c2mk2lz80k",
+          "term": "notorious",
+          "def": "adjective. famous or well known for something bad"
+        },
+        {
+          "id": "c2mkkj0he6",
+          "term": "pare",
+          "def": "verb. to trim away often the edges or ends"
+        },
+        {
+          "id": "c2ml5aj27v",
+          "term": "talisman",
+          "def": "noun. an object thought to have magic or to bring good luck "
+        },
+        {
+          "id": "c2mlqwfs4x",
+          "term": "writhe",
+          "def": "verb. to twist, contort, or squirm a body repeatedly"
+        }
+      ]
     }
   ]
 }
