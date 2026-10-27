@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated": "2026-10-08",
+  "updated": "2026-10-27",
   "folders": [
     {
       "id": "f56mcnn0z5",
@@ -25,6 +25,11 @@
     {
       "id": "fl7824f3tz",
       "name": "Verbos Irregulares",
+      "parent": "f9tuc8lobh"
+    },
+    {
+      "id": "f41i7c5shp",
+      "name": "1° Persona Irregular",
       "parent": "f9tuc8lobh"
     }
   ],
@@ -705,7 +710,7 @@
     {
       "id": "d2lb9kn84s",
       "name": "Mechanics VI",
-      "subject": "Quiz 10/14",
+      "subject": "Complete",
       "folder": "f56mcnn0z5",
       "createdAt": 1791496216136,
       "cards": [
@@ -758,6 +763,65 @@
           "id": "c2mlqwfs4x",
           "term": "writhe",
           "def": "verb. to twist, contort, or squirm a body repeatedly"
+        }
+      ]
+    },
+    {
+      "id": "d488cr37jy",
+      "name": "Meaning",
+      "subject": "",
+      "folder": "f41i7c5shp",
+      "createdAt": 1793131551819,
+      "cards": [
+        {
+          "id": "c488cr95ay",
+          "term": "saber",
+          "def": "to know"
+        },
+        {
+          "id": "c4aakr4t9n",
+          "term": "dar",
+          "def": "to give"
+        },
+        {
+          "id": "c4aay1rpah",
+          "term": "ver",
+          "def": "to see"
+        },
+        {
+          "id": "c4ab9v8ni5",
+          "term": "caber",
+          "def": "to fit"
+        },
+        {
+          "id": "c4abnelc2k",
+          "term": "hacer",
+          "def": "to make/do"
+        },
+        {
+          "id": "c4ac4vndjy",
+          "term": "traer",
+          "def": "to bring"
+        },
+        {
+          "id": "c4adchjdcu",
+          "term": "poner",
+          "def": "to put"
+        },
+        {
+          "id": "c4ae26bqnp",
+          "term": "saliir",
+          "def": "to exit/leave"
+        },
+        {
+          "id": "c4aemhn0ej",
+          "term": "caer",
+          "def": "to fall"
+        },
+        {
+          "id": "c4g8ras4wj",
+          "term": "valer",
+          "def": "to be worth"
         }
       ]
     }
