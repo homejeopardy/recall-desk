@@ -911,6 +911,36 @@
           "id": "c4i1zl5to2",
           "term": "valer",
           "def": "valgo"
+        },
+        {
+          "id": "c4w5i3y83g",
+          "term": "parecer",
+          "def": "parezco"
+        },
+        {
+          "id": "c4w60z8tt0",
+          "term": "conocer",
+          "def": "conozco"
+        },
+        {
+          "id": "c4w6k6cqmp",
+          "term": "traducir",
+          "def": "traduzco"
+        },
+        {
+          "id": "c4w72dat7d",
+          "term": "agradecer",
+          "def": "agradezco"
+        },
+        {
+          "id": "c4w7j44ojw",
+          "term": "producir",
+          "def": "produzco"
+        },
+        {
+          "id": "c4w7yunthd",
+          "term": "conducir",
+          "def": "conduzco"
         }
       ]
     }
