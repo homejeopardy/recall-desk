@@ -824,6 +824,65 @@
           "def": "to be worth"
         }
       ]
+    },
+    {
+      "id": "d4gicbtri0",
+      "name": "1° Person Conjugation",
+      "subject": "",
+      "folder": "f41i7c5shp",
+      "createdAt": 1793131938011,
+      "cards": [
+        {
+          "id": "c4gicb2twg",
+          "term": "saber",
+          "def": "sé"
+        },
+        {
+          "id": "c4hwl81ex4",
+          "term": "dar",
+          "def": "doy"
+        },
+        {
+          "id": "c4hx9ja509",
+          "term": "ver",
+          "def": "veo"
+        },
+        {
+          "id": "c4hxmtvafa",
+          "term": "caber",
+          "def": "quepo"
+        },
+        {
+          "id": "c4hxz4fbhd",
+          "term": "hacer",
+          "def": "hago"
+        },
+        {
+          "id": "c4hyiap87p",
+          "term": "traer",
+          "def": "traigo"
+        },
+        {
+          "id": "c4hzzht1bb",
+          "term": "poner",
+          "def": "pongo"
+        },
+        {
+          "id": "c4i0lwmx6f",
+          "term": "salir",
+          "def": "salgo"
+        },
+        {
+          "id": "c4i1ff8soq",
+          "term": "caer",
+          "def": "caigo"
+        },
+        {
+          "id": "c4i1zl5to2",
+          "term": "valer",
+          "def": "valgo"
+        }
+      ]
     }
   ]
 }
