@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated": "2026-10-27",
+  "updated": "2026-10-29",
   "folders": [
     {
       "id": "f56mcnn0z5",
@@ -941,6 +941,65 @@
           "id": "c4w7yunthd",
           "term": "conducir",
           "def": "conduzco"
+        }
+      ]
+    },
+    {
+      "id": "dyoie71hhh",
+      "name": "Mechanics VII",
+      "subject": "",
+      "folder": "f56mcnn0z5",
+      "createdAt": 1793243165983,
+      "cards": [
+        {
+          "id": "cyoie79mxy",
+          "term": "aloof \t\t",
+          "def": "adj.\tnot friendly; cool and distant\n"
+        },
+        {
+          "id": "cyptjnbvxh",
+          "term": "contempt",
+          "def": "noun. a feeling that something is worthless or beneath you\n"
+        },
+        {
+          "id": "cysd42yz0a",
+          "term": "curt",
+          "def": "adj. rudely brief"
+        },
+        {
+          "id": "cysx2bqupl",
+          "term": "implore",
+          "def": "verb. to beg earnestly and desperately\n"
+        },
+        {
+          "id": "cytqk8os98",
+          "term": "impromptu",
+          "def": "adj.\tdone without being planned or rehearsed\n"
+        },
+        {
+          "id": "cyun6hccb8",
+          "term": "insufferable",
+          "def": "adj.\tintolerable\n"
+        },
+        {
+          "id": "cyv6t79xv3",
+          "term": "mundane",
+          "def": "adj.\tlacking interest; dull\n"
+        },
+        {
+          "id": "cyvr337qpj",
+          "term": "petulant ",
+          "def": "adj.\tchildishly sulky or bad tempered\n"
+        },
+        {
+          "id": "cyw9us9zvp",
+          "term": "pretense",
+          "def": "noun.a claim, often a false one\n"
+        },
+        {
+          "id": "cywteub1sm",
+          "term": "tenuous",
+          "def": "adj.\tvery weak or slight\n"
         }
       ]
     }
