@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated": "2026-11-04",
+  "updated": "2026-11-05",
   "folders": [
     {
       "id": "f56mcnn0z5",
@@ -1000,6 +1000,65 @@
           "id": "cywteub1sm",
           "term": "tenuous",
           "def": "adj.\tvery weak or slight\n"
+        }
+      ]
+    },
+    {
+      "id": "d5l28lzhe2",
+      "name": "Mechanics VIII",
+      "subject": "",
+      "folder": "f56mcnn0z5",
+      "createdAt": 1793919890325,
+      "cards": [
+        {
+          "id": "c5l28lqqty",
+          "term": "belligerent",
+          "def": "adjective. being eager to fight"
+        },
+        {
+          "id": "c5lnhxp4j3",
+          "term": "delirious",
+          "def": "adjective. wild with excitement or enthusiasm"
+        },
+        {
+          "id": "c5lqrj83vq",
+          "term": "embellish",
+          "def": "verb. to make something more impressive bay adding details (often the details are not true)"
+        },
+        {
+          "id": "c5lrhv2774",
+          "term": "gall",
+          "def": "noun. bold and rude behavior"
+        },
+        {
+          "id": "c5ls39rbgu",
+          "term": "impending",
+          "def": "adjective. about to happen"
+        },
+        {
+          "id": "c5lslp4ccn",
+          "term": "impertinent",
+          "def": "adjective. 1) intrusive or presumptuous; uncivil. 2) irrelevant"
+        },
+        {
+          "id": "c5lt56yg2f",
+          "term": "introspective",
+          "def": "adjective. thoughtfully reflective"
+        },
+        {
+          "id": "c5lto307fc",
+          "term": "inconsequential",
+          "def": "adjective. not important or significant"
+        },
+        {
+          "id": "c5lv8c5l8h",
+          "term": "respite",
+          "def": "noun. a pause or relief from doing something"
+        },
+        {
+          "id": "c5lxa9lki5",
+          "term": "shrewd",
+          "def": "adjective. having or showing strong judgement"
         }
       ]
     }
