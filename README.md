@@ -1,7 +1,9 @@
 # Quizletish
 
 A study site for course terms — an adaptive Learn mode, flashcards, multiple choice,
-typed recall, and a timed matching drill, with decks organised into folders. Static: no build step, no server, no database. It runs on GitHub Pages
+typed recall, and a timed matching drill, with decks organised into folders. Decks come
+in three types: plain cards, vocabulary (each word carries a part of speech), and
+conjugation (each verb carries a table of forms). Static: no build step, no server, no database. It runs on GitHub Pages
 straight out of this repo.
 
 **Live:** https://quizletish.catherine-crump.com — served from this repo by GitHub Pages
@@ -35,6 +37,50 @@ start with a part of speech ("noun …") would mark a correct answer wrong.
 
 Learn progress is saved after every answer, per student name, in that browser — leaving
 mid-round loses nothing. The deck page's **Mastered** count is Learn's.
+
+## Deck types
+
+Set this with the **Type** menu in the deck editor. It changes what you can type in and
+which study modes appear; switching type never throws data away.
+
+**Cards** — the original two-sided card. Term on one side, definition on the other.
+
+**Vocabulary** — adds a part of speech to each word, picked from a fixed list so it stays
+consistent. In Learn the word climbs a third rung: pick the definition, type the word,
+then name what part of speech it is. All three, and only then is it mastered. Words left
+without a part of speech master after the usual two rungs. There is also a **Parts of
+speech** mode that drills only that, start to finish.
+
+**Conjugation** — one verb per card, with a table of forms. The deck sets the tense and
+the rows (yo, tú, él/ella/usted, nosotros, vosotros, ellos/ellas/ustedes by default;
+rename or delete rows, or add your own, for another language). Each card holds the verb,
+its meaning, and one form per row.
+
+A conjugation deck is studied two ways:
+
+- **Fill the table** — one verb at a time. Type every form, then the table is marked row
+  by row, with the right answer shown beside anything missed.
+- Everything else — Learn, flashcards, multiple choice, typing, matching — drills the
+  forms **one at a time** ("recordar · nosotros" → "recordamos"). The wrong options in
+  multiple choice are other forms from the same deck, so they are genuinely hard. The
+  Term → Definition toggle disappears, since a form is only ever asked the one way.
+
+Typed answers forgive spelling slips here as everywhere, so a missed accent on
+`probáis` still counts.
+
+### Pasting a list into them
+
+**Paste a list** follows the deck's type, one line per card:
+
+```
+Cards         term <tab> definition
+Vocabulary    word <tab> part of speech <tab> definition
+Conjugation   verb <tab> meaning <tab> yo, tú, él, nosotros, vosotros, ellos
+```
+
+For vocabulary, leave the middle field out and the part of speech stays blank. For
+conjugation the forms can each be their own column instead of one comma-separated list.
+**Copy as text** gives the same columns back.
 
 ## Folders
 
@@ -91,6 +137,24 @@ shared machine, and use **Disconnect** if you ever do. If it leaks, revoke it at
 
 You can still edit `decks.json` directly and push; the app picks up either. The shape:
 
+A vocabulary deck adds `"kind": "vocab"` and a `pos` per card. A conjugation deck adds
+`"kind": "conj"`, a `tense`, a `persons` list, and a `forms` map per card keyed by person
+id:
+
+```json
+{
+  "kind": "conj",
+  "tense": "Present",
+  "persons": [{ "id": "yo", "label": "yo" }, { "id": "tu", "label": "tú" }],
+  "cards": [
+    { "id": "c1", "term": "recordar", "def": "to remember",
+      "forms": { "yo": "recuerdo", "tu": "recuerdas" } }
+  ]
+}
+```
+
+The plain-card shape, unchanged:
+
 ```json
 {
   "version": 1,
@@ -116,7 +180,8 @@ You can still edit `decks.json` directly and push; the app picks up either. The 
 
 Every `id` needs to be unique and should stay stable — student progress and stars are
 filed against the card id, so renaming an id resets that card for everyone. `folders`, a
-folder's `parent`, and a deck's `folder` are all optional — leave `folder` off and the deck sits outside any
+folder's `parent`, a deck's `folder`, `kind`, `tense` and `persons`, and a card's `pos`
+and `forms` are all optional — leave `folder` off and the deck sits outside any
 folder, and a `folder` that doesn't match a listed id is ignored. `createdAt` only sets
 the order decks appear in the rail. In a definition, alternate accepted
 answers can be separated with `/`; typed answers also forgive spelling slips.

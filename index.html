@@ -349,6 +349,46 @@ input.text:focus{border-color:var(--ink);outline:none}
 .st.l{color:var(--brass)}
 .st.f{color:var(--bad)}
 
+/* ---- vocab + conjugation decks ---- */
+.rows.vocab .rowhead,.rows.vocab .row{grid-template-columns:32px 1fr 130px 1.5fr 32px}
+.row select.pos{border:1px solid transparent;border-radius:2px;background:transparent;padding:7px 6px;font-size:13px;width:100%;color:var(--ink-soft)}
+.row select.pos:hover{border-color:var(--rule)}
+.row select.pos:focus{border-color:var(--ink);outline:none;background:var(--surface-2)}
+.postag{font-family:var(--mono);font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-soft);border:1px solid var(--rule);padding:2px 7px;white-space:nowrap}
+.prompt .postag{display:inline-block;margin-bottom:12px}
+.kindbar{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.conjhead{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+.conjhead .tensein{width:190px}
+.persons{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.persons input{width:124px;font-size:13px;padding:5px 8px}
+.pdel{color:var(--ink-faint);padding:5px;border-radius:2px;line-height:0}
+.pdel:hover{color:var(--bad);background:var(--bad-wash)}
+.conjcard{border:1px solid var(--rule);background:var(--surface);margin-bottom:-1px}
+.conjcard .ch{display:grid;grid-template-columns:32px 1fr 1fr 32px;gap:10px;padding:9px 12px;align-items:center;border-bottom:1px solid var(--rule-soft);background:var(--surface-2)}
+.conjcard .ch .n{font-family:var(--mono);font-size:11px;color:var(--ink-faint)}
+.conjcard .ch input{width:100%}
+.cgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(192px,1fr));gap:0}
+.cell{display:flex;align-items:center;gap:9px;padding:8px 12px;border-right:1px solid var(--rule-soft);border-bottom:1px solid var(--rule-soft)}
+.cell label{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint);width:84px;flex:none;overflow:hidden;text-overflow:ellipsis}
+.cell input{flex:1;min-width:0;font-family:var(--read);font-size:15px}
+.ctable{border:1px solid var(--ink);background:var(--surface);box-shadow:var(--lift);margin-bottom:16px}
+.ctable .cth{padding:18px 20px 14px;border-bottom:1px solid var(--rule)}
+.ctable .cth h3{font-family:var(--read);font-size:27px;font-weight:600;letter-spacing:-.02em}
+.ctable .cth .m{font-size:13.5px;color:var(--ink-soft);margin-top:3px}
+.crow{display:grid;grid-template-columns:150px 1fr;gap:0;border-bottom:1px solid var(--rule-soft);align-items:stretch}
+.crow:last-child{border-bottom:0}
+.crow .pl{font-family:var(--mono);font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-soft);padding:13px 14px;background:var(--surface-2);border-right:1px solid var(--rule-soft);display:flex;align-items:center}
+.crow .pv{padding:7px 10px;display:flex;align-items:center;gap:10px;min-width:0}
+.crow input{width:100%;max-width:300px;font-family:var(--read);font-size:17px;padding:7px 10px;border:1px solid var(--rule);border-radius:2px;background:var(--surface)}
+.crow input:focus{border-color:var(--ink);outline:none}
+.crow.ok{background:var(--good-wash)}
+.crow.no{background:var(--bad-wash)}
+.crow .mark{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+.crow.ok .mark{color:var(--good)}
+.crow.no .mark{color:var(--bad)}
+.crow .right{font-family:var(--read);font-size:16px;color:var(--bad)}
+.crow .given{font-family:var(--read);font-size:17px;padding:7px 0}
+
 .railtoggle{display:none}
 @media (max-width:860px){
   .app{grid-template-columns:1fr}
@@ -371,6 +411,12 @@ input.text:focus{border-color:var(--ink);outline:none}
   .learn{grid-template-columns:1fr}
   .missed.lround li{grid-template-columns:1fr}
   .st{text-align:left}
+  .rows.vocab .rowhead,.rows.vocab .row{grid-template-columns:24px 1fr 32px}
+  .rows.vocab .row select.pos{grid-column:2/4;width:auto}
+  .conjcard .ch{grid-template-columns:24px 1fr 32px}
+  .conjcard .ch input:nth-of-type(2){grid-column:2/4}
+  .crow{grid-template-columns:104px 1fr}
+  .crow .pl{padding:11px 10px}
 }
 </style>
 
@@ -430,7 +476,9 @@ var I = {
   user:"M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8M4.5 20a7.5 7.5 0 0 1 15 0",
   learn:"M3 20h5v-5h5v-5h5V5h3",
   folder:"M3 7.5A1.5 1.5 0 0 1 4.5 6H9l2 2h8.5A1.5 1.5 0 0 1 21 9.5v8a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5z",
-  chev:"M9 6l6 6-6 6"
+  chev:"M9 6l6 6-6 6",
+  table:"M4 5h16v14H4zM4 10h16M10 10v9",
+  tag:"M4 5h8l8 8-7 7-8-8zM8.5 9.5h.01"
 };
 function starIcon(on){
   var s = icon(I.star, 15);
@@ -448,6 +496,36 @@ function shuffled(a){
   return r;
 }
 function uid(p){ return (p||"c") + Date.now().toString(36).slice(-5) + Math.random().toString(36).slice(2,6); }
+function cap(t){ t = String(t||""); return t ? t.charAt(0).toUpperCase() + t.slice(1) : ""; }
+
+/* ---- deck kinds ----
+   "cards" (the original two-sided card), "vocab" (adds a part of speech), and
+   "conj" (a verb with one table of forms). Only "cards" fields are written to
+   decks.json unless a deck actually uses the others, so old files round-trip. */
+var POS = ["noun","verb","adjective","adverb","pronoun","preposition","conjunction","interjection","phrase"];
+var DEFAULT_PERSONS = [
+  {id:"yo", label:"yo"}, {id:"tu", label:"tú"}, {id:"el", label:"él / ella / usted"},
+  {id:"nos", label:"nosotros"}, {id:"vos", label:"vosotros"}, {id:"ellos", label:"ellos / ellas / ustedes"}
+];
+function kindOf(d){ return d && (d.kind === "vocab" || d.kind === "conj") ? d.kind : "cards"; }
+function personsOf(d){ return (d && Array.isArray(d.persons) && d.persons.length) ? d.persons : DEFAULT_PERSONS; }
+function formOf(c, pid){ return (c && c.forms && c.forms[pid]) ? String(c.forms[pid]) : ""; }
+function hasForms(c){ return !!(c && c.forms && Object.keys(c.forms).some(function(k){ return String(c.forms[k]).trim(); })); }
+function cellId(cardId, pid){ return cardId + "#" + pid; }
+// A conjugation card becomes one study item per filled-in form, so Learn, the quiz,
+// typing and matching all work on it without knowing anything about tables.
+function cellsOf(d){
+  var out = [];
+  cardsOf(d).forEach(function(c){
+    personsOf(d).forEach(function(p){
+      var f = formOf(c, p.id).trim();
+      if(!f) return;
+      out.push({id: cellId(c.id, p.id), term: (c.term || "") + " · " + p.label, def: f,
+                fixed: true, card: c, person: p});
+    });
+  });
+  return out;
+}
 
 /* ============================ state ============================ */
 var S = {
@@ -548,16 +626,18 @@ function folderTree(){                         // depth-first, for indented menu
   return out;
 }
 function indent(depth){ return new Array(depth + 1).join("\u2003"); }
-function cardsOf(d){ return (d && Array.isArray(d.cards)) ? d.cards.filter(function(c){ return (c.term||"").trim() || (c.def||"").trim(); }) : []; }
+function cardsOf(d){ return (d && Array.isArray(d.cards)) ? d.cards.filter(function(c){ return (c.term||"").trim() || (c.def||"").trim() || hasForms(c); }) : []; }
+// What the study modes actually drill: cards, except conjugation decks, which drill cells.
+function unitsOf(d){ return kindOf(d) === "conj" ? cellsOf(d) : cardsOf(d); }
 function pool(){
   var d = deck(); if(!d) return [];
-  var all = cardsOf(d);
+  var all = unitsOf(d);
   if(S.filter === "starred") return all.filter(function(c){ return prog(d.id, c.id).star; });
   if(S.filter === "missed")  return all.filter(function(c){ var p = prog(d.id, c.id); return p.wrong > 0 && p.last !== "right"; });
   return all;
 }
-function ask(c){ return S.dir === "t2d" ? c.term : c.def; }
-function ans(c){ return S.dir === "t2d" ? c.def : c.term; }
+function ask(c){ return (c && c.fixed) || S.dir === "t2d" ? c.term : c.def; }
+function ans(c){ return (c && c.fixed) || S.dir === "t2d" ? c.def : c.term; }
 var ASK_LABEL = function(){ return S.dir === "t2d" ? "Term" : "Definition"; };
 var ANS_LABEL = function(){ return S.dir === "t2d" ? "Definition" : "Term"; };
 
@@ -621,7 +701,18 @@ function deckPayload(){
         id: d.id, name: d.name || "Untitled deck", subject: d.subject || "",
         folder: d.folder || undefined,      // dropped from the JSON when a deck isn't filed
         createdAt: d.createdAt || 0,
-        cards: cardsOf(d).map(function(c){ return {id: c.id, term: c.term || "", def: c.def || ""}; })
+        kind: kindOf(d) === "cards" ? undefined : d.kind,
+        tense: kindOf(d) === "conj" ? (d.tense || "") : undefined,
+        persons: kindOf(d) === "conj" ? personsOf(d).map(function(p){ return {id:p.id, label:p.label}; }) : undefined,
+        cards: cardsOf(d).map(function(c){
+          var out = {id: c.id, term: c.term || "", def: c.def || ""};
+          if((c.pos || "").trim()) out.pos = c.pos;          // kept even on a plain deck, so
+          if(hasForms(c)){                                    // switching kinds loses nothing
+            out.forms = {};
+            Object.keys(c.forms).forEach(function(k){ if(String(c.forms[k]).trim()) out.forms[k] = c.forms[k]; });
+          }
+          return out;
+        })
       };
     })
   };
@@ -852,6 +943,8 @@ function render(){
   var v = S.view;
   if(v === "home") return renderHome();
   if(v === "learn") return renderLearn();
+  if(v === "pos") return renderPos();
+  if(v === "table") return renderTable();
   if(v === "flash") return renderFlash();
   if(v === "quiz") return renderQuiz();
   if(v === "write") return renderWrite();
@@ -879,14 +972,14 @@ function renderNoDecks(){
 
 /* ---------------- deck home ---------------- */
 function renderHome(){
-  var d = deck(), all = cardsOf(d), n = all.length;
+  var d = deck(), kind = kindOf(d), all = unitsOf(d), n = all.length;
   var starred = 0, missed = 0, mastered = 0, touched = 0;
   all.forEach(function(c){
     var p = prog(d.id, c.id);
     if(p.star) starred++;
     if(p.seen) touched++;
     if(p.wrong > 0 && p.last !== "right") missed++;
-    if(lstage(d.id, c.id) >= 2) mastered++;      // mastery is earned in Learn, by typing it
+    if(isMastered(d, c)) mastered++;             // mastery is earned in Learn
   });
   var crumbs = [];
   folderPath(d.folder).forEach(function(a){
@@ -897,7 +990,10 @@ function renderHome(){
     el("div",{},[
       el("h2",{text:d.name || "Untitled deck"}),
       d.subject ? el("p",{class:"deskdesc",style:"margin-bottom:0",text:d.subject}) : null,
-      el("div",{class:"sub"}, crumbs.concat([ n + (n === 1 ? " card" : " cards") ]))
+      el("div",{class:"sub"}, crumbs.concat([
+        kind === "conj" ? (cardsOf(d).length + (cardsOf(d).length === 1 ? " verb · " : " verbs · ") + n + (n === 1 ? " form" : " forms") + (d.tense ? " · " + d.tense : ""))
+                        : n + (n === 1 ? " card" : " cards")
+      ]))
     ]),
     el("div",{class:"rowctl"},[
       S.canEdit ? el("button",{class:"btn",onclick:function(){ go("edit"); }},[icon(I.edit,15),"Edit cards"]) : el("button",{class:"btn",onclick:function(){ go("edit"); }},[icon(I.cards,15),"Browse all cards"]),
@@ -922,19 +1018,30 @@ function renderHome(){
   stage.appendChild(el("div",{class:"learn"},[
     el("div",{},[
       el("h3",{},[icon(I.learn,19),"Learn"]),
-      el("p",{text:"Short rounds that adapt to you. Each card starts as multiple choice, and only counts as mastered once you can see the definition and type the term. Misses come straight back."}),
+      el("p",{text: kind === "conj"
+        ? "Short rounds that adapt to you. Every form in the table is drilled on its own — picked from a lineup first, then typed from memory. Misses come straight back."
+        : kind === "vocab"
+        ? "Short rounds that adapt to you. Pick the definition, type the word, then say what part of speech it is. Only all three count as mastered, and misses come straight back."
+        : "Short rounds that adapt to you. Each card starts as multiple choice, and only counts as mastered once you can see the definition and type the term. Misses come straight back."}),
       learnMeter(d, lp)
     ]),
     el("button",{class:"btn primary",disabled: np ? null : "disabled",
       onclick: allDone ? function(){ learnReset(lp); } : startLearn},
       [ allDone ? "Start over" : (lk.mastered || lk.learning) ? "Keep going" : "Start learning" ])
   ]));
-  var tiles = [
+  var withPos = kind === "vocab" ? cardsOf(d).filter(function(c){ return (c.pos||"").trim(); }).length : 0;
+  var verbs = kind === "conj" ? cardsOf(d).filter(hasForms).length : 0;
+  var tiles = [];
+  if(kind === "conj") tiles.push(["table","Fill the table", I.table,
+    "The whole table for one verb at a time. Type every form, then see it marked row by row.", verbs >= 1, verbs ? null : "No verb has any forms yet"]);
+  if(kind === "vocab") tiles.push(["pos","Parts of speech", I.tag,
+    "Noun, verb, adjective? Straight through the deck, one word at a time.", withPos >= 1, withPos ? null : "No word has a part of speech yet"]);
+  tiles = tiles.concat([
     ["flash","Flashcards", I.cards, "Flip through at your own pace. Star the ones that keep slipping.", np >= 1, np ? null : "No cards in this filter"],
     ["quiz","Multiple choice", I.quiz, "Four options drawn from the deck's own answers. Scored at the end.", np >= 2, np < 2 ? "Needs 2+ cards" : null],
     ["write","Type the answer", I.write, "Write it out. Near-misses and spelling slips still count.", np >= 1, np ? null : "No cards in this filter"],
     ["match","Matching", I.match, "Pair terms to definitions against the clock. Beat your best time.", np >= 3, np < 3 ? "Needs 3+ cards" : null]
-  ];
+  ]);
   var grid = el("div",{class:"modes"});
   tiles.forEach(function(t){
     grid.appendChild(el("button",{class:"mode",disabled: t[4] ? null : "disabled", onclick:function(){ startMode(t[0]); }},[
@@ -945,19 +1052,21 @@ function renderHome(){
   stage.appendChild(grid);
 
   if(S.filter !== "all"){
-    stage.appendChild(el("div",{class:"notice"},[icon(I.shuffle,15), "Studying " + np + " of " + n + " cards — " + (S.filter === "starred" ? "starred only." : "cards you've missed and not yet re-answered correctly.")]));
+    stage.appendChild(el("div",{class:"notice"},[icon(I.shuffle,15), "Studying " + np + " of " + n + (kind === "conj" ? " forms — " : " cards — ") + (S.filter === "starred" ? "starred only." : "cards you've missed and not yet re-answered correctly.")]));
   }
 }
 
 function optsBar(withFilter){
   var bar = el("div",{class:"opts"});
-  var seg1 = el("div",{class:"seg"},[
-    el("button",{"aria-pressed": S.dir === "t2d" ? "true":"false", text:"Term → Definition", onclick:function(){ S.dir="t2d"; S.session=null; render(); }}),
-    el("button",{"aria-pressed": S.dir === "d2t" ? "true":"false", text:"Definition → Term", onclick:function(){ S.dir="d2t"; S.session=null; render(); }})
-  ]);
-  bar.appendChild(seg1);
+  // A conjugation deck is always asked verb+person -> form, so the direction toggle is moot.
+  if(kindOf(deck()) !== "conj"){
+    bar.appendChild(el("div",{class:"seg"},[
+      el("button",{"aria-pressed": S.dir === "t2d" ? "true":"false", text:"Term → Definition", onclick:function(){ S.dir="t2d"; S.session=null; render(); }}),
+      el("button",{"aria-pressed": S.dir === "d2t" ? "true":"false", text:"Definition → Term", onclick:function(){ S.dir="d2t"; S.session=null; render(); }})
+    ]));
+  }
   if(withFilter){
-    var d = deck(), all = cardsOf(d), st = 0, ms = 0;
+    var d = deck(), all = unitsOf(d), st = 0, ms = 0;
     all.forEach(function(c){ var p = prog(d.id,c.id); if(p.star) st++; if(p.wrong>0 && p.last!=="right") ms++; });
     bar.appendChild(el("div",{class:"seg"},[
       el("button",{"aria-pressed": S.filter==="all"?"true":"false", text:"All " + all.length, onclick:function(){ S.filter="all"; render(); }}),
@@ -971,7 +1080,8 @@ function optsBar(withFilter){
 
 function modeHead(title, extra){
   return el("div",{class:"stage-head"},[
-    el("div",{},[ el("h2",{text:title}), el("div",{class:"sub",text:(deck().name || "Untitled deck") + " · " + ASK_LABEL() + " → " + ANS_LABEL()}) ]),
+    el("div",{},[ el("h2",{text:title}), el("div",{class:"sub",text:(deck().name || "Untitled deck") + " · " +
+      (kindOf(deck()) === "conj" ? (deck().tense || "Conjugation") : ASK_LABEL() + " → " + ANS_LABEL())}) ]),
     el("div",{class:"rowctl"},[ extra || null, el("button",{class:"btn ghost",onclick:function(){ S.session=null; go("home"); }},[icon(I.back,15),"Deck"]) ])
   ]);
 }
@@ -983,6 +1093,14 @@ function startMode(mode){
   if(mode === "quiz")  S.session = {mode:"quiz", cards:order, i:0, picked:null, correct:0, missed:[]};
   if(mode === "write") S.session = {mode:"write", cards:order, i:0, state:null, correct:0, missed:[]};
   if(mode === "match") S.session = null, startMatch(order);
+  if(mode === "pos"){
+    var pc = cardsOf(deck()).filter(function(c){ return (c.pos||"").trim(); });
+    S.session = {mode:"pos", cards: S.shuffle ? shuffled(pc) : pc, i:0, picked:null, correct:0, missed:[]};
+  }
+  if(mode === "table"){
+    var vs = cardsOf(deck()).filter(hasForms);
+    S.session = {mode:"table", cards: S.shuffle ? shuffled(vs) : vs, i:0, given:{}, checked:false, right:0, total:0, misses:[]};
+  }
   go(mode);
 }
 
@@ -996,10 +1114,23 @@ function startMode(mode){
    so walking away mid-round loses nothing but the round's order. */
 var ROUND_SIZE = 7, learnTimer = null;
 
+// A vocabulary word with a part of speech gets a third rung: define it, type it, then
+// name what it is. Everything else keeps the original two.
+function maxStage(d, c){ return (kindOf(d) === "vocab" && (c.pos || "").trim()) ? 3 : 2; }
+function isMastered(d, c){ return lstage(d.id, c.id) >= maxStage(d, c); }
 function learnCounts(d, cards){
   var k = {fresh:0, learning:0, mastered:0};
-  cards.forEach(function(c){ var st = lstage(d.id, c.id); if(st >= 2) k.mastered++; else if(st === 1) k.learning++; else k.fresh++; });
+  cards.forEach(function(c){
+    var st = lstage(d.id, c.id);
+    if(st >= maxStage(d, c)) k.mastered++; else if(st > 0) k.learning++; else k.fresh++;
+  });
   return k;
+}
+function posChoices(c, all){
+  var right = cap(c.pos), used = {}, others = [];
+  all.forEach(function(o){ var x = cap(o.pos); if(x && x !== right && !used[x]){ used[x] = true; others.push(x); } });
+  POS.forEach(function(x){ var y = cap(x); if(y !== right && !used[y]){ used[y] = true; others.push(y); } });
+  return shuffled(shuffled(others).slice(0, 3).concat([right]));
 }
 function learnMeter(d, cards){
   var k = learnCounts(d, cards), n = cards.length || 1;
@@ -1024,13 +1155,13 @@ function canChoose(cards){
 // The typed rung shows the definition and asks for the term, whichever way the deck is
 // being drilled. Typing a whole definition back verbatim is a transcription test, and a
 // definition carrying a part-of-speech line ("noun …") would fail a correct answer.
-function typesTerm(c){ return !!(c.term || "").trim() && !!(c.def || "").trim(); }
-function lask(c, kind){ return kind === "type" && typesTerm(c) ? c.def : ask(c); }
-function lans(c, kind){ return kind === "type" && typesTerm(c) ? c.term : ans(c); }
+function typesTerm(c){ return !c.fixed && !!(c.term || "").trim() && !!(c.def || "").trim(); }
+function lask(c, kind){ return kind === "pos" ? c.term : kind === "type" && typesTerm(c) ? c.def : ask(c); }
+function lans(c, kind){ return kind === "pos" ? cap(c.pos) : kind === "type" && typesTerm(c) ? c.term : ans(c); }
 
 function buildLearnRound(cards){
   var d = deck();
-  var learning = cards.filter(function(c){ return lstage(d.id, c.id) === 1; });
+  var learning = cards.filter(function(c){ var st = lstage(d.id, c.id); return st > 0 && st < maxStage(d, c); });
   var fresh = cards.filter(function(c){ return lstage(d.id, c.id) === 0; });
   if(S.shuffle){ learning = shuffled(learning); fresh = shuffled(fresh); }
   // Carry half-learned cards forward, but keep room to introduce a couple of new ones.
@@ -1065,15 +1196,16 @@ function learnReset(cards){
 
 function renderLearn(){
   var s = S.session; if(!s || s.mode !== "learn") return go("home");
-  var d = deck(), all = cardsOf(d);
+  var d = deck(), all = unitsOf(d);
   if(!s.queue.length) return renderLearnDone(s);
   if(s.i >= s.queue.length){
     return learnCounts(d, s.all).mastered >= s.all.length ? renderLearnDone(s) : renderLearnRound(s);
   }
   var c = s.queue[s.i];
   if(s.kindFor !== s.i){
-    s.kind = (lstage(d.id, c.id) === 0 && canChoose(all)) ? "choice" : "type";
-    s.choices = s.kind === "choice" ? buildChoices(c, all) : null;
+    var st0 = lstage(d.id, c.id);
+    s.kind = st0 >= 2 ? "pos" : (st0 === 0 && canChoose(all)) ? "choice" : "type";
+    s.choices = s.kind === "choice" ? buildChoices(c, all) : s.kind === "pos" ? posChoices(c, all) : null;
     s.kindFor = s.i;
   }
   var a = s.answer, typed = s.kind === "type", right = lans(c, s.kind);
@@ -1082,16 +1214,16 @@ function renderLearn(){
   stage.appendChild(learnMeter(d, s.all));
   stage.appendChild(el("div",{class:"deskrow"},[
     el("span",{class:"counter",text:"Round " + s.round + " · " + (s.i+1) + " / " + s.queue.length}),
-    el("span",{class:"kind",text: !typed ? "Pick one" : typesTerm(c) ? "Type the term" : "Type it"})
+    el("span",{class:"kind",text: s.kind === "pos" ? "Part of speech" : !typed ? "Pick one" : c.fixed ? "Type the form" : typesTerm(c) ? "Type the term" : "Type it"})
   ]));
   var tr = el("div",{class:"track"}); tr.appendChild(el("i",{style:"width:" + (s.i/s.queue.length*100) + "%"})); stage.appendChild(tr);
   stage.appendChild(el("div",{class:"prompt"},[
-    el("div",{class:"role",text: typed && typesTerm(c) ? "Definition" : ASK_LABEL()}),
+    el("div",{class:"role",text: s.kind === "pos" ? "What part of speech?" : c.fixed ? "Which form?" : typed && typesTerm(c) ? "Definition" : ASK_LABEL()}),
     el("div",{class:"q",text:lask(c, s.kind) || "—"})
   ]));
 
   var input = null;
-  if(s.kind === "choice"){
+  if(!typed){
     var wrap = el("div",{class:"choices"});
     s.choices.forEach(function(opt, idx){
       var cls = "choice";
@@ -1102,7 +1234,7 @@ function renderLearn(){
     });
     stage.appendChild(wrap);
   } else {
-    input = el("input",{class:"answer",type:"text",placeholder:"Type the " + (typesTerm(c) ? "term" : ANS_LABEL().toLowerCase()) + "…","aria-label":"Your answer",autocomplete:"off",autocapitalize:"off",spellcheck:"false"});
+    input = el("input",{class:"answer",type:"text",placeholder:"Type the " + (c.fixed ? "form" : typesTerm(c) ? "term" : ANS_LABEL().toLowerCase()) + "…","aria-label":"Your answer",autocomplete:"off",autocapitalize:"off",spellcheck:"false"});
     if(a){ input.value = a.given; input.disabled = true; }
     else {
       input.addEventListener("keydown", function(ev){ if(ev.key === "Enter"){ ev.preventDefault(); learnType(input.value); } });
@@ -1114,7 +1246,7 @@ function renderLearn(){
   if(!a){
     stage.appendChild(el("div",{class:"rowctl",style:"margin-top:12px;justify-content:space-between"},[
       el("span",{style:"font-size:11.5px;color:var(--ink-faint)",
-        html: s.kind === "choice" ? 'Press <kbd>1</kbd>–<kbd>' + s.choices.length + '</kbd>' : 'Press <kbd>Enter</kbd> to check'}),
+        html: !typed ? 'Press <kbd>1</kbd>–<kbd>' + s.choices.length + '</kbd>' : 'Press <kbd>Enter</kbd> to check'}),
       el("span",{class:"rowctl"},[
         el("button",{class:"linkbtn",onclick:learnDontKnow},["Don't know?"]),
         s.kind === "type" ? el("button",{class:"btn primary",onclick:function(){ learnType(input.value); }},["Check"]) : null
@@ -1123,7 +1255,11 @@ function renderLearn(){
     return;
   }
 
-  var note = a.to >= 2 && a.from < 2 ? " Mastered." : (a.to === 1 && a.from === 0 ? " Next time, type it." : "");
+  var mx = maxStage(d, c);
+  var note = a.to >= mx && a.from < mx ? " Mastered."
+           : a.to === 1 && a.from === 0 ? " Next time, type it."
+           : a.to === 2 && mx === 3 ? " Next: what part of speech it is."
+           : "";
   var cls = a.result === "no" ? "no" : a.result === "near" ? "near" : "ok", msg;
   if(a.result === "no"){
     msg = [ a.skipped ? "The answer is " : "Not quite — the answer is ", el("b",{text:right}), ". ",
@@ -1146,7 +1282,7 @@ function learnAnswer(c, ok, a){
   var s = S.session, d = deck();
   a.from = lstage(d.id, c.id);
   a.requeued = false;
-  if(ok) setStage(d.id, c.id, Math.min(2, a.from + 1));
+  if(ok) setStage(d.id, c.id, Math.min(maxStage(d, c), a.from + 1));
   else {
     setStage(d.id, c.id, 0);
     if(!s.requeued[c.id]){ s.requeued[c.id] = true; s.queue.push(c); a.requeued = true; }
@@ -1179,7 +1315,7 @@ function learnOverride(){
   var s = S.session, a = s && s.answer;
   if(!a || a.result !== "no" || a.kind !== "type" || a.skipped) return;
   var c = s.queue[s.i], d = deck();
-  setStage(d.id, c.id, Math.min(2, a.from + 1));
+  setStage(d.id, c.id, Math.min(maxStage(d, c), a.from + 1));
   if(a.requeued && s.queue[s.queue.length - 1] === c){ s.queue.pop(); delete s.requeued[c.id]; a.requeued = false; }
   var p = prog(d.id, c.id); p.wrong = Math.max(0, p.wrong - 1); p.right++; p.last = "right"; saveLocal();
   a.result = "exact"; a.overridden = true; a.to = lstage(d.id, c.id);
@@ -1197,10 +1333,11 @@ function renderLearnRound(s){
   var k = learnCounts(d, s.all);
   var ul = el("ul",{class:"missed lround"});
   seen.forEach(function(c){
-    var st = lstage(d.id, c.id);
+    var st = lstage(d.id, c.id), mx = maxStage(d, c);
     ul.appendChild(el("li",{},[
       el("span",{class:"t",text:ask(c)}), el("span",{class:"d",text:ans(c)}),
-      el("span",{class:"st " + (st >= 2 ? "m" : st === 1 ? "l" : "f"), text: st >= 2 ? "Mastered" : st === 1 ? "Type it next" : "Needs work"})
+      el("span",{class:"st " + (st >= mx ? "m" : st > 0 ? "l" : "f"),
+        text: st >= mx ? "Mastered" : st === 2 ? "Part of speech next" : st === 1 ? "Type it next" : "Needs work"})
     ]));
   });
   stage.appendChild(modeHead("Learn"));
@@ -1224,7 +1361,10 @@ function renderLearnDone(s){
   stage.appendChild(el("div",{class:"result"},[
     el("div",{class:"eyebrow",text:"Learn complete"}),
     el("div",{class:"score",text:s.all.length + "/" + s.all.length}),
-    el("p",{style:"margin:2px 0 16px;color:var(--ink-soft);font-size:14px",text:"Every card mastered — picked out of a lineup, then named from its definition."}),
+    el("p",{style:"margin:2px 0 16px;color:var(--ink-soft);font-size:14px",
+      text: kindOf(d) === "conj" ? "Every form mastered — picked out of a lineup, then typed from memory."
+          : kindOf(d) === "vocab" ? "Every word mastered — defined, typed, and named by part of speech."
+          : "Every card mastered — picked out of a lineup, then named from its definition."}),
     learnMeter(d, s.all),
     el("div",{class:"rowctl",style:"margin-top:22px"},[
       el("button",{class:"btn primary",onclick:function(){ S.session = null; startMode("match"); }, disabled: s.all.length >= 3 ? null : "disabled"},["Test it with matching"]),
@@ -1232,6 +1372,165 @@ function renderLearnDone(s){
       el("button",{class:"btn ghost",onclick:function(){ S.session = null; go("home"); }},["Back to deck"])
     ])
   ]));
+}
+
+/* ---------------- parts of speech ----------------
+   A straight drill over the deck's own tags. It records right/wrong like any other
+   mode, and leaves the Learn ladder alone — Learn asks the same thing on its own rung. */
+function renderPos(){
+  var s = S.session; if(!s || s.mode !== "pos") return go("home");
+  if(!s.cards.length) return go("home");
+  if(s.i >= s.cards.length) return renderScore("Parts of speech", s);
+  var c = s.cards[s.i], all = cardsOf(deck()), right = cap(c.pos);
+  if(!s.choices || s.choicesFor !== c.id){ s.choices = posChoices(c, all); s.choicesFor = c.id; }
+
+  stage.appendChild(modeHead("Parts of speech"));
+  stage.appendChild(el("div",{class:"deskrow"},[
+    el("span",{class:"counter",text:(s.i+1) + " / " + s.cards.length}),
+    el("span",{class:"counter",text:s.correct + " correct"})
+  ]));
+  var tr = el("div",{class:"track"}); tr.appendChild(el("i",{style:"width:" + (s.i/s.cards.length*100) + "%"})); stage.appendChild(tr);
+  stage.appendChild(el("div",{class:"prompt"},[
+    el("div",{class:"role",text:"What part of speech?"}),
+    el("div",{class:"q",text:c.term || "—"}),
+    c.def ? el("div",{style:"font-size:13.5px;color:var(--ink-faint);margin-top:10px",text:c.def}) : null
+  ]));
+  var wrap = el("div",{class:"choices"});
+  s.choices.forEach(function(opt, idx){
+    var cls = "choice";
+    if(s.picked !== null){ if(opt === right) cls += " right"; else if(idx === s.picked) cls += " wrong"; }
+    wrap.appendChild(el("button",{class:cls, disabled: s.picked !== null ? "disabled" : null, onclick:function(){ pickPos(idx); }},[
+      el("span",{class:"key",text:String(idx+1)}), el("span",{text:opt})
+    ]));
+  });
+  stage.appendChild(wrap);
+
+  if(s.picked !== null){
+    var ok = s.choices[s.picked] === right;
+    stage.appendChild(el("div",{class:"verdict " + (ok ? "ok" : "no")},[
+      el("span",{},[ ok ? "Correct." : "Not quite — it's a ", ok ? null : el("b",{text:right.toLowerCase()}) ]),
+      el("button",{class:"btn sm",onclick:nextPos},[ s.i + 1 >= s.cards.length ? "See score" : "Next", icon(I.chev,14)])
+    ]));
+  } else {
+    stage.appendChild(el("div",{style:"margin-top:12px;font-size:11.5px;color:var(--ink-faint);text-align:center",html:'Press <kbd>1</kbd>–<kbd>' + s.choices.length + '</kbd> to answer'}));
+  }
+}
+function pickPos(idx){
+  var s = S.session; if(!s || s.picked !== null) return;
+  var c = s.cards[s.i], ok = s.choices[idx] === cap(c.pos);
+  s.picked = idx;
+  if(ok) s.correct++; else s.missed.push(c);
+  record(c.id, ok);
+  render();
+}
+function nextPos(){ var s = S.session; s.i++; s.picked = null; s.choices = null; render(); }
+
+/* ---------------- fill the table ----------------
+   One verb, the whole grid, marked row by row. Each row is recorded against the same
+   cell id the other modes use, so a form missed here shows up under Missed. */
+function renderTable(){
+  var s = S.session; if(!s || s.mode !== "table") return go("home");
+  if(!s.cards.length) return go("home");
+  if(s.i >= s.cards.length) return renderTableDone(s);
+  var d = deck(), c = s.cards[s.i], persons = personsOf(d).filter(function(pp){ return formOf(c, pp.id).trim(); });
+
+  stage.appendChild(modeHead("Fill the table"));
+  stage.appendChild(el("div",{class:"deskrow"},[
+    el("span",{class:"counter",text:(s.i+1) + " / " + s.cards.length}),
+    el("span",{class:"counter",text:s.right + " / " + s.total + " forms right"})
+  ]));
+  var tr = el("div",{class:"track"}); tr.appendChild(el("i",{style:"width:" + (s.i/s.cards.length*100) + "%"})); stage.appendChild(tr);
+
+  var inputs = [];
+  var body = el("div",{class:"ctable"},[
+    el("div",{class:"cth"},[
+      el("h3",{text:c.term || "—"}),
+      el("div",{class:"m",text:[c.def || "", d.tense || ""].filter(Boolean).join(" · ")})
+    ])
+  ]);
+  persons.forEach(function(pp, k){
+    var want = formOf(c, pp.id).trim(), got = (s.given[pp.id] || "");
+    var row, res = null;
+    if(s.checked){
+      res = grade(got, want) !== "no";
+      row = el("div",{class:"crow " + (res ? "ok" : "no")},[
+        el("span",{class:"pl",text:pp.label}),
+        el("span",{class:"pv"},[
+          el("span",{class:"given",text: got.trim() || "—"}),
+          el("span",{style:"flex:1"}),
+          res ? null : el("span",{class:"right",text:want}),
+          el("span",{class:"mark",text: res ? "right" : "missed"})
+        ])
+      ]);
+    } else {
+      var inp = el("input",{type:"text",value:got,placeholder:"—","aria-label":pp.label + " form",autocomplete:"off",autocapitalize:"off",spellcheck:"false"});
+      inp.addEventListener("input", function(ev){ s.given[pp.id] = ev.target.value; });
+      inp.addEventListener("keydown", function(ev){
+        if(ev.key !== "Enter") return;
+        ev.preventDefault();
+        if(k + 1 < inputs.length) inputs[k+1].focus(); else checkTable();
+      });
+      inputs.push(inp);
+      row = el("div",{class:"crow"},[ el("span",{class:"pl",text:pp.label}), el("span",{class:"pv"},[inp]) ]);
+    }
+    body.appendChild(row);
+  });
+  stage.appendChild(body);
+
+  if(!s.checked){
+    stage.appendChild(el("div",{class:"rowctl",style:"justify-content:space-between"},[
+      el("span",{style:"font-size:11.5px;color:var(--ink-faint)",html:'<kbd>Enter</kbd> moves down the table'}),
+      el("span",{class:"rowctl"},[
+        el("button",{class:"linkbtn",onclick:function(){ s.given = {}; checkTable(); }},["Don't know?"]),
+        el("button",{class:"btn primary",onclick:checkTable},["Check the table"])
+      ])
+    ]));
+    setTimeout(function(){ if(inputs.length) inputs[0].focus(); }, 0);
+  } else {
+    var gotRight = persons.filter(function(pp){ return grade(s.given[pp.id] || "", formOf(c, pp.id).trim()) !== "no"; }).length;
+    stage.appendChild(el("div",{class:"verdict " + (gotRight === persons.length ? "ok" : gotRight ? "near" : "no")},[
+      el("span",{text: gotRight + " of " + persons.length + " right."}),
+      el("button",{class:"btn sm",onclick:nextTable},[ s.i + 1 >= s.cards.length ? "See score" : "Next verb", icon(I.chev,14)])
+    ]));
+    stage.appendChild(el("div",{style:"margin-top:12px;font-size:11.5px;color:var(--ink-faint);text-align:center",html:'Press <kbd>Enter</kbd> to continue'}));
+  }
+}
+function checkTable(){
+  var s = S.session; if(!s || s.checked) return;
+  var d = deck(), c = s.cards[s.i];
+  personsOf(d).forEach(function(pp){
+    var want = formOf(c, pp.id).trim(); if(!want) return;
+    var ok = grade(s.given[pp.id] || "", want) !== "no";
+    s.total++; if(ok) s.right++; else s.misses.push({verb:c.term, person:pp.label, want:want, got:(s.given[pp.id]||"").trim()});
+    record(cellId(c.id, pp.id), ok);
+  });
+  s.checked = true; render();
+}
+function nextTable(){
+  var s = S.session; if(!s || !s.checked) return;
+  s.i++; s.given = {}; s.checked = false; render();
+}
+function renderTableDone(s){
+  var pct = s.total ? Math.round(s.right / s.total * 100) : 0;
+  stage.appendChild(modeHead("Fill the table"));
+  var body = el("div",{class:"result"},[
+    el("div",{class:"eyebrow",text:"Session score"}),
+    el("div",{class:"score",text:pct + "%"}),
+    el("p",{style:"margin:2px 0 20px;color:var(--ink-soft);font-size:14px",text:s.right + " of " + s.total + " forms right, across " + s.cards.length + (s.cards.length === 1 ? " verb" : " verbs")}),
+    el("div",{class:"rowctl"},[
+      el("button",{class:"btn primary",onclick:function(){ startMode("table"); }},["Start over"]),
+      el("button",{class:"btn ghost",onclick:function(){ S.session=null; go("home"); }},["Back to deck"])
+    ])
+  ]);
+  if(s.misses.length){
+    var ul = el("ul",{class:"missed"});
+    s.misses.forEach(function(m){
+      ul.appendChild(el("li",{},[ el("span",{class:"t",text:m.verb + " · " + m.person}), el("span",{class:"d",text:m.want + (m.got ? "   (you put “" + m.got + "”)" : "")}) ]));
+    });
+    body.appendChild(el("div",{class:"eyebrow",style:"margin-top:24px;text-align:left",text:"Forms to go back to"}));
+    body.appendChild(ul);
+  }
+  stage.appendChild(body);
 }
 
 /* ---------------- flashcards ---------------- */
@@ -1439,7 +1738,10 @@ function renderScore(title, s){
   if(s.missed.length){
     var ul = el("ul",{class:"missed"});
     s.missed.forEach(function(c){
-      ul.appendChild(el("li",{},[ el("span",{class:"t",text:ask(c)}), el("span",{class:"d",text:ans(c)}) ]));
+      ul.appendChild(el("li",{},[
+        el("span",{class:"t",text: s.mode === "pos" ? (c.term || "—") : ask(c)}),
+        el("span",{class:"d",text: s.mode === "pos" ? cap(c.pos) : ans(c)})
+      ]));
     });
     body.appendChild(el("div",{class:"eyebrow",style:"margin-top:24px;text-align:left",text:"Missed this round"}));
     body.appendChild(ul);
@@ -1449,6 +1751,7 @@ function renderScore(title, s){
 function retryMissed(s){
   var again = s.missed.slice();
   if(s.mode === "quiz") S.session = {mode:"quiz", cards:shuffled(again), i:0, picked:null, correct:0, missed:[]};
+  else if(s.mode === "pos") S.session = {mode:"pos", cards:shuffled(again), i:0, picked:null, correct:0, missed:[]};
   else S.session = {mode:"write", cards:shuffled(again), i:0, state:null, correct:0, missed:[]};
   render();
 }
@@ -1541,14 +1844,14 @@ function renderEdit(){
          : el("input",{class:"text descin",type:"text",maxlength:"140",value:d.subject || "",placeholder:"Short description (optional) — shown under the title","aria-label":"Deck description",
              oninput:function(ev){ d.subject = ev.target.value; S.lastKeystroke = Date.now(); queueSave(d); }}),
       ro ? el("div",{class:"sub",text:"All " + cardsOf(d).length + " cards, read-only."})
-         : el("div",{class:"editmeta"},[ folderPicker(d), el("span",{class:"sub",style:"margin:0",text:"Edits are kept on this device until you publish."}) ])
+         : el("div",{class:"editmeta"},[ folderPicker(d), kindPicker(d), el("span",{class:"sub",style:"margin:0",text:"Edits are kept on this device until you publish."}) ])
     ]),
     el("button",{class:"btn ghost",onclick:function(){ go("home"); }},[icon(I.back,15),"Deck"])
   ]));
 
   var bar = el("div",{class:"editbar"});
   if(!ro){
-    bar.appendChild(el("button",{class:"btn primary",onclick:function(){ addRow(d); }},[icon(I.plus,15),"Add card"]));
+    bar.appendChild(el("button",{class:"btn primary",onclick:function(){ addRow(d); }},[icon(I.plus,15), kindOf(d) === "conj" ? "Add verb" : "Add card"]));
     bar.appendChild(el("button",{class:"btn",onclick:function(){ var p = $("pastepanel"); p.hidden = !p.hidden; if(!p.hidden) $("pastebox").focus(); }},["Paste a list"]));
   }
   bar.appendChild(el("button",{class:"btn ghost",onclick:function(){ copyDeck(d); }},[icon(I.copy,15),"Copy as text"]));
@@ -1564,9 +1867,23 @@ function renderEdit(){
 
   if(!ro) stage.appendChild(pastePanel(d));
 
-  var rows = el("div",{class:"rows"});
+  var kind = kindOf(d);
+  if(kind === "conj"){
+    stage.appendChild(el("div",{class:"conjhead"},[
+      ro ? el("span",{class:"kind",text:(d.tense || "Tense not set")})
+         : el("label",{class:"fpick"},["Tense", el("input",{class:"text tensein",value:d.tense || "",placeholder:"e.g. Present","aria-label":"Tense",
+             oninput:function(ev){ d.tense = ev.target.value; S.lastKeystroke = Date.now(); queueSave(d); }})]),
+      ro ? null : el("span",{class:"sub",style:"margin:0",text:"Rows:"}),
+      ro ? null : personsEditor(d)
+    ]));
+    return renderConjRows(d, ro);
+  }
+
+  var rows = el("div",{class:"rows" + (kind === "vocab" ? " vocab" : "")});
   rows.appendChild(el("div",{class:"rowhead"},[
-    el("span",{text:"#"}), el("span",{text:"Term"}), el("span",{class:"h-def",text:"Definition"}), el("span",{})
+    el("span",{text:"#"}), el("span",{text:"Term"}),
+    kind === "vocab" ? el("span",{text:"Part of speech"}) : null,
+    el("span",{class:"h-def",text:"Definition"}), el("span",{})
   ]));
   var list = d.cards && d.cards.length ? d.cards : (d.cards = [{id:uid(),term:"",def:""}]);
   list.forEach(function(c, i){
@@ -1585,6 +1902,7 @@ function renderEdit(){
     rows.appendChild(el("div",{class:"row"},[
       el("span",{class:"n",text:String(i+1)}),
       mkta("term","term"),
+      kind === "vocab" ? posSelect(c, i, ro, function(){ queueSave(d); }) : null,
       el("div",{class:"def-cell"},[mkta("def","def")]),
       ro ? el("span",{}) : el("button",{class:"del","aria-label":"Delete card " + (i+1),onclick:function(){ d.cards.splice(i,1); if(!d.cards.length) d.cards.push({id:uid(),term:"",def:""}); queueSave(d); render(); }},[icon(I.trash,15)])
     ]));
@@ -1597,15 +1915,96 @@ function renderEdit(){
     });
   });
 }
+function renderConjRows(d, ro){
+  var list = d.cards && d.cards.length ? d.cards : (d.cards = [{id:uid(),term:"",def:"",forms:{}}]);
+  var wrap = el("div",{});
+  list.forEach(function(c, i){
+    if(!c.id) c.id = uid();
+    if(!c.forms) c.forms = {};
+    var grid = el("div",{class:"cgrid"});
+    personsOf(d).forEach(function(pp){
+      var inp = el("input",{class:"text",value:formOf(c, pp.id),placeholder:"—","aria-label":pp.label + " form of " + (c.term || "verb " + (i+1))});
+      if(ro) inp.readOnly = true;
+      else inp.addEventListener("input", function(ev){
+        c.forms[pp.id] = ev.target.value; S.lastKeystroke = Date.now(); queueSave(d);
+      });
+      grid.appendChild(el("div",{class:"cell"},[ el("label",{text:pp.label,title:pp.label}), inp ]));
+    });
+    var mk = function(field, ph){
+      var inp = el("input",{class:"text",value:c[field] || "",placeholder:ph,"aria-label":ph + " " + (i+1)});
+      if(ro) inp.readOnly = true;
+      else inp.addEventListener("input", function(ev){ c[field] = ev.target.value; S.lastKeystroke = Date.now(); queueSave(d); });
+      return inp;
+    };
+    wrap.appendChild(el("div",{class:"conjcard"},[
+      el("div",{class:"ch"},[
+        el("span",{class:"n",text:String(i+1)}),
+        mk("term","Verb"), mk("def","Meaning"),
+        ro ? el("span",{}) : el("button",{class:"del","aria-label":"Delete verb " + (i+1),onclick:function(){
+          d.cards.splice(i,1); if(!d.cards.length) d.cards.push({id:uid(),term:"",def:"",forms:{}});
+          saveDraft(); render();
+        }},[icon(I.trash,15)])
+      ]),
+      grid
+    ]));
+  });
+  stage.appendChild(wrap);
+}
 function addRow(d){
-  d.cards = d.cards || []; d.cards.push({id:uid(), term:"", def:""});
+  d.cards = d.cards || []; d.cards.push({id:uid(), term:"", def:"", forms: kindOf(d) === "conj" ? {} : undefined});
   queueSave(d); render();
   setTimeout(function(){
-    var tas = stage.querySelectorAll(".row textarea.term");
-    if(tas.length) tas[tas.length-1].focus();
+    var tas = stage.querySelectorAll(kindOf(d) === "conj" ? ".conjcard .ch input" : ".row textarea.term");
+    if(tas.length) tas[tas.length - (kindOf(d) === "conj" ? 2 : 1)].focus();
   }, 0);
 }
 /* ---------------- folders ---------------- */
+function kindPicker(d){
+  var sel = el("select",{"aria-label":"Deck type"});
+  [["cards","Cards"],["vocab","Vocabulary"],["conj","Conjugation"]].forEach(function(o){
+    sel.appendChild(el("option",{value:o[0],text:o[1]}));
+  });
+  sel.value = kindOf(d);
+  sel.addEventListener("change", function(){
+    d.kind = sel.value === "cards" ? undefined : sel.value;
+    if(d.kind === "conj" && !Array.isArray(d.persons)) d.persons = DEFAULT_PERSONS.map(function(x){ return {id:x.id, label:x.label}; });
+    S.session = null;
+    saveDraft(); renderRail(); render();
+    toast(sel.value === "conj" ? "Conjugation deck — one table per verb"
+       : sel.value === "vocab" ? "Vocabulary deck — each word gets a part of speech"
+       : "Plain two-sided cards");
+  });
+  return el("label",{class:"fpick"},[icon(I.cards,15), "Type", sel]);
+}
+function posSelect(c, i, ro, onset){
+  var sel = el("select",{class:"pos","aria-label":"Part of speech " + (i+1)});
+  sel.appendChild(el("option",{value:"",text:"—"}));
+  POS.forEach(function(x){ sel.appendChild(el("option",{value:x,text:cap(x)})); });
+  sel.value = c.pos || "";
+  if(ro) sel.disabled = true;
+  else sel.addEventListener("change", function(){ c.pos = sel.value; S.lastKeystroke = Date.now(); if(onset) onset(); });
+  return sel;
+}
+function personsEditor(d){
+  var list = personsOf(d);
+  if(!Array.isArray(d.persons)) d.persons = list.map(function(x){ return {id:x.id, label:x.label}; });
+  var wrap = el("div",{class:"persons"});
+  d.persons.forEach(function(pp, i){
+    wrap.appendChild(el("input",{class:"text",value:pp.label,"aria-label":"Person " + (i+1),
+      oninput:function(ev){ pp.label = ev.target.value; S.lastKeystroke = Date.now(); queueSave(d); }}));
+    wrap.appendChild(el("button",{class:"pdel","aria-label":"Remove " + pp.label,onclick:function(){
+      if(d.persons.length <= 1) return toast("A table needs at least one row");
+      if(!confirm("Remove the “" + pp.label + "” row? Any forms typed in it are deleted.")) return;
+      d.persons = d.persons.filter(function(x){ return x.id !== pp.id; });
+      d.cards.forEach(function(c){ if(c.forms) delete c.forms[pp.id]; });
+      saveDraft(); render();
+    }},[icon(I.trash,13)]));
+  });
+  wrap.appendChild(el("button",{class:"btn ghost sm",onclick:function(){
+    d.persons.push({id:uid("p"), label:"New row"}); saveDraft(); render();
+  }},[icon(I.plus,13),"Row"]));
+  return wrap;
+}
 function folderPicker(d){
   var sel = el("select",{"aria-label":"Folder"});
   sel.appendChild(el("option",{value:"",text:"Not in a folder"}));
@@ -1773,7 +2172,12 @@ function removeDeck(d){
   renderRail(); render();
 }
 function copyDeck(d){
-  var txt = cardsOf(d).map(function(c){ return (c.term||"") + "\t" + (c.def||""); }).join("\n");
+  var kind = kindOf(d);
+  var txt = cardsOf(d).map(function(c){
+    if(kind === "conj") return [(c.term||""), (c.def||"")].concat(personsOf(d).map(function(p){ return formOf(c, p.id); })).join("\t");
+    if(kind === "vocab") return (c.term||"") + "\t" + (c.pos||"") + "\t" + (c.def||"");
+    return (c.term||"") + "\t" + (c.def||"");
+  }).join("\n");
   if(navigator.clipboard && navigator.clipboard.writeText){
     navigator.clipboard.writeText(txt).then(function(){ toast("Copied " + cardsOf(d).length + " cards (tab-separated)"); },
                                             function(){ toast("Couldn't reach the clipboard"); });
@@ -1789,24 +2193,58 @@ function pastePanel(d){
     if(v === "colon") return [":"];
     return [custom.value || "\t"];
   }
+  function split(line){                      // every field on the line, not just the first cut
+    var ss = seps(), parts = [line], i;
+    ss.forEach(function(sp){
+      var next = [];
+      parts.forEach(function(chunk){ next = next.concat(chunk.split(sp)); });
+      parts = next;
+    });
+    for(i = 0; i < parts.length; i++) parts[i] = parts[i].trim();
+    return parts;
+  }
   function parse(){
-    var out = [], ss = seps();
+    var kind = kindOf(d), out = [];
     box.value.split("\n").forEach(function(line){
       if(!line.trim()) return;
-      var cut = -1, used = "";
-      ss.forEach(function(sp){ var k = line.indexOf(sp); if(k > 0 && (cut === -1 || k < cut)){ cut = k; used = sp; } });
-      if(cut === -1) out.push({id:uid(), term:line.trim(), def:""});
-      else out.push({id:uid(), term:line.slice(0,cut).trim(), def:line.slice(cut + used.length).trim()});
+      var f = split(line);
+      if(kind === "conj"){
+        var card = {id:uid(), term:f[0] || "", def:f[1] || "", forms:{}};
+        // forms may be their own columns, or one comma-separated column
+        var rest = f.slice(2);
+        if(rest.length === 1 && rest[0].indexOf(",") > -1) rest = rest[0].split(",").map(function(x){ return x.trim(); });
+        personsOf(d).forEach(function(pp, k){ if(rest[k]) card.forms[pp.id] = rest[k]; });
+        out.push(card);
+      } else if(kind === "vocab"){
+        var pos = (f[1] || "").toLowerCase();
+        if(POS.indexOf(pos) > -1) out.push({id:uid(), term:f[0] || "", pos:pos, def:f.slice(2).join(" ").trim()});
+        else out.push({id:uid(), term:f[0] || "", def:f.slice(1).join(" ").trim()});
+      } else {
+        out.push({id:uid(), term:f[0] || "", def:f.slice(1).join(" ").trim()});
+      }
     });
     return out;
   }
   function refresh(){
-    var n = parse();
+    var n = parse(), kind = kindOf(d);
+    if(!n.length){ preview.textContent = "Nothing to import yet."; return; }
+    if(kind === "conj"){
+      var full = n.filter(function(c){ return Object.keys(c.forms).length >= personsOf(d).length; }).length;
+      preview.textContent = n.length + " verb" + (n.length===1?"":"s") + " · " + full + " with every form filled in";
+      return;
+    }
     var withDef = n.filter(function(c){ return c.def; }).length;
-    preview.textContent = n.length ? n.length + " card" + (n.length===1?"":"s") + " · " + withDef + " with a definition" +
-      (withDef < n.length ? " · " + (n.length - withDef) + " line" + (n.length-withDef===1?"":"s") + " had no separator" : "") : "Nothing to import yet.";
+    var withPos = n.filter(function(c){ return c.pos; }).length;
+    preview.textContent = n.length + " card" + (n.length===1?"":"s") + " · " + withDef + " with a definition" +
+      (kind === "vocab" ? " · " + withPos + " with a part of speech" : "") +
+      (withDef < n.length ? " · " + (n.length - withDef) + " line" + (n.length-withDef===1?"":"s") + " had no separator" : "");
   }
-  box = el("textarea",{class:"paste",id:"pastebox",placeholder:"Fourth Amendment\tProtects against unreasonable searches and seizures\nStrict scrutiny\tCompelling interest, narrowly tailored, least restrictive means",oninput:refresh});
+  var ph = kindOf(d) === "conj"
+      ? "recordar\tto remember\trecuerdo, recuerdas, recuerda, recordamos, recordáis, recuerdan\nalmorzar\tto have lunch\talmuerzo, almuerzas, almuerza, almorzamos, almorzáis, almuerzan"
+    : kindOf(d) === "vocab"
+      ? "adamant\tadjective\tunyielding; firm in opinion\nsolitude\tnoun\tthe state of being alone"
+      : "Fourth Amendment\tProtects against unreasonable searches and seizures\nStrict scrutiny\tCompelling interest, narrowly tailored, least restrictive means";
+  box = el("textarea",{class:"paste",id:"pastebox",placeholder:ph,oninput:refresh});
   sepSel = el("select",{"aria-label":"Separator",onchange:function(){ custom.hidden = sepSel.value !== "custom"; refresh(); }},[
     el("option",{value:"tab",text:"Tab (paste from a spreadsheet)"}),
     el("option",{value:"dash",text:"A dash  -  between them"}),
@@ -1819,7 +2257,11 @@ function pastePanel(d){
 
   var panel = el("div",{class:"panel",id:"pastepanel",hidden:"hidden"},[
     el("h3",{text:"Paste a list"}),
-    el("p",{text:"One card per line, term first. Straight from a spreadsheet column pair, a Word table, or your outline."}),
+    el("p",{text: kindOf(d) === "conj"
+      ? "One verb per line: verb, meaning, then its forms in the order of the rows above — either as their own columns or as one comma-separated list."
+      : kindOf(d) === "vocab"
+      ? "One word per line: word, part of speech, definition. Leave the middle one out and the part of speech stays blank."
+      : "One card per line, term first. Straight from a spreadsheet column pair, a Word table, or your outline."}),
     box,
     el("div",{class:"rowctl",style:"justify-content:flex-start;margin-top:12px"},[
       el("span",{style:"font-size:12.5px;color:var(--ink-soft)",text:"Split on"}), sepSel, custom, preview,
@@ -1828,6 +2270,7 @@ function pastePanel(d){
       el("button",{class:"btn primary",onclick:function(){
         var n = parse(); if(!n.length) return toast("Nothing to import");
         d.cards = cardsOf(d).concat(n);
+        if(kindOf(d) === "vocab") n.forEach(function(c){ if(!c.pos) delete c.pos; });
         box.value = ""; refresh();
         saveDraft(); toast("Added " + n.length + " card" + (n.length===1?"":"s"));
         render();
@@ -2021,10 +2464,19 @@ document.addEventListener("keydown", function(ev){
     } else if((k === "Enter" || k === " ") && s.picked !== null){ ev.preventDefault(); nextQuiz(); }
   } else if(S.view === "write" && s && s.state && (k === "Enter" || k === " ")){
     ev.preventDefault(); nextWrite();
+  } else if(S.view === "pos" && s && s.i < s.cards.length){
+    if(s.picked === null && /^[1-4]$/.test(k)){
+      var pi = parseInt(k,10) - 1;
+      if(s.choices && pi < s.choices.length){ ev.preventDefault(); pickPos(pi); }
+    } else if((k === "Enter" || k === " ") && s.picked !== null){ ev.preventDefault(); nextPos(); }
+    if(k === "Escape"){ S.session = null; go("home"); }
+  } else if(S.view === "table" && s && s.mode === "table"){
+    if(s.checked && (k === "Enter" || k === " ")){ ev.preventDefault(); nextTable(); }
+    if(k === "Escape"){ S.session = null; go("home"); }
   } else if(S.view === "learn" && s && s.mode === "learn"){
     if(s.i >= s.queue.length){
       if(k === "Enter"){ ev.preventDefault(); learnContinueRound(); }
-    } else if(!s.answer && s.kind === "choice" && /^[1-4]$/.test(k)){
+    } else if(!s.answer && s.kind !== "type" && /^[1-4]$/.test(k)){
       var li = parseInt(k,10) - 1;
       if(s.choices && li < s.choices.length){ ev.preventDefault(); learnPick(li); }
     } else if(s.answer && (k === "Enter" || k === " ")){ ev.preventDefault(); learnNext(); }
@@ -2070,8 +2522,21 @@ function normalizeStore(raw){
       name: v.name || "Untitled deck",
       subject: v.subject || "",
       folder: ids[v.folder] ? v.folder : "",
+      kind: (v.kind === "vocab" || v.kind === "conj") ? v.kind : undefined,
+      tense: v.tense ? String(v.tense) : "",
+      persons: (Array.isArray(v.persons) && v.persons.length
+        ? v.persons.filter(function(x){ return x && x.id; }).map(function(x, k){
+            return {id: String(x.id), label: x.label ? String(x.label) : "Form " + (k+1)};
+          })
+        : null) || undefined,
       cards: (Array.isArray(v.cards) ? v.cards : []).map(function(c){
-        return {id: c.id || uid(), term: c.term || "", def: c.def || ""};
+        var out = {id: c.id || uid(), term: c.term || "", def: c.def || ""};
+        if(c.pos && POS.indexOf(String(c.pos)) > -1) out.pos = String(c.pos);
+        if(c.forms && typeof c.forms === "object"){
+          out.forms = {};
+          Object.keys(c.forms).forEach(function(k){ out.forms[k] = String(c.forms[k] == null ? "" : c.forms[k]); });
+        }
+        return out;
       }),
       createdAt: v.createdAt || n
     };
