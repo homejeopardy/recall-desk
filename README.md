@@ -51,6 +51,12 @@ then name what part of speech it is. All three, and only then is it mastered. Wo
 without a part of speech master after the usual two rungs. There is also a **Parts of
 speech** mode that drills only that, start to finish.
 
+The options offered are only the parts of speech **this deck actually uses** — a deck of
+nouns, verbs and adjectives never offers "preposition" — so the choices stay plausible
+and the deck sets its own difficulty. A deck using only one part of speech has nothing to
+tell apart, so the question is dropped: the mode is greyed out and Learn goes back to two
+rungs.
+
 **Conjugation** — one verb per card, with a table of forms. The deck sets the tense and
 the rows (yo, tú, él/ella/usted, nosotros, vosotros, ellos/ellas/ustedes by default;
 rename or delete rows, or add your own, for another language). Each card holds the verb,

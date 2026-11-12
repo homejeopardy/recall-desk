@@ -718,7 +718,7 @@ function deckPayload(){
   };
 }
 function saveDraft(){
-  S.draft = true;
+  S.draft = true; STORE_VER++;
   try{ localStorage.setItem(DRAFT_KEY, JSON.stringify(deckPayload())); }catch(e){}
   if($("pubbar") && !S.busy) pubState("", unpublishedMsg(), S.token ? "Publish to everyone" : "Set up publishing");
   delete S.pendingDeck;
@@ -732,6 +732,7 @@ function pushDeck(d){
 }
 function queueSave(d){
   if(!S.canEdit) return;
+  STORE_VER++;
   S.dirtyDecks[d.id] = true;
   var f = $("saveflag"); if(f) f.textContent = "Saving…";
   clearTimeout(S.saveTimer);
@@ -1020,7 +1021,7 @@ function renderHome(){
       el("h3",{},[icon(I.learn,19),"Learn"]),
       el("p",{text: kind === "conj"
         ? "Short rounds that adapt to you. Every form in the table is drilled on its own — picked from a lineup first, then typed from memory. Misses come straight back."
-        : kind === "vocab"
+        : posAskable(d)
         ? "Short rounds that adapt to you. Pick the definition, type the word, then say what part of speech it is. Only all three count as mastered, and misses come straight back."
         : "Short rounds that adapt to you. Each card starts as multiple choice, and only counts as mastered once you can see the definition and type the term. Misses come straight back."}),
       learnMeter(d, lp)
@@ -1030,12 +1031,14 @@ function renderHome(){
       [ allDone ? "Start over" : (lk.mastered || lk.learning) ? "Keep going" : "Start learning" ])
   ]));
   var withPos = kind === "vocab" ? cardsOf(d).filter(function(c){ return (c.pos||"").trim(); }).length : 0;
+  var posKinds = kind === "vocab" ? deckPos(d).length : 0;
   var verbs = kind === "conj" ? cardsOf(d).filter(hasForms).length : 0;
   var tiles = [];
   if(kind === "conj") tiles.push(["table","Fill the table", I.table,
     "The whole table for one verb at a time. Type every form, then see it marked row by row.", verbs >= 1, verbs ? null : "No verb has any forms yet"]);
   if(kind === "vocab") tiles.push(["pos","Parts of speech", I.tag,
-    "Noun, verb, adjective? Straight through the deck, one word at a time.", withPos >= 1, withPos ? null : "No word has a part of speech yet"]);
+    "Straight through the deck, one word at a time. The options are the parts of speech this deck uses.",
+    posKinds >= 2, !withPos ? "No word has a part of speech yet" : posKinds < 2 ? "Every word here is the same part of speech" : null]);
   tiles = tiles.concat([
     ["flash","Flashcards", I.cards, "Flip through at your own pace. Star the ones that keep slipping.", np >= 1, np ? null : "No cards in this filter"],
     ["quiz","Multiple choice", I.quiz, "Four options drawn from the deck's own answers. Scored at the end.", np >= 2, np < 2 ? "Needs 2+ cards" : null],
@@ -1116,7 +1119,7 @@ var ROUND_SIZE = 7, learnTimer = null;
 
 // A vocabulary word with a part of speech gets a third rung: define it, type it, then
 // name what it is. Everything else keeps the original two.
-function maxStage(d, c){ return (kindOf(d) === "vocab" && (c.pos || "").trim()) ? 3 : 2; }
+function maxStage(d, c){ return (posAskable(d) && (c.pos || "").trim()) ? 3 : 2; }
 function isMastered(d, c){ return lstage(d.id, c.id) >= maxStage(d, c); }
 function learnCounts(d, cards){
   var k = {fresh:0, learning:0, mastered:0};
@@ -1129,9 +1132,21 @@ function learnCounts(d, cards){
 function posChoices(c, all){
   var right = cap(c.pos), used = {}, others = [];
   all.forEach(function(o){ var x = cap(o.pos); if(x && x !== right && !used[x]){ used[x] = true; others.push(x); } });
-  POS.forEach(function(x){ var y = cap(x); if(y !== right && !used[y]){ used[y] = true; others.push(y); } });
   return shuffled(shuffled(others).slice(0, 3).concat([right]));
 }
+// The distinct parts of speech a deck actually uses. Cached per edit, because asking
+// it per card while counting a long deck would be quadratic.
+var STORE_VER = 0;
+function deckPos(d){
+  if(d._posVer === STORE_VER && d._pos) return d._pos;
+  var seen = {}, out = [];
+  cardsOf(d).forEach(function(c){ var x = (c.pos || "").trim(); if(x && !seen[x]){ seen[x] = true; out.push(x); } });
+  d._pos = out; d._posVer = STORE_VER;
+  return out;
+}
+// With only one part of speech in the deck there is nothing to tell apart, so the
+// question is dropped rather than shown as a single button.
+function posAskable(d){ return kindOf(d) === "vocab" && deckPos(d).length >= 2; }
 function learnMeter(d, cards){
   var k = learnCounts(d, cards), n = cards.length || 1;
   return el("div",{class:"lmeter"},[
@@ -2498,7 +2513,7 @@ render();
 
 function copy(x){ return JSON.parse(JSON.stringify(x)); }
 function currentStore(){ return {folders:S.folders, decks:S.decks}; }
-function useStore(st){ st = copy(st || {folders:[], decks:[]}); S.folders = st.folders; S.decks = st.decks; }
+function useStore(st){ st = copy(st || {folders:[], decks:[]}); S.folders = st.folders; S.decks = st.decks; STORE_VER++; }
 // Accepts decks.json with or without folders, and drops a deck's folder if it points nowhere.
 function normalizeStore(raw){
   var folders = (raw && Array.isArray(raw.folders) ? raw.folders : []).map(function(f){
