@@ -1077,6 +1077,247 @@
           "pos": "adjective"
         }
       ]
+    },
+    {
+      "id": "dax1vlqbca",
+      "name": "Mechanics IX",
+      "subject": "",
+      "folder": "f56mcnn0z5",
+      "createdAt": 1794593975745,
+      "kind": "vocab",
+      "cards": [
+        {
+          "id": "cax1vlrr2x",
+          "term": "alliance",
+          "def": "a partnership bet",
+          "pos": "noun"
+        }
+      ]
+    },
+    {
+      "id": "dcjv3zvy4x",
+      "name": "Irregular Yo",
+      "subject": "",
+      "folder": "f41i7c5shp",
+      "createdAt": 1794596719679,
+      "kind": "conj",
+      "tense": "All",
+      "persons": [
+        {
+          "id": "yo",
+          "label": "yo"
+        }
+      ],
+      "cards": [
+        {
+          "id": "ccjv3ztg0v",
+          "term": "agradecer",
+          "def": "to be grateful / thank",
+          "forms": {
+            "yo": "agradezco"
+          }
+        },
+        {
+          "id": "ccl5mydjhr",
+          "term": "caber",
+          "def": "to fit",
+          "forms": {
+            "yo": "quepo"
+          }
+        },
+        {
+          "id": "cclhwwqkb6",
+          "term": "caer",
+          "def": "to fall",
+          "forms": {
+            "yo": "caigo"
+          }
+        },
+        {
+          "id": "cclijbrye5",
+          "term": "conducir",
+          "def": "to drive / conduct",
+          "forms": {
+            "yo": "conduzco"
+          }
+        },
+        {
+          "id": "ccljctvylt",
+          "term": "conocer",
+          "def": "to know / meet (person/place)",
+          "forms": {
+            "yo": "concozco"
+          }
+        },
+        {
+          "id": "ccljtc4a00",
+          "term": "dar",
+          "def": "to give",
+          "forms": {
+            "yo": "doy"
+          }
+        },
+        {
+          "id": "cclk9ckfoi",
+          "term": "decir",
+          "def": "to say / tell",
+          "forms": {
+            "yo": "digo"
+          }
+        },
+        {
+          "id": "ccllaqo07l",
+          "term": "dirigir",
+          "def": "to direct",
+          "forms": {
+            "yo": "dirijo"
+          }
+        },
+        {
+          "id": "cclltpg1ca",
+          "term": "elegir",
+          "def": "to chose",
+          "forms": {
+            "yo": "elijo"
+          }
+        },
+        {
+          "id": "cclmcgx05o",
+          "term": "escoger",
+          "def": "to choose",
+          "forms": {
+            "yo": "escojo"
+          }
+        },
+        {
+          "id": "cclmv4wuta",
+          "term": "estar",
+          "def": "to be (condition / location)",
+          "forms": {
+            "yo": "estoy"
+          }
+        },
+        {
+          "id": "cclny0l0xg",
+          "term": "hacer",
+          "def": "to do / make",
+          "forms": {
+            "yo": "hago"
+          }
+        },
+        {
+          "id": "cclojxs71j",
+          "term": "ir ",
+          "def": "to go",
+          "forms": {
+            "yo": "voy"
+          }
+        },
+        {
+          "id": "cclp9bgaio",
+          "term": "obedecer",
+          "def": "to obey",
+          "forms": {
+            "yo": "obedezco"
+          }
+        },
+        {
+          "id": "cclpxw3ydy",
+          "term": "ofrecer",
+          "def": "to offer",
+          "forms": {
+            "yo": "ofrezco"
+          }
+        },
+        {
+          "id": "cclqnjeeoq",
+          "term": "oír",
+          "def": "to hear",
+          "forms": {
+            "yo": "oigo"
+          }
+        },
+        {
+          "id": "cclrcwyfpi",
+          "term": "parecer",
+          "def": "to seem / look like",
+          "forms": {
+            "yo": "parezco"
+          }
+        },
+        {
+          "id": "ccls1q6qa3",
+          "term": "poner",
+          "def": "to put / place",
+          "forms": {
+            "yo": "produzco"
+          }
+        },
+        {
+          "id": "cclsqkn2ht",
+          "term": "saber",
+          "def": "to know (facts / how to)0",
+          "forms": {
+            "yo": "sé"
+          }
+        },
+        {
+          "id": "ccltcrj0ql",
+          "term": "salir",
+          "def": "to leave / go",
+          "forms": {
+            "yo": "salgo"
+          }
+        },
+        {
+          "id": "cclty6xvsy",
+          "term": "ser",
+          "def": "to be (permanent / identity) soy",
+          "forms": {
+            "yo": "soy"
+          }
+        },
+        {
+          "id": "cclukufz2f",
+          "term": "tener",
+          "def": "to have",
+          "forms": {
+            "yo": "tengo"
+          }
+        },
+        {
+          "id": "ccyas3vy2d",
+          "term": "traducir",
+          "def": "to translate",
+          "forms": {
+            "yo": "traduzco"
+          }
+        },
+        {
+          "id": "ccydbfltkk",
+          "term": "traer",
+          "def": "to bring",
+          "forms": {
+            "yo": "traigo"
+          }
+        },
+        {
+          "id": "ccyf8cdn52",
+          "term": "valer",
+          "def": "to be worth",
+          "forms": {
+            "yo": "valgo"
+          }
+        },
+        {
+          "id": "ccyhh3xi6h",
+          "term": "venir",
+          "def": "to come",
+          "forms": {
+            "yo": "vengo"
+          }
+        }
+      ]
     }
   ]
 }
