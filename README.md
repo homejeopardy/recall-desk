@@ -131,7 +131,23 @@ through it under **Set up publishing**; the short version:
    repositories** → `recall-desk`.
 3. Under **Repository permissions** set **Contents** to **Read and write**. Leave
    everything else alone.
-4. Generate, copy, paste it into the app.
+4. Under **Expiration** pick **No expiration**, or the longest it offers. The box
+   defaults to **30 days**, which is the usual reason publishing quietly stops working a
+   month later.
+5. Generate, copy, paste it into the app.
+
+**Say yes when the browser offers to save it.** The setup box is a real sign-in form, so
+your password manager (iCloud Keychain, Chrome, 1Password…) keeps the token and fills it
+in next time — including on your other devices, which is the only thing that carries it
+from one browser to another. The app also asks the browser for persistent storage, which
+Chrome, Edge and Firefox grant to a site you use regularly. Safari clears script-written
+storage after about a week of not visiting the site, so there the password manager is
+what saves you.
+
+**Connected** shows the date the token was saved and has a **Check it still works**
+button that asks GitHub. A token that has expired or been revoked is named as such and
+cleared, rather than left sitting there dead — and an unpublished draft survives either
+way, so nothing is lost when it happens mid-edit.
 
 Scoped that way the token can change **one file in one repo** and nothing else. It's
 stored in that browser and never written into the site's code, so it isn't in this repo
