@@ -541,7 +541,7 @@ var S = {
 };
 
 /* -------- per-viewer progress: browser-local, never sent anywhere -------- */
-var WHO_KEY = "recalldesk.who.v1", DRAFT_KEY = "recalldesk.draft.v1", TOKEN_KEY = "recalldesk.gh.v1", FOLD_KEY = "recalldesk.folders-open.v1";
+var WHO_KEY = "recalldesk.who.v1", DRAFT_KEY = "recalldesk.draft.v1", TOKEN_KEY = "recalldesk.gh.v1", FOLD_KEY = "recalldesk.folders-open.v1", TOKEN_AT = "recalldesk.gh.at.v1";
 // Scores are filed under whichever name is signed in, so a shared classroom machine
 // keeps them apart. Still browser-local: nothing about a score leaves the device.
 function slug(n){ return String(n||"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"") || "guest"; }
@@ -771,7 +771,7 @@ function ghFetch(url, opts){
   return fetch(url, opts);
 }
 function ghError(res){
-  if(res.status === 401) return "GitHub rejected the token. It may have expired — connect a new one.";
+  if(res.status === 401) return "GitHub rejected the token — it has expired or been revoked. Set up publishing again with a fresh one.";
   if(res.status === 403) return "That token isn't allowed to write to this repo. It needs Contents: Read and write on recall-desk.";
   if(res.status === 404) return "GitHub can't see " + GH_OWNER + "/" + GH_REPO + ". Either the repo doesn't exist yet or the token wasn't given access to it.";
   if(res.status === 409 || res.status === 422) return "The file changed on GitHub while you were editing. Reload the page, then redo this change.";
@@ -779,8 +779,26 @@ function ghError(res){
 }
 function setToken(t){
   S.token = t || null;
-  try{ t ? localStorage.setItem(TOKEN_KEY, t) : localStorage.removeItem(TOKEN_KEY); }catch(e){}
+  try{
+    if(t){ localStorage.setItem(TOKEN_KEY, t); localStorage.setItem(TOKEN_AT, new Date().toISOString().slice(0,10)); }
+    else { localStorage.removeItem(TOKEN_KEY); localStorage.removeItem(TOKEN_AT); }
+  }catch(e){}
+  if(t) keepStorage();
   refreshFoot();
+}
+/* Browsers clear "script-written" storage on their own when a site looks idle — Safari
+   after about a week without a visit. This asks the browser to exempt this site, which
+   Chrome, Edge and Firefox honour for a site you actually use. Safari ignores it, which
+   is why the token also wants saving in a password manager. */
+function keepStorage(){
+  try{
+    if(navigator.storage && navigator.storage.persist && navigator.storage.persisted){
+      navigator.storage.persisted().then(function(already){ if(!already) navigator.storage.persist(); });
+    }
+  }catch(e){}
+}
+function tokenAge(){
+  try{ return localStorage.getItem(TOKEN_AT) || ""; }catch(e){ return ""; }
 }
 function pubState(cls, msg, btnLabel){
   var bar = $("pubbar"); if(!bar) return;
@@ -842,7 +860,9 @@ function publish(){
     toast("Published — students see it in about a minute");
   }).catch(function(err){
     S.busy = false;
-    pubState("fail", el("span",{},[el("b",{text:"Didn't publish. "}), String(err && err.message || err)]), "Try again");
+    var msg = String(err && err.message || err);
+    if(/expired or been revoked/.test(msg)) setToken(null);   // don't leave a dead token in place
+    pubState("fail", el("span",{},[el("b",{text:"Didn't publish. "}), msg]), S.token ? "Try again" : "Set up publishing");
   });
 }
 
@@ -2381,6 +2401,24 @@ function renderWho(){
 }
 
 /* ============================ connect to GitHub ============================ */
+// Asks GitHub whether the saved token is still good, so a dead one is found here
+// rather than halfway through publishing.
+function checkToken(){
+  var out = $("tokcheck"), btn = $("checktok");
+  if(!out || !S.token) return;
+  out.hidden = false; out.className = "saveflag"; out.textContent = "Asking GitHub…";
+  if(btn) btn.setAttribute("disabled","disabled");
+  ghFetch(GH_API + "?ref=" + GH_BRANCH).then(function(res){
+    if(btn) btn.removeAttribute("disabled");
+    if(res.ok){ out.className = "saveflag"; out.textContent = "Still good — you can publish."; return; }
+    out.className = "err";
+    out.textContent = ghError(res);
+    if(res.status === 401){ setToken(null); setTimeout(function(){ render(); }, 1200); }
+  }).catch(function(){
+    if(btn) btn.removeAttribute("disabled");
+    out.className = "err"; out.textContent = "Couldn't reach GitHub. Check your connection and try again.";
+  });
+}
 function renderConnect(){
   var errBox, tokIn;
   function fail(msg){ errBox.textContent = msg; errBox.hidden = false; }
@@ -2399,17 +2437,25 @@ function renderConnect(){
     wrap.appendChild(el("div",{class:"panel"},[
       el("h3",{text:"Connected"}),
       el("p",{text:"This browser can publish to " + GH_OWNER + "/" + GH_REPO + ". The token is stored here and nowhere else — it isn't in the site's code and never goes to anyone but GitHub."}),
+      tokenAge() ? el("p",{class:"saveflag",style:"margin:-6px 0 12px",text:"Saved in this browser on " + tokenAge() + "."}) : null,
       el("div",{class:"rowctl",style:"justify-content:flex-start"},[
+        el("button",{class:"btn",id:"checktok",onclick:checkToken},["Check it still works"]),
         el("button",{class:"btn",onclick:function(){ setToken(null); toast("Token removed from this browser"); render(); }},["Disconnect"]),
         el("button",{class:"btn ghost",onclick:downloadJSON},[icon(I.upload,15),"Download decks.json instead"])
-      ])
+      ]),
+      el("p",{class:"err",id:"tokcheck",hidden:"hidden",style:"margin:14px 0 0"})
     ]));
     stage.appendChild(wrap);
     return;
   }
 
-  tokIn = el("input",{class:"text",type:"password",placeholder:"github_pat_…",autocomplete:"off",spellcheck:"false"});
-  tokIn.addEventListener("keydown", function(ev){ if(ev.key === "Enter"){ ev.preventDefault(); connect(); } });
+  // A real form with a username and a password field, so the browser's password manager
+  // (or 1Password, iCloud Keychain, …) offers to save the token and fills it next time.
+  // autocomplete="off" here was the reason it never offered.
+  var userIn = el("input",{class:"text",type:"text",name:"username",autocomplete:"username",
+    value: GH_OWNER, "aria-label":"GitHub account",spellcheck:"false"});
+  tokIn = el("input",{class:"text",type:"password",name:"password",placeholder:"github_pat_…",
+    autocomplete:"current-password",spellcheck:"false","aria-label":"Token"});
 
   function connect(){
     var t = tokIn.value.trim();
@@ -2427,32 +2473,44 @@ function renderConnect(){
     }).then(function(){
       setToken(t);
       toast("Connected to GitHub");
-      go(S.decks.length ? "edit" : "home");
+      // Let the password manager see a completed sign-in before the view changes.
+      if(window.PasswordCredential){
+        try{ navigator.credentials.store(new window.PasswordCredential({id: userIn.value || GH_OWNER, password: t, name: "Quizletish publishing"})); }catch(e){}
+      }
+      setTimeout(function(){ go(S.decks.length ? "edit" : "home"); }, 0);
     }).catch(function(err){
       S.token = was;
       fail(String(err && err.message || err));
     });
   }
 
-  wrap.appendChild(el("div",{class:"panel"},[
+  var form = el("form",{id:"ghform",autocomplete:"on"});
+  form.addEventListener("submit", function(ev){ ev.preventDefault(); connect(); });
+  form.appendChild(el("div",{class:"panel"},[
     el("h3",{text:"Let this browser publish for you"}),
     el("p",{text:"Publishing means writing decks.json to the repo. Give this browser a token that can do only that, and the Publish button does the rest — no terminal, no commit."}),
     el("ol",{class:"steps"},[
       el("li",{html:'Open <code>github.com/settings/personal-access-tokens/new</code> — this is the <b>fine-grained</b> token page, not the classic one.'}),
       el("li",{html:'Resource owner <code>' + GH_OWNER + '</code>. Under <b>Repository access</b> choose <b>Only select repositories</b> and pick <code>' + GH_REPO + '</code>.'}),
       el("li",{html:'Under <b>Repository permissions</b> set <b>Contents</b> to <b>Read and write</b>. Leave every other permission alone.'}),
-      el("li",{html:'Set an expiry you can live with, generate it, and copy the token — GitHub shows it once.'})
+      el("li",{html:'Under <b>Expiration</b> pick <b>No expiration</b>, or the longest it will let you. The box defaults to <b>30 days</b>, which is why a token you set up last month has stopped working.'}),
+      el("li",{html:'Generate it and copy the token — GitHub shows it once.'})
     ]),
-    el("div",{class:"field"},[ el("label",{text:"Paste the token"}), tokIn ]),
+    el("div",{class:"field"},[ el("label",{for:"ghuser",text:"GitHub account"}), userIn ]),
+    el("div",{class:"field"},[ el("label",{for:"ghtok",text:"Paste the token"}), tokIn ]),
     el("div",{class:"rowctl",style:"justify-content:flex-start"},[
-      el("button",{class:"btn primary",onclick:connect},["Connect"]),
-      el("button",{class:"btn ghost",onclick:downloadJSON},[icon(I.upload,15),"Download decks.json instead"])
-    ])
+      el("button",{class:"btn primary",type:"submit"},["Connect"]),
+      el("button",{class:"btn ghost",type:"button",onclick:downloadJSON},[icon(I.upload,15),"Download decks.json instead"])
+    ]),
+    el("p",{class:"saveflag",style:"margin:14px 0 0",text:"Say yes when your browser offers to save it — then next time it fills itself in, and it follows you to your other devices."})
   ]));
+
+  userIn.id = "ghuser"; tokIn.id = "ghtok";
+  wrap.appendChild(form);
 
   wrap.appendChild(el("div",{class:"panel"},[
     el("h3",{text:"What the token can and can't do"}),
-    el("p",{html:"Scoped that way it can change <b>one file in one repo</b> and nothing else — not your other repos, not your account, not your other GitHub data. It lives in this browser\'s storage, so treat this like a signed-in session: don\'t set it up on a shared or classroom machine, and hit Disconnect if you ever do. If it leaks, revoke it at <code>github.com/settings/tokens</code> and make a new one — nothing else needs changing."})
+    el("p",{html:"Scoped that way it can change <b>one file in one repo</b> and nothing else — not your other repos, not your account, not your other GitHub data. It lives in this browser\'s storage and, if you let the browser save it, in your password manager — so treat this like a signed-in session: don\'t set it up on a shared or classroom machine, and hit Disconnect if you ever do. If it leaks, revoke it at <code>github.com/settings/tokens</code> and make a new one — nothing else needs changing."})
   ]));
 
   errBox = el("p",{class:"err",hidden:"hidden"});
@@ -2504,6 +2562,7 @@ document.addEventListener("keydown", function(ev){
 /* ============================ boot ============================ */
 try{ S.who = localStorage.getItem(WHO_KEY) || null; }catch(e){ S.who = null; }
 try{ S.token = localStorage.getItem(TOKEN_KEY) || null; }catch(e){ S.token = null; }
+if(S.token) keepStorage();
 S.open = ls(FOLD_KEY, {});
 loadLocal();
 $("whobtn").addEventListener("click", function(){ go("who"); });
