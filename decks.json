@@ -159,7 +159,7 @@
     },
     {
       "id": "d6xunlo8e7",
-      "name": "✅ Science Pendulums",
+      "name": "✓ Science Pendulums",
       "subject": "Complete",
       "folder": "f5dsm3kqj3",
       "createdAt": 1789508135793,
@@ -772,6 +772,184 @@
       ]
     },
     {
+      "id": "d488cr37jy",
+      "name": "Meaning",
+      "subject": "",
+      "folder": "f41i7c5shp",
+      "createdAt": 1793131551819,
+      "cards": [
+        {
+          "id": "c488cr95ay",
+          "term": "saber",
+          "def": "to know"
+        },
+        {
+          "id": "c4aakr4t9n",
+          "term": "dar",
+          "def": "to give"
+        },
+        {
+          "id": "c4aay1rpah",
+          "term": "ver",
+          "def": "to see"
+        },
+        {
+          "id": "c4ab9v8ni5",
+          "term": "caber",
+          "def": "to fit"
+        },
+        {
+          "id": "c4abnelc2k",
+          "term": "hacer",
+          "def": "to make/do"
+        },
+        {
+          "id": "c4ac4vndjy",
+          "term": "traer",
+          "def": "to bring"
+        },
+        {
+          "id": "c4adchjdcu",
+          "term": "poner",
+          "def": "to put"
+        },
+        {
+          "id": "c4ae26bqnp",
+          "term": "saliir",
+          "def": "to exit/leave"
+        },
+        {
+          "id": "c4aemhn0ej",
+          "term": "caer",
+          "def": "to fall"
+        },
+        {
+          "id": "c4g8ras4wj",
+          "term": "valer",
+          "def": "to be worth"
+        },
+        {
+          "id": "c4lqd3x8hi",
+          "term": "parecer",
+          "def": "to look like/seem like"
+        },
+        {
+          "id": "c4lr5oq4sw",
+          "term": "conocer",
+          "def": "to know a person/place"
+        },
+        {
+          "id": "c4lru89ewh",
+          "term": "traducir",
+          "def": "to translate"
+        },
+        {
+          "id": "c4np4sdo6s",
+          "term": "agradecer",
+          "def": "to be grateful"
+        },
+        {
+          "id": "c4nq3pbe0g",
+          "term": "producir",
+          "def": "to produce"
+        },
+        {
+          "id": "c4nqm58p5r",
+          "term": "conducir",
+          "def": "to conduct (reaserch)/to drive"
+        }
+      ]
+    },
+    {
+      "id": "d4gicbtri0",
+      "name": "1° Person Conjugation",
+      "subject": "",
+      "folder": "f41i7c5shp",
+      "createdAt": 1793131938011,
+      "cards": [
+        {
+          "id": "c4gicb2twg",
+          "term": "saber",
+          "def": "sé"
+        },
+        {
+          "id": "c4hwl81ex4",
+          "term": "dar",
+          "def": "doy"
+        },
+        {
+          "id": "c4hx9ja509",
+          "term": "ver",
+          "def": "veo"
+        },
+        {
+          "id": "c4hxmtvafa",
+          "term": "caber",
+          "def": "quepo"
+        },
+        {
+          "id": "c4hxz4fbhd",
+          "term": "hacer",
+          "def": "hago"
+        },
+        {
+          "id": "c4hyiap87p",
+          "term": "traer",
+          "def": "traigo"
+        },
+        {
+          "id": "c4hzzht1bb",
+          "term": "poner",
+          "def": "pongo"
+        },
+        {
+          "id": "c4i0lwmx6f",
+          "term": "salir",
+          "def": "salgo"
+        },
+        {
+          "id": "c4i1ff8soq",
+          "term": "caer",
+          "def": "caigo"
+        },
+        {
+          "id": "c4i1zl5to2",
+          "term": "valer",
+          "def": "valgo"
+        },
+        {
+          "id": "c4w5i3y83g",
+          "term": "parecer",
+          "def": "parezco"
+        },
+        {
+          "id": "c4w60z8tt0",
+          "term": "conocer",
+          "def": "conozco"
+        },
+        {
+          "id": "c4w6k6cqmp",
+          "term": "traducir",
+          "def": "traduzco"
+        },
+        {
+          "id": "c4w72dat7d",
+          "term": "agradecer",
+          "def": "agradezco"
+        },
+        {
+          "id": "c4w7j44ojw",
+          "term": "producir",
+          "def": "produzco"
+        },
+        {
+          "id": "c4w7yunthd",
+          "term": "conducir",
+          "def": "conduzco"
+        }
+      ]
+    },
+    {
       "id": "dyoie71hhh",
       "name": "✅ Mechanics VII",
       "subject": "Complete",
@@ -918,9 +1096,9 @@
     },
     {
       "id": "dcjv3zvy4x",
-      "name": "Conjugation",
+      "name": "1° Persona Irregular",
       "subject": "",
-      "folder": "f41i7c5shp",
+      "folder": "f9tuc8lobh",
       "createdAt": 1794596719679,
       "kind": "conj",
       "tense": "All",
@@ -1145,7 +1323,7 @@
       "id": "dd79sms8rw",
       "name": "Meaning",
       "subject": "",
-      "folder": "f41i7c5shp",
+      "folder": "f9tuc8lobh",
       "createdAt": 1794597811798,
       "cards": [
         {
