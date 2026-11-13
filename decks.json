@@ -41,7 +41,7 @@
   "decks": [
     {
       "id": "dexample01",
-      "name": "✓ Mechanics II",
+      "name": "✅ Mechanics II",
       "subject": "Complete",
       "folder": "favtt44r29",
       "createdAt": 1000,
@@ -100,7 +100,7 @@
     },
     {
       "id": "dz4r18spjq",
-      "name": "✓ Mechanics III",
+      "name": "✅ Mechanics III",
       "subject": "Complete",
       "folder": "favtt44r29",
       "createdAt": 1789495020764,
@@ -159,7 +159,7 @@
     },
     {
       "id": "d6xunlo8e7",
-      "name": "✓ Science Pendulums",
+      "name": "✅ Science Pendulums",
       "subject": "Complete",
       "folder": "f5dsm3kqj3",
       "createdAt": 1789508135793,
@@ -213,7 +213,7 @@
     },
     {
       "id": "d9u5bgwlx6",
-      "name": "✓ Meaning / Conj",
+      "name": "Meaning / Conj",
       "subject": "",
       "folder": "fl7824f3tz",
       "createdAt": 1789754866540,
@@ -380,7 +380,7 @@
     },
     {
       "id": "d5udigaqiw",
-      "name": "✓ Mechanics IV",
+      "name": "✅ Mechanics IV",
       "subject": "Complete",
       "folder": "favtt44r29",
       "createdAt": 1790292354280,
@@ -439,7 +439,7 @@
     },
     {
       "id": "dlig1kdcci",
-      "name": "✓ Longitude & Latitude",
+      "name": "✅ Longitude & Latitude",
       "subject": "Complete",
       "folder": "fwzsn7rl4g",
       "createdAt": 1790621002424,
@@ -496,7 +496,7 @@
     },
     {
       "id": "d2vzqpl6hb",
-      "name": "✓ Mechanics V",
+      "name": "✅ Mechanics V",
       "subject": "Quiz 10/7",
       "folder": "favtt44r29",
       "createdAt": 1790892052657,
@@ -555,7 +555,7 @@
     },
     {
       "id": "dlcdmc2qby",
-      "name": "✓ Conjugation",
+      "name": "Conjugation",
       "subject": "",
       "folder": "fl7824f3tz",
       "createdAt": 1791225381108,
@@ -714,7 +714,7 @@
     },
     {
       "id": "d2lb9kn84s",
-      "name": "✓ Mechanics VI",
+      "name": "✅ Mechanics VI",
       "subject": "Complete",
       "folder": "favtt44r29",
       "createdAt": 1791496216136,
@@ -773,7 +773,7 @@
     },
     {
       "id": "dyoie71hhh",
-      "name": "✓ Mechanics VII",
+      "name": "✅ Mechanics VII",
       "subject": "Complete",
       "folder": "favtt44r29",
       "createdAt": 1793243165983,
@@ -832,7 +832,7 @@
     },
     {
       "id": "d5l28lzhe2",
-      "name": "✓ Mechanics VIII",
+      "name": "✅ Mechanics VIII",
       "subject": "",
       "folder": "favtt44r29",
       "createdAt": 1793919890325,
@@ -1072,7 +1072,7 @@
           "term": "poner",
           "def": "to put / place",
           "forms": {
-            "yo": "produzco"
+            "yo": "pongo"
           }
         },
         {
@@ -1151,132 +1151,132 @@
         {
           "id": "cd7eov6fru",
           "term": "agradecer",
-          "def": "to be grateful / thank agradezco"
+          "def": "to be grateful / thank "
         },
         {
           "id": "cd7eovwc7s",
           "term": "caber",
-          "def": "to fit quepo"
+          "def": "to fit "
         },
         {
           "id": "cd7eovyhw8",
           "term": "caer",
-          "def": "to fall caigo"
+          "def": "to fall "
         },
         {
           "id": "cd7eovwlia",
           "term": "conducir",
-          "def": "to drive / conduct conduzco"
+          "def": "to drive / conduct "
         },
         {
           "id": "cd7eovmpdv",
           "term": "conocer",
-          "def": "to know / meet (person/place) concozco"
+          "def": "to know / meet (person/place)"
         },
         {
           "id": "cd7eovmjr8",
           "term": "dar",
-          "def": "to give doy"
+          "def": "to give"
         },
         {
           "id": "cd7eov7t87",
           "term": "decir",
-          "def": "to say / tell digo"
+          "def": "to say / tell"
         },
         {
           "id": "cd7eowmsse",
           "term": "dirigir",
-          "def": "to direct dirijo"
+          "def": "to direct "
         },
         {
           "id": "cd7eowogny",
           "term": "elegir",
-          "def": "to chose elijo"
+          "def": "to chose "
         },
         {
           "id": "cd7eowhkna",
           "term": "escoger",
-          "def": "to choose escojo"
+          "def": "to choose "
         },
         {
           "id": "cd7eowth6n",
           "term": "estar",
-          "def": "to be (condition / location) estoy"
+          "def": "to be (condition / location) "
         },
         {
           "id": "cd7eowrtru",
           "term": "hacer",
-          "def": "to do / make hago"
+          "def": "to do / make "
         },
         {
           "id": "cd7eown4nh",
           "term": "ir",
-          "def": "to go voy"
+          "def": "to go "
         },
         {
           "id": "cd7eowbtau",
           "term": "obedecer",
-          "def": "to obey obedezco"
+          "def": "to obey "
         },
         {
           "id": "cd7eowljot",
           "term": "ofrecer",
-          "def": "to offer ofrezco"
+          "def": "to offer "
         },
         {
           "id": "cd7eowwe6n",
           "term": "oír",
-          "def": "to hear oigo"
+          "def": "to hear "
         },
         {
           "id": "cd7eowzwbp",
           "term": "parecer",
-          "def": "to seem / look like parezco"
+          "def": "to seem / look like "
         },
         {
           "id": "cd7eowj43j",
           "term": "poner",
-          "def": "to put / place produzco"
+          "def": "to put / place"
         },
         {
           "id": "cd7eowgg9g",
           "term": "saber",
-          "def": "to know (facts / how to)0 sé"
+          "def": "to know (facts / how to)"
         },
         {
           "id": "cd7eowiu8s",
           "term": "salir",
-          "def": "to leave / go salgo"
+          "def": "to leave / go"
         },
         {
           "id": "cd7eow3tbu",
           "term": "ser",
-          "def": "to be (permanent / identity) soy soy"
+          "def": "to be (permanent / identity)"
         },
         {
           "id": "cd7eowuwwx",
           "term": "tener",
-          "def": "to have tengo"
+          "def": "to have"
         },
         {
           "id": "cd7eowrnj6",
           "term": "traducir",
-          "def": "to translate traduzco"
+          "def": "to translate"
         },
         {
           "id": "cd7eowgil4",
           "term": "traer",
-          "def": "to bring traigo"
+          "def": "to bring "
         },
         {
           "id": "cd7eowvqit",
           "term": "valer",
-          "def": "to be worth valgo"
+          "def": "to be worth "
         },
         {
           "id": "cd7eow1uw9",
           "term": "venir",
-          "def": "to come vengo"
+          "def": "to come "
         }
       ]
     }
