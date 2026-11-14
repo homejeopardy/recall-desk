@@ -938,8 +938,10 @@ function setSync(state, msg){
   $("syncmsg").textContent = msg;
 }
 function whoLine(){
+  // A signed-in account speaks for itself; ADMIN is only named when that is genuinely
+  // what unlocked editing, with no account behind it.
+  if(S.user) return whoName(S.user) + (isEditor() ? " (editor)" : "");
   if(S.canEdit) return "Editing as ADMIN" + (S.token ? " · can publish" : " · publishing not set up");
-  if(S.user) return "Signed in as " + whoName(S.user) + (isEditor() ? " · editor" : "");
   return S.who ? "Studying as " + S.who + " · this browser only" : "Not signed in · scores stay on this device";
 }
 function refreshFoot(){
