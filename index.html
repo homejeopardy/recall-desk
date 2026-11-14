@@ -38,6 +38,8 @@
   --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
   --rail:262px;
   --lift:3px 3px 0 var(--rule);
+  --r:7px;          /* one dial for every corner in the app */
+  --r-lg:12px;
 }
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
@@ -86,9 +88,9 @@
 body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--ui);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
 button,input,textarea,select{font:inherit;color:inherit}
 button{cursor:pointer;background:none;border:none;padding:0}
-:focus-visible{outline:2px solid var(--ink);outline-offset:2px;border-radius:0}
+:focus-visible{outline:2px solid var(--ink);outline-offset:2px;border-radius:var(--r)}
 h1,h2,h3{margin:0;text-wrap:balance;font-weight:600;letter-spacing:-.01em}
-kbd{font-family:var(--mono);font-size:11px;background:var(--surface-2);border:1px solid var(--rule);border-bottom-width:2px;border-radius:2px;padding:1px 5px;color:var(--ink-soft)}
+kbd{font-family:var(--mono);font-size:11px;background:var(--surface-2);border:1px solid var(--rule);border-bottom-width:2px;border-radius:var(--r);padding:1px 5px;color:var(--ink-soft)}
 .mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
 /* catalogue labels: mono small caps, the way a drawer is labelled */
 .eyebrow{font-family:var(--mono);font-size:10.5px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint)}
@@ -102,7 +104,7 @@ kbd{font-family:var(--mono);font-size:11px;background:var(--surface-2);border:1p
 .brand .tag{font-family:var(--mono);font-size:10px;color:var(--ink-faint);letter-spacing:.04em}
 .rail-head{display:flex;align-items:center;justify-content:space-between;padding:15px 18px 7px}
 .decks{list-style:none;margin:0;padding:0 10px 10px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:1px}
-.deck-btn{width:100%;text-align:left;padding:9px 10px;border-radius:2px;display:flex;align-items:baseline;gap:8px;color:var(--ink-soft);border-left:3px solid transparent}
+.deck-btn{width:100%;text-align:left;padding:9px 10px;border-radius:var(--r);display:flex;align-items:baseline;gap:8px;color:var(--ink-soft);border-left:3px solid transparent}
 .deck-btn:hover{background:var(--surface-2);color:var(--ink)}
 .deck-btn .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}
 .deck-btn .ct{font-family:var(--mono);font-size:11px;color:var(--ink-faint);font-variant-numeric:tabular-nums}
@@ -110,7 +112,7 @@ kbd{font-family:var(--mono);font-size:11px;background:var(--surface-2);border:1p
 .deck-btn[aria-current="true"] .ct{color:var(--accent-ink);opacity:.65}
 .rail-foot{border-top:1px solid var(--rule);padding:12px 18px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-faint);width:100%;text-align:left}
 .rail-foot:hover{background:var(--surface-2);color:var(--ink-soft)}
-.dot{width:6px;height:6px;border-radius:0;background:var(--good);flex:none}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--good);flex:none}
 .dot.off{background:var(--ink-faint)}
 .dot.edit{background:var(--bad)}
 
@@ -120,7 +122,7 @@ kbd{font-family:var(--mono);font-size:11px;background:var(--surface-2);border:1p
 .sub{color:var(--ink-soft);font-size:13px;margin-top:5px}
 
 /* ---- buttons: bordered, square, no glow ---- */
-.btn{display:inline-flex;align-items:center;gap:7px;padding:8px 14px;border-radius:2px;border:1px solid var(--rule);background:var(--surface);font-weight:500;font-size:14px;transition:border-color .1s,background .1s,color .1s}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:8px 14px;border-radius:var(--r);border:1px solid var(--rule);background:var(--surface);font-weight:500;font-size:14px;transition:border-color .1s,background .1s,color .1s}
 .btn:hover{border-color:var(--ink);background:var(--surface-2)}
 .btn.primary{background:var(--ink);border-color:var(--ink);color:var(--accent-ink)}
 .btn.primary:hover{background:var(--ink-soft);border-color:var(--ink-soft)}
@@ -132,7 +134,7 @@ kbd{font-family:var(--mono);font-size:11px;background:var(--surface-2);border:1p
 .btn:disabled{opacity:.4;cursor:not-allowed}
 
 /* ---- mode tiles ---- */
-.modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0;margin:0 0 26px;border:1px solid var(--rule);background:var(--surface)}
+.modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0;margin:0 0 26px;border:1px solid var(--rule);background:var(--surface);border-radius:var(--r-lg);overflow:hidden}
 .mode{text-align:left;padding:17px 18px;background:var(--surface);display:flex;flex-direction:column;gap:6px;transition:background .1s;border:0;outline-offset:-3px;box-shadow:0 0 0 .5px var(--rule)}
 .mode:hover:not(:disabled){background:var(--surface-2)}
 .mode:disabled{opacity:.45}
@@ -141,7 +143,7 @@ kbd{font-family:var(--mono);font-size:11px;background:var(--surface-2);border:1p
 .mode svg{flex:none;color:var(--bad)}
 
 /* ---- deck summary: a ruled slip, not a stat dashboard ---- */
-.summary{display:flex;gap:0;align-items:stretch;border:1px solid var(--rule);background:var(--surface);margin-bottom:22px;flex-wrap:wrap}
+.summary{display:flex;gap:0;align-items:stretch;border:1px solid var(--rule);background:var(--surface);margin-bottom:22px;flex-wrap:wrap;border-radius:var(--r-lg);overflow:hidden}
 .stat{display:flex;flex-direction:column;gap:2px;padding:13px 20px;flex:1;min-width:104px}
 .stat + .stat{border-left:1px solid var(--rule-soft)}
 .stat .v{font-family:var(--mono);font-size:20px;font-weight:500;font-variant-numeric:tabular-nums;letter-spacing:-.03em}
@@ -152,7 +154,7 @@ kbd{font-family:var(--mono);font-size:11px;background:var(--surface-2);border:1p
 
 /* ---- options bar ---- */
 .opts{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:18px}
-.seg{display:inline-flex;border:1px solid var(--rule);border-radius:2px;overflow:hidden;background:var(--surface)}
+.seg{display:inline-flex;border:1px solid var(--rule);border-radius:var(--r);overflow:hidden;background:var(--surface)}
 .seg button{padding:6px 12px;font-size:13px;color:var(--ink-soft);border-right:1px solid var(--rule)}
 .seg button:last-child{border-right:none}
 .seg button:hover{background:var(--surface-2)}
@@ -161,18 +163,18 @@ kbd{font-family:var(--mono);font-size:11px;background:var(--surface-2);border:1p
 /* ---- the card: ruled index stock ---- */
 .deskrow{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:12px}
 .counter{font-family:var(--mono);font-size:12.5px;color:var(--ink-soft);font-variant-numeric:tabular-nums}
-.track{height:2px;background:var(--rule-soft);overflow:hidden;margin-bottom:22px}
-.track>i{display:block;height:100%;background:var(--ink);transition:width .25s ease}
+.track{height:4px;background:var(--rule-soft);overflow:hidden;border-radius:99px;margin-bottom:22px}
+.track>i{display:block;height:100%;background:var(--ink);border-radius:99px;transition:width .25s ease}
 .cardwrap{perspective:1600px;margin-bottom:18px}
 .card{position:relative;min-height:340px;transform-style:preserve-3d;transition:transform .4s cubic-bezier(.2,.7,.2,1);cursor:pointer}
 .card.flipped{transform:rotateX(180deg)}
-.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;background:var(--surface);border:1px solid var(--ink);border-radius:2px;box-shadow:var(--lift);padding:56px 46px 46px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;overflow:auto;
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;background:var(--surface);border:1px solid var(--ink);border-radius:var(--r-lg);box-shadow:var(--lift);padding:56px 46px 46px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;overflow:auto;
   background-image:repeating-linear-gradient(to bottom,transparent 0,transparent 33px,var(--rule-soft) 33px,var(--rule-soft) 34px);
   background-position:0 40px}
 .face::before{content:"";position:absolute;left:0;right:0;top:38px;height:1px;background:var(--bad);opacity:.5}
 .face.back{transform:rotateX(180deg)}
 .face .role{position:absolute;top:12px;left:22px;font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint)}
-.face .star{position:absolute;top:9px;right:16px;padding:6px;border-radius:2px;color:var(--ink-faint);line-height:0}
+.face .star{position:absolute;top:9px;right:16px;padding:6px;border-radius:var(--r);color:var(--ink-faint);line-height:0}
 .face .star[aria-pressed="true"]{color:var(--brass)}
 .face .star:hover{background:var(--surface-2)}
 .facetext{font-family:var(--read);font-size:29px;line-height:1.36;max-width:33ch;letter-spacing:-.015em}
@@ -189,20 +191,20 @@ kbd{font-family:var(--mono);font-size:11px;background:var(--surface-2);border:1p
 .judge .again:hover{background:var(--brass-wash);border-color:var(--brass)}
 
 /* ---- quiz ---- */
-.prompt{background:var(--surface);border:1px solid var(--ink);border-radius:2px;box-shadow:var(--lift);padding:34px 32px;margin-bottom:18px;text-align:center}
+.prompt{background:var(--surface);border:1px solid var(--ink);border-radius:var(--r-lg);box-shadow:var(--lift);padding:34px 32px;margin-bottom:18px;text-align:center}
 .prompt .role{font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:14px}
 .prompt .q{font-family:var(--read);font-size:26px;line-height:1.35;max-width:40ch;margin:0 auto;letter-spacing:-.015em}
-.choices{display:grid;gap:0;border:1px solid var(--rule)}
+.choices{display:grid;gap:0;border:1px solid var(--rule);border-radius:var(--r);overflow:hidden}
 .choice{display:flex;gap:13px;align-items:flex-start;text-align:left;padding:13px 15px;border:0;border-bottom:1px solid var(--rule);background:var(--surface);font-family:var(--read);font-size:17px;line-height:1.45;transition:background .1s}
 .choice:last-child{border-bottom:0}
 .choice:hover:not(:disabled){background:var(--surface-2)}
-.choice .key{font-family:var(--mono);font-size:11px;font-weight:500;color:var(--ink-faint);border:1px solid var(--rule);border-radius:2px;width:20px;height:20px;display:grid;place-items:center;flex:none;margin-top:4px}
+.choice .key{font-family:var(--mono);font-size:11px;font-weight:500;color:var(--ink-faint);border:1px solid var(--rule);border-radius:var(--r);width:20px;height:20px;display:grid;place-items:center;flex:none;margin-top:4px}
 .choice.right{background:var(--good-wash);color:var(--good)}
 .choice.right .key{border-color:var(--good);color:var(--good)}
 .choice.wrong{background:var(--bad-wash);color:var(--bad)}
 .choice.wrong .key{border-color:var(--bad);color:var(--bad)}
 .choice:disabled{cursor:default}
-.verdict{margin-top:16px;padding:12px 15px;border-radius:2px;font-size:14px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;border:1px solid currentColor}
+.verdict{margin-top:16px;padding:12px 15px;border-radius:var(--r);font-size:14px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;border:1px solid currentColor}
 .verdict.ok{background:var(--good-wash);color:var(--good)}
 .verdict.no{background:var(--bad-wash);color:var(--bad)}
 .verdict.near{background:var(--brass-wash);color:var(--brass)}
@@ -210,12 +212,12 @@ kbd{font-family:var(--mono);font-size:11px;background:var(--surface-2);border:1p
 .verdict .btn:not(.primary){color:var(--ink)}
 
 /* ---- write mode ---- */
-.answer{width:100%;padding:14px 16px;border:1px solid var(--rule);border-radius:2px;background:var(--surface);font-family:var(--read);font-size:20px}
+.answer{width:100%;padding:14px 16px;border:1px solid var(--rule);border-radius:var(--r);background:var(--surface);font-family:var(--read);font-size:20px}
 .answer:focus{border-color:var(--ink);outline:none;box-shadow:var(--lift)}
 
 /* ---- match ---- */
 .matchgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
-.tile{min-height:104px;padding:14px;border:1px solid var(--rule);border-radius:2px;background:var(--surface);display:flex;align-items:center;justify-content:center;text-align:center;font-size:14px;line-height:1.4;transition:background .1s,border-color .1s,opacity .25s}
+.tile{min-height:104px;padding:14px;border:1px solid var(--rule);border-radius:var(--r-lg);background:var(--surface);display:flex;align-items:center;justify-content:center;text-align:center;font-size:14px;line-height:1.4;transition:background .1s,border-color .1s,opacity .25s}
 .tile.term{font-family:var(--ui);font-weight:600;border-left:3px solid var(--ink)}
 .tile.def{font-family:var(--read);font-size:15px}
 .tile:hover:not(:disabled):not(.done){border-color:var(--ink);background:var(--surface-2)}
@@ -226,9 +228,9 @@ kbd{font-family:var(--mono);font-size:11px;background:var(--surface-2);border:1p
 @media (prefers-reduced-motion:reduce){.tile.miss{animation:none}}
 
 /* ---- results ---- */
-.result{background:var(--surface);border:1px solid var(--ink);border-radius:2px;box-shadow:var(--lift);padding:34px 30px;text-align:center;margin-bottom:18px}
+.result{background:var(--surface);border:1px solid var(--ink);border-radius:var(--r-lg);box-shadow:var(--lift);padding:34px 30px;text-align:center;margin-bottom:18px}
 .result .score{font-family:var(--mono);font-size:56px;font-weight:500;letter-spacing:-.05em;font-variant-numeric:tabular-nums;line-height:1.05}
-.missed{list-style:none;margin:18px 0 0;padding:0;display:flex;flex-direction:column;text-align:left;border:1px solid var(--rule);overflow:hidden}
+.missed{list-style:none;margin:18px 0 0;padding:0;display:flex;flex-direction:column;text-align:left;border:1px solid var(--rule);overflow:hidden;border-radius:var(--r)}
 .missed li{display:grid;grid-template-columns:minmax(120px,1fr) 1.4fr;gap:16px;padding:11px 14px;background:var(--surface);border-bottom:1px solid var(--rule-soft);font-size:14px}
 .missed li:last-child{border-bottom:none}
 .missed .t{font-weight:600}
@@ -237,33 +239,33 @@ kbd{font-family:var(--mono);font-size:11px;background:var(--surface-2);border:1p
 /* ---- editor ---- */
 .editbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
 .saveflag{font-family:var(--mono);font-size:11px;color:var(--ink-faint);letter-spacing:.03em}
-.rows{display:flex;flex-direction:column;border:1px solid var(--rule);overflow:hidden;background:var(--rule-soft)}
+.rows{display:flex;flex-direction:column;border:1px solid var(--rule);overflow:hidden;background:var(--rule-soft);border-radius:var(--r-lg)}
 .rowhead{display:grid;grid-template-columns:32px 1fr 1.5fr 32px;gap:10px;padding:8px 12px;background:var(--surface-2);font-family:var(--mono);font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-faint);border-bottom:1px solid var(--rule)}
 .row{display:grid;grid-template-columns:32px 1fr 1.5fr 32px;gap:10px;padding:8px 12px;background:var(--surface);align-items:start;border-bottom:1px solid var(--rule-soft)}
 .row:last-child{border-bottom:0}
 .row .n{font-family:var(--mono);font-size:11px;color:var(--ink-faint);padding-top:10px;font-variant-numeric:tabular-nums}
-.row textarea{width:100%;border:1px solid transparent;border-radius:2px;background:transparent;padding:7px 8px;resize:vertical;min-height:38px;font-size:14px}
+.row textarea{width:100%;border:1px solid transparent;border-radius:var(--r);background:transparent;padding:7px 8px;resize:vertical;min-height:38px;font-size:14px}
 .row textarea.def{font-family:var(--read);font-size:16px}
 .row textarea:hover{border-color:var(--rule)}
 .row textarea:focus{border-color:var(--ink);outline:none;background:var(--surface-2)}
-.row .del{color:var(--ink-faint);padding:8px;border-radius:2px;line-height:0}
+.row .del{color:var(--ink-faint);padding:8px;border-radius:var(--r);line-height:0}
 .row .del:hover{color:var(--bad);background:var(--bad-wash)}
 
-.panel{border:1px solid var(--rule);border-radius:2px;background:var(--surface);padding:20px;margin-bottom:16px}
+.panel{border:1px solid var(--rule);border-radius:var(--r-lg);background:var(--surface);padding:20px;margin-bottom:16px}
 .panel h3{font-family:var(--read);font-size:19px;margin-bottom:5px;font-weight:600}
 .panel p{margin:0 0 13px;font-size:13.5px;color:var(--ink-soft);line-height:1.55}
-.paste{width:100%;min-height:132px;border:1px solid var(--rule);border-radius:2px;padding:11px 12px;background:var(--surface-2);font-family:var(--mono);font-size:12.5px;line-height:1.65;resize:vertical}
+.paste{width:100%;min-height:132px;border:1px solid var(--rule);border-radius:var(--r);padding:11px 12px;background:var(--surface-2);font-family:var(--mono);font-size:12.5px;line-height:1.65;resize:vertical}
 .paste:focus{border-color:var(--ink);outline:none}
-select{border:1px solid var(--rule);border-radius:2px;padding:7px 10px;background:var(--surface);font-size:13.5px}
-input.text{border:1px solid var(--rule);border-radius:2px;padding:8px 11px;background:var(--surface);font-size:14px}
+select{border:1px solid var(--rule);border-radius:var(--r);padding:7px 10px;background:var(--surface);font-size:13.5px}
+input.text{border:1px solid var(--rule);border-radius:var(--r);padding:8px 11px;background:var(--surface);font-size:14px}
 input.text:focus{border-color:var(--ink);outline:none}
 
-.empty{border:1px dashed var(--rule);border-radius:2px;padding:50px 30px;text-align:center;color:var(--ink-soft);background:var(--surface)}
+.empty{border:1px dashed var(--rule);border-radius:var(--r-lg);padding:50px 30px;text-align:center;color:var(--ink-soft);background:var(--surface)}
 .empty h3{font-family:var(--read);font-size:22px;margin-bottom:7px;color:var(--ink)}
 .empty p{margin:0 auto 18px;max-width:46ch;font-size:14px}
 
-.notice{display:flex;gap:10px;align-items:center;padding:10px 14px;border-radius:2px;background:var(--surface);color:var(--ink-soft);font-size:13px;margin-bottom:18px;border:1px solid var(--rule);border-left:3px solid var(--brass)}
-.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:var(--ink);color:var(--accent-ink);padding:10px 18px;border-radius:2px;font-size:13.5px;box-shadow:3px 3px 0 var(--rule);z-index:50}
+.notice{display:flex;gap:10px;align-items:center;padding:10px 14px;border-radius:var(--r);background:var(--surface);color:var(--ink-soft);font-size:13px;margin-bottom:18px;border:1px solid var(--rule);border-left:3px solid var(--brass)}
+.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:var(--ink);color:var(--accent-ink);padding:10px 18px;border-radius:var(--r);font-size:13.5px;box-shadow:3px 3px 0 var(--rule);z-index:50}
 
 /* ---- sign-in / publishing ---- */
 .signin{max-width:460px;margin:0 auto}
@@ -274,7 +276,7 @@ input.text:focus{border-color:var(--ink);outline:none}
 .err{font-size:13px;color:var(--bad);margin:0 0 10px;border-left:3px solid var(--bad);padding-left:10px}
 .hr{display:flex;align-items:center;gap:14px;margin:24px 0;color:var(--ink-faint);font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase}
 .hr::before,.hr::after{content:"";flex:1;height:1px;background:var(--rule)}
-.pubbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:12px 15px;border:1px solid var(--brass);border-left:3px solid var(--brass);background:var(--brass-wash);border-radius:2px;margin-bottom:16px;font-size:13px;color:var(--brass)}
+.pubbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:12px 15px;border:1px solid var(--brass);border-left:3px solid var(--brass);background:var(--brass-wash);border-radius:var(--r);margin-bottom:16px;font-size:13px;color:var(--brass)}
 .pubbar b{font-weight:600}
 .pubbar .btn:not(.primary){color:var(--ink)}
 .pubbar.busy{border-color:var(--rule);border-left-color:var(--ink-faint);background:var(--surface-2);color:var(--ink-soft)}
@@ -282,12 +284,12 @@ input.text:focus{border-color:var(--ink);outline:none}
 .pubbar code{font-family:var(--mono);font-size:12px}
 .steps{margin:0 0 15px;padding-left:20px;font-size:13.5px;color:var(--ink-soft);line-height:1.7}
 .steps li{margin-bottom:5px}
-.steps code{font-family:var(--mono);font-size:12px;background:var(--surface-2);border:1px solid var(--rule-soft);border-radius:2px;padding:1px 5px}
+.steps code{font-family:var(--mono);font-size:12px;background:var(--surface-2);border:1px solid var(--rule-soft);border-radius:var(--r);padding:1px 5px}
 
 /* ---- folders: drawer dividers in the rail ---- */
 #newdeckslot{display:flex;gap:2px}
 .fgroup{list-style:none}
-.folder{display:flex;align-items:stretch;border-radius:2px}
+.folder{display:flex;align-items:stretch;border-radius:var(--r)}
 .folder:hover{background:var(--surface-2)}
 .folder.on{background:var(--surface-2);box-shadow:inset 3px 0 0 var(--bad)}
 .fold-tog{width:24px;display:grid;place-items:center;color:var(--ink-faint);flex:none}
@@ -308,7 +310,7 @@ input.text:focus{border-color:var(--ink);outline:none}
 .loose{padding:12px 10px 4px}
 .crumb{color:var(--ink-soft);text-decoration:underline;text-decoration-color:var(--rule);text-underline-offset:3px}
 .crumb:hover{color:var(--ink);text-decoration-color:var(--ink)}
-.flist{border:1px solid var(--rule);background:var(--surface);margin-bottom:18px}
+.flist{border:1px solid var(--rule);background:var(--surface);margin-bottom:18px;border-radius:var(--r-lg);overflow:hidden}
 .frow{width:100%;display:grid;grid-template-columns:1fr 150px 70px;gap:20px;align-items:center;padding:14px 18px;border-bottom:1px solid var(--rule-soft);text-align:left}
 .frow:last-child{border-bottom:0}
 .frow:hover{background:var(--surface-2)}
@@ -323,12 +325,12 @@ input.text:focus{border-color:var(--ink);outline:none}
 .foldfoot{display:flex;justify-content:flex-end}
 
 /* ---- learn: the three piles, drawn like a ledger ---- */
-.learn{display:grid;grid-template-columns:1fr auto;gap:24px;align-items:center;padding:20px 22px;border:1px solid var(--ink);background:var(--surface);box-shadow:var(--lift);margin-bottom:18px}
+.learn{display:grid;grid-template-columns:1fr auto;gap:24px;align-items:center;padding:20px 22px;border:1px solid var(--ink);background:var(--surface);box-shadow:var(--lift);margin-bottom:18px;border-radius:var(--r-lg)}
 .learn h3{font-family:var(--read);font-size:23px;font-weight:600;display:flex;align-items:center;gap:9px;margin-bottom:4px;letter-spacing:-.015em}
 .learn h3 svg{color:var(--bad)}
 .learn p{margin:0 0 14px;font-size:13.5px;color:var(--ink-soft);max-width:62ch;line-height:1.55}
 .learn > .btn{padding:11px 24px;font-size:15px}
-.lbar{display:flex;height:9px;border:1px solid var(--ink);background:var(--surface)}
+.lbar{display:flex;height:9px;border:1px solid var(--ink);background:var(--surface);border-radius:99px;overflow:hidden}
 .lbar i{display:block;height:100%;transition:width .3s ease}
 .lbar .lm-m,.sw.m{background:var(--ink)}
 .lbar .lm-l,.sw.l{background:repeating-linear-gradient(135deg,var(--brass) 0 2px,transparent 2px 5px)}
@@ -338,7 +340,7 @@ input.text:focus{border-color:var(--ink);outline:none}
 .lmeter{margin-bottom:18px}
 .result .lmeter{max-width:440px;margin:4px auto 0}
 .result .llegend{justify-content:center}
-.minibar{display:flex;height:7px;border:1px solid var(--rule);background:var(--surface)}
+.minibar{display:flex;height:7px;border:1px solid var(--rule);background:var(--surface);border-radius:99px;overflow:hidden}
 .minibar i{display:block;height:100%}
 .kind{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);border:1px solid var(--rule);padding:2px 7px}
 .linkbtn{font-size:13px;color:var(--ink-soft);text-decoration:underline;text-decoration-color:var(--rule);text-underline-offset:3px;padding:6px 2px}
@@ -351,7 +353,7 @@ input.text:focus{border-color:var(--ink);outline:none}
 
 /* ---- vocab + conjugation decks ---- */
 .rows.vocab .rowhead,.rows.vocab .row{grid-template-columns:32px 1fr 130px 1.5fr 32px}
-.row select.pos{border:1px solid transparent;border-radius:2px;background:transparent;padding:7px 6px;font-size:13px;width:100%;color:var(--ink-soft)}
+.row select.pos{border:1px solid transparent;border-radius:var(--r);background:transparent;padding:7px 6px;font-size:13px;width:100%;color:var(--ink-soft)}
 .row select.pos:hover{border-color:var(--rule)}
 .row select.pos:focus{border-color:var(--ink);outline:none;background:var(--surface-2)}
 .postag{font-family:var(--mono);font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-soft);border:1px solid var(--rule);padding:2px 7px;white-space:nowrap}
@@ -361,9 +363,9 @@ input.text:focus{border-color:var(--ink);outline:none}
 .conjhead .tensein{width:190px}
 .persons{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
 .persons input{width:124px;font-size:13px;padding:5px 8px}
-.pdel{color:var(--ink-faint);padding:5px;border-radius:2px;line-height:0}
+.pdel{color:var(--ink-faint);padding:5px;border-radius:var(--r);line-height:0}
 .pdel:hover{color:var(--bad);background:var(--bad-wash)}
-.conjcard{border:1px solid var(--rule);background:var(--surface);margin-bottom:-1px}
+.conjcard{border:1px solid var(--rule);background:var(--surface);margin-bottom:-1px;border-radius:var(--r);overflow:hidden}
 .conjcard .ch{display:grid;grid-template-columns:32px 1fr 1fr 32px;gap:10px;padding:9px 12px;align-items:center;border-bottom:1px solid var(--rule-soft);background:var(--surface-2)}
 .conjcard .ch .n{font-family:var(--mono);font-size:11px;color:var(--ink-faint)}
 .conjcard .ch input{width:100%}
@@ -371,7 +373,7 @@ input.text:focus{border-color:var(--ink);outline:none}
 .cell{display:flex;align-items:center;gap:9px;padding:8px 12px;border-right:1px solid var(--rule-soft);border-bottom:1px solid var(--rule-soft)}
 .cell label{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint);width:84px;flex:none;overflow:hidden;text-overflow:ellipsis}
 .cell input{flex:1;min-width:0;font-family:var(--read);font-size:15px}
-.ctable{border:1px solid var(--ink);background:var(--surface);box-shadow:var(--lift);margin-bottom:16px}
+.ctable{border:1px solid var(--ink);background:var(--surface);box-shadow:var(--lift);margin-bottom:16px;border-radius:var(--r-lg);overflow:hidden}
 .ctable .cth{padding:18px 20px 14px;border-bottom:1px solid var(--rule)}
 .ctable .cth h3{font-family:var(--read);font-size:27px;font-weight:600;letter-spacing:-.02em}
 .ctable .cth .m{font-size:13.5px;color:var(--ink-soft);margin-top:3px}
@@ -379,7 +381,7 @@ input.text:focus{border-color:var(--ink);outline:none}
 .crow:last-child{border-bottom:0}
 .crow .pl{font-family:var(--mono);font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-soft);padding:13px 14px;background:var(--surface-2);border-right:1px solid var(--rule-soft);display:flex;align-items:center}
 .crow .pv{padding:7px 10px;display:flex;align-items:center;gap:10px;min-width:0}
-.crow input{width:100%;max-width:300px;font-family:var(--read);font-size:17px;padding:7px 10px;border:1px solid var(--rule);border-radius:2px;background:var(--surface)}
+.crow input{width:100%;max-width:300px;font-family:var(--read);font-size:17px;padding:7px 10px;border:1px solid var(--rule);border-radius:var(--r);background:var(--surface)}
 .crow input:focus{border-color:var(--ink);outline:none}
 .crow.ok{background:var(--good-wash)}
 .crow.no{background:var(--bad-wash)}
@@ -388,6 +390,95 @@ input.text:focus{border-color:var(--ink);outline:none}
 .crow.no .mark{color:var(--bad)}
 .crow .right{font-family:var(--read);font-size:16px;color:var(--bad)}
 .crow .given{font-family:var(--read);font-size:17px;padding:7px 0}
+
+/* ---- sidebar controls ---- */
+.railbar{display:flex;align-items:center;gap:4px}
+.icbtn{width:26px;height:26px;display:grid;place-items:center;border-radius:var(--r);color:var(--ink-faint);flex:none}
+.icbtn:hover{background:var(--surface-2);color:var(--ink)}
+.app.shut{grid-template-columns:0 1fr}
+.app.shut .rail{display:none}
+.reopen{position:fixed;left:0;top:14px;z-index:40;display:none;align-items:center;gap:7px;padding:9px 13px 9px 11px;
+  border:1px solid var(--rule);border-left:0;border-radius:0 var(--r-lg) var(--r-lg) 0;background:var(--surface);box-shadow:var(--lift);font-size:13px;font-weight:500}
+.reopen:hover{background:var(--surface-2)}
+.app.shut + .reopen{display:inline-flex}
+
+/* ---- what's coming up ---- */
+.soon{border-top:1px solid var(--rule);padding:11px 14px 12px}
+.soon .hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px}
+.soon ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:1px}
+.soon button{width:100%;display:flex;align-items:baseline;gap:8px;padding:5px 7px;border-radius:var(--r);text-align:left;color:var(--ink-soft)}
+.soon button:hover{background:var(--surface-2);color:var(--ink)}
+.soon .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px}
+.soon .when{font-family:var(--mono);font-size:10.5px;letter-spacing:.03em;white-space:nowrap}
+.when.today{color:var(--bad);font-weight:600}
+.when.soon{color:var(--brass)}
+.when.past{color:var(--ink-faint)}
+.soon .none{font-size:12px;color:var(--ink-faint);padding:2px 7px 0;font-style:italic}
+
+/* ---- calendar ---- */
+.calhead{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.calgrid{display:grid;grid-template-columns:repeat(7,1fr);border:1px solid var(--rule);border-radius:var(--r-lg);overflow:hidden;background:var(--rule-soft);gap:1px}
+.caldow{background:var(--surface-2);padding:8px 10px;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);text-align:center}
+.calday{background:var(--surface);min-height:96px;padding:7px 8px;display:flex;flex-direction:column;gap:4px}
+.calday.off{background:var(--surface-2);opacity:.5}
+.calday.now{box-shadow:inset 0 0 0 2px var(--bad)}
+.calday .dn{font-family:var(--mono);font-size:11px;color:var(--ink-faint);font-variant-numeric:tabular-nums}
+.calday.now .dn{color:var(--bad);font-weight:600}
+.calpill{display:block;width:100%;text-align:left;font-size:11.5px;line-height:1.3;padding:4px 6px;border-radius:var(--r);background:var(--accent-wash);color:var(--ink);border-left:3px solid var(--bad);overflow:hidden;text-overflow:ellipsis}
+.calpill:hover{background:var(--surface-2)}
+.calpill.done{opacity:.45;border-left-color:var(--ink-faint)}
+.callist{margin-top:20px}
+.quizfield{display:inline-flex;align-items:center;gap:7px;color:var(--ink-soft);font-size:13px}
+.quizfield input{font-size:13px;padding:5px 8px;width:150px}
+.duetag{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;letter-spacing:.05em;text-transform:uppercase;border:1px solid var(--rule);border-radius:99px;padding:3px 10px}
+.duetag.today{border-color:var(--bad);color:var(--bad)}
+.duetag.soon{border-color:var(--brass);color:var(--brass)}
+.duetag.past{color:var(--ink-faint)}
+
+/* ---- print sheet ---- */
+.sheet{background:var(--surface);border:1px solid var(--rule);border-radius:var(--r-lg);padding:28px 30px}
+.sheet h3{font-family:var(--read);font-size:24px;margin-bottom:3px}
+.sheet .meta{font-size:13px;color:var(--ink-soft);margin-bottom:18px}
+.sheet section{margin-bottom:22px;break-inside:auto}
+.sheet section > h4{font-family:var(--read);font-size:17px;font-weight:600;margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid var(--rule)}
+.plist{list-style:none;margin:0;padding:0}
+.plist li{display:grid;grid-template-columns:minmax(130px,1fr) 2fr;gap:18px;padding:5px 0;border-bottom:1px solid var(--rule-soft);font-size:14px;break-inside:avoid}
+.plist .t{font-weight:600}
+.plist .d{font-family:var(--read);font-size:15px;color:var(--ink-soft)}
+.plist .pos{font-family:var(--mono);font-size:10px;text-transform:uppercase;color:var(--ink-faint)}
+@media print{
+  .rail,.reopen,.stage-head .rowctl,.opts,.toast,.pubbar,.editbar{display:none!important}
+  .app{display:block}
+  .stage{padding:0;max-width:none}
+  .sheet{border:0;padding:0;border-radius:0;background:#fff;color:#000}
+  .stage-head{border-bottom:2px solid #000;margin-bottom:14px}
+  .plist li{border-bottom:1px solid #ccc}
+  body{background:#fff}
+  a[href]:after{content:""}
+}
+
+/* ---- simulated test ---- */
+.setup{display:grid;gap:0;border:1px solid var(--rule);border-radius:var(--r-lg);overflow:hidden;margin-bottom:18px;background:var(--surface)}
+.setup .srow{display:grid;grid-template-columns:168px 1fr;gap:18px;align-items:center;padding:14px 18px;border-bottom:1px solid var(--rule-soft)}
+.setup .srow:last-child{border-bottom:0}
+.setup .sl{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint)}
+.setup .sv{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.chk{display:inline-flex;align-items:center;gap:7px;font-size:13.5px;color:var(--ink-soft);border:1px solid var(--rule);border-radius:99px;padding:6px 13px}
+.chk:hover{border-color:var(--ink);color:var(--ink)}
+.chk input{margin:0}
+.testbar{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:12px;flex-wrap:wrap}
+.tclock{font-family:var(--mono);font-size:15px;font-variant-numeric:tabular-nums;border:1px solid var(--rule);border-radius:99px;padding:5px 14px}
+.tclock.low{border-color:var(--bad);color:var(--bad)}
+.qnum{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint)}
+.review{list-style:none;margin:18px 0 0;padding:0;border:1px solid var(--rule);border-radius:var(--r);overflow:hidden;text-align:left}
+.review li{padding:11px 14px;border-bottom:1px solid var(--rule-soft);background:var(--surface);display:grid;grid-template-columns:22px 1fr;gap:12px;font-size:14px}
+.review li:last-child{border-bottom:0}
+.review .mk{font-family:var(--mono);font-size:12px}
+.review li.ok .mk{color:var(--good)}
+.review li.no .mk{color:var(--bad)}
+.review .q{font-weight:600;margin-bottom:3px}
+.review .a{font-family:var(--read);font-size:15px;color:var(--ink-soft)}
+.review .a b{color:var(--bad);font-weight:600}
 
 .railtoggle{display:none}
 @media (max-width:860px){
@@ -417,6 +508,11 @@ input.text:focus{border-color:var(--ink);outline:none}
   .conjcard .ch input:nth-of-type(2){grid-column:2/4}
   .crow{grid-template-columns:104px 1fr}
   .crow .pl{padding:11px 10px}
+  .setup .srow{grid-template-columns:1fr;gap:8px}
+  .calgrid{grid-template-columns:repeat(7,1fr);font-size:11px}
+  .calday{min-height:62px;padding:4px 3px}
+  .calpill{font-size:10px;padding:2px 4px;border-left-width:2px}
+  .caldow{padding:6px 2px;font-size:9px}
 }
 </style>
 
@@ -426,12 +522,14 @@ input.text:focus{border-color:var(--ink);outline:none}
 <div class="app">
   <aside class="rail" id="rail">
     <div class="brand"><h1>Quizlet<em>ish</em></h1><span class="tag">v1</span></div>
-    <div class="rail-head"><span class="eyebrow">Decks</span><span id="newdeckslot"></span></div>
+    <div class="rail-head"><span class="eyebrow">Decks</span><span class="railbar"><span id="newdeckslot"></span><span id="railctl"></span></span></div>
     <ul class="decks" id="decks"></ul>
+    <div id="soonslot"></div>
     <button class="rail-foot" id="whobtn"><span class="dot off" id="syncdot"></span><span id="syncmsg">Loading…</span></button>
   </aside>
   <main class="stage" id="stage"></main>
 </div>
+<button class="reopen" id="reopen"><span aria-hidden="true">\u203a</span> Decks</button>
 
 <script>
 (function(){
@@ -477,6 +575,12 @@ var I = {
   learn:"M3 20h5v-5h5v-5h5V5h3",
   folder:"M3 7.5A1.5 1.5 0 0 1 4.5 6H9l2 2h8.5A1.5 1.5 0 0 1 21 9.5v8a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5z",
   chev:"M9 6l6 6-6 6",
+  collapse:"M5 8l4 4-4 4M19 8l-4 4 4 4",
+  panel:"M4 5h16v14H4zM9.5 5v14",
+  cal:"M4 6h16v14H4zM4 10h16M8 3v4M16 3v4",
+  clock:"M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18M12 7v5l3 2",
+  test:"M7 4h10v16H7zM10 9h4M10 13h4M10 17h2",
+  print:"M7 9V4h10v5M7 18H5v-6h14v6h-2M8 15h8v5H8z",
   table:"M4 5h16v14H4zM4 10h16M10 10v9",
   tag:"M4 5h8l8 8-7 7-8-8zM8.5 9.5h.01"
 };
@@ -496,6 +600,53 @@ function shuffled(a){
   return r;
 }
 function uid(p){ return (p||"c") + Date.now().toString(36).slice(-5) + Math.random().toString(36).slice(2,6); }
+/* ---- quiz dates ----
+   A deck may carry quiz:"YYYY-MM-DD". Everything date-driven reads from these helpers,
+   and a deck without one simply sorts last and never archives itself. */
+function today(){ var d = new Date(); return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
+function parseDate(v){
+  var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(v || ""));
+  if(!m) return null;
+  var d = new Date(+m[1], +m[2] - 1, +m[3]);
+  return (d.getFullYear() === +m[1] && d.getMonth() === +m[2] - 1 && d.getDate() === +m[3]) ? d : null;
+}
+function ymd(d){
+  return d.getFullYear() + "-" + ("0" + (d.getMonth()+1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2);
+}
+function daysUntil(v){
+  var d = parseDate(v); if(!d) return null;
+  return Math.round((d - today()) / 86400000);
+}
+var MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+var DOW = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+function whenText(v){
+  var n = daysUntil(v), d = parseDate(v);
+  if(n === null) return "";
+  if(n === 0) return "today";
+  if(n === 1) return "tomorrow";
+  if(n === -1) return "yesterday";
+  if(n < 0) return Math.abs(n) + "d ago";
+  if(n <= 13) return "in " + n + "d";
+  return DOW[d.getDay()] + " " + (d.getMonth()+1) + "/" + d.getDate();
+}
+function whenClass(v){
+  var n = daysUntil(v);
+  if(n === null) return "";
+  return n < 0 ? "past" : n === 0 ? "today" : n <= 7 ? "soon" : "";
+}
+// Soonest first; undated decks keep their own order at the end.
+function byQuiz(list){
+  return list.slice().sort(function(a, b){
+    var x = parseDate(a.quiz), y = parseDate(b.quiz);
+    if(x && y) return x - y || (a.createdAt||0) - (b.createdAt||0);
+    if(x) return -1;
+    if(y) return 1;
+    return (a.createdAt||0) - (b.createdAt||0);
+  });
+}
+function upcoming(limit){
+  return byQuiz(S.decks.filter(function(d){ return parseDate(d.quiz) && daysUntil(d.quiz) >= 0; })).slice(0, limit || 4);
+}
 function cap(t){ t = String(t||""); return t ? t.charAt(0).toUpperCase() + t.slice(1) : ""; }
 
 /* ---- deck kinds ----
@@ -531,7 +682,7 @@ function cellsOf(d){
 var S = {
   canEdit:false, ready:false, who:null, published:null, draft:false, token:null, busy:false, incoming:null,
   decks:[], deckId:null, view:"home",
-  folders:[], folderId:null, open:{}, learn:{},
+  folders:[], folderId:null, open:{}, learn:{}, railShut:false, calMonth:null,
   dir:"t2d",        // t2d = term -> definition, d2t = definition -> term
   filter:"all",     // all | starred | missed
   shuffle:true,
@@ -541,7 +692,7 @@ var S = {
 };
 
 /* -------- per-viewer progress: browser-local, never sent anywhere -------- */
-var WHO_KEY = "recalldesk.who.v1", DRAFT_KEY = "recalldesk.draft.v1", TOKEN_KEY = "recalldesk.gh.v1", FOLD_KEY = "recalldesk.folders-open.v1", TOKEN_AT = "recalldesk.gh.at.v1";
+var WHO_KEY = "recalldesk.who.v1", DRAFT_KEY = "recalldesk.draft.v1", TOKEN_KEY = "recalldesk.gh.v1", FOLD_KEY = "recalldesk.folders-open.v1", TOKEN_AT = "recalldesk.gh.at.v1", RAIL_KEY = "recalldesk.rail.v1";
 // Scores are filed under whichever name is signed in, so a shared classroom machine
 // keeps them apart. Still browser-local: nothing about a score leaves the device.
 function slug(n){ return String(n||"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"") || "guest"; }
@@ -586,6 +737,27 @@ function setStage(deckId, cardId, st){
 
 /* ============================ deck helpers ============================ */
 function deck(){ for(var i=0;i<S.decks.length;i++) if(S.decks[i].id === S.deckId) return S.decks[i]; return null; }
+function archiveFolder(){
+  for(var i=0;i<S.folders.length;i++) if(S.folders[i].archive) return S.folders[i];
+  return null;
+}
+/* Decks whose quiz has gone by collect themselves in one folder. Only ever run for the
+   editor: it is an edit to the shared file, so it has to be published like any other,
+   and a student's browser must never quietly rearrange the decks. */
+function autoArchive(){
+  if(!S.canEdit) return false;
+  var stale = S.decks.filter(function(d){
+    var n = daysUntil(d.quiz);
+    return n !== null && n < 0 && !(folderById(d.folder) || {}).archive;
+  });
+  if(!stale.length) return false;
+  var box = archiveFolder();
+  if(!box){ box = {id:uid("f"), name:"Old", parent:"", archive:true}; S.folders.push(box); }
+  stale.forEach(function(d){ d.folder = box.id; });
+  saveDraft();
+  toast(stale.length + (stale.length === 1 ? " deck" : " decks") + " moved to " + (box.name || "Old"));
+  return true;
+}
 function folderById(id){ for(var i=0;i<S.folders.length;i++) if(S.folders[i].id === id) return S.folders[i]; return null; }
 function decksIn(folderId){ return S.decks.filter(function(d){ return (d.folder || "") === folderId; }); }
 // Folders nest through an optional parent id. Three levels is the ceiling: past that the
@@ -695,11 +867,12 @@ function deckPayload(){
   return {
     version: 1,
     updated: new Date().toISOString().slice(0,10),
-    folders: S.folders.map(function(f){ return {id: f.id, name: f.name || "Untitled folder", parent: f.parent || undefined}; }),
+    folders: S.folders.map(function(f){ return {id: f.id, name: f.name || "Untitled folder", parent: f.parent || undefined, archive: f.archive ? true : undefined}; }),
     decks: S.decks.map(function(d){
       return {
         id: d.id, name: d.name || "Untitled deck", subject: d.subject || "",
         folder: d.folder || undefined,      // dropped from the JSON when a deck isn't filed
+        quiz: parseDate(d.quiz) ? d.quiz : undefined,
         createdAt: d.createdAt || 0,
         kind: kindOf(d) === "cards" ? undefined : d.kind,
         tense: kindOf(d) === "conj" ? (d.tense || "") : undefined,
@@ -907,13 +1080,13 @@ function renderRail(){
       var ul = el("ul",{class:"fdecks"});
       if(!inside.length && !kids.length) ul.appendChild(el("li",{class:"fempty",text:"Empty"}));
       kids.forEach(function(k){ ul.appendChild(folderGroup(k)); });
-      inside.forEach(function(d){ ul.appendChild(deckItem(d)); });
+      byQuiz(inside).forEach(function(d){ ul.appendChild(deckItem(d)); });
       group.appendChild(ul);
     }
     return group;
   }
   childFolders("").forEach(function(f){ list.appendChild(folderGroup(f)); });
-  var loose = decksIn("");
+  var loose = byQuiz(decksIn(""));
   if(S.folders.length && loose.length) list.appendChild(el("li",{class:"eyebrow loose",text:"Not in a folder"}));
   loose.forEach(function(d){ list.appendChild(deckItem(d)); });
 
@@ -922,6 +1095,50 @@ function renderRail(){
     slot.appendChild(el("button",{class:"btn ghost sm",onclick:function(){ newFolder(""); },title:"New folder"},[icon(I.folder,14),"Folder"]));
     slot.appendChild(el("button",{class:"btn ghost sm",onclick:function(){ newDeck(""); },title:"New deck"},[icon(I.plus,14),"Deck"]));
   }
+  var ctl = $("railctl"); ctl.textContent = "";
+  if(S.folders.length){
+    var anyOpen = S.folders.some(function(f){ return f.id in S.open ? S.open[f.id] : false; });
+    ctl.appendChild(el("button",{class:"icbtn",title: anyOpen ? "Collapse all folders" : "Expand all folders",
+      "aria-label": anyOpen ? "Collapse all folders" : "Expand all folders",
+      onclick:function(){ collapseAll(anyOpen); }},[icon(I.collapse,15)]));
+  }
+  ctl.appendChild(el("button",{class:"icbtn",title:"Hide the sidebar","aria-label":"Hide the sidebar",
+    onclick:function(){ setRail(true); }},[icon(I.panel,15)]));
+  renderSoon();
+}
+function collapseAll(shut){
+  S.folders.forEach(function(f){ S.open[f.id] = !shut; });
+  saveFolds(); renderRail();
+}
+function setRail(shut){
+  S.railShut = !!shut;
+  try{ localStorage.setItem(RAIL_KEY, shut ? "1" : "0"); }catch(e){}
+  document.querySelector(".app").className = "app" + (shut ? " shut" : "");
+}
+// What's coming up, in the space above "Studying as…".
+function renderSoon(){
+  var slot = $("soonslot"); if(!slot) return;
+  slot.textContent = "";
+  var list = upcoming(4);
+  var box = el("div",{class:"soon"},[
+    el("div",{class:"hd"},[
+      el("span",{class:"eyebrow",text:"Coming up"}),
+      el("button",{class:"icbtn",title:"Calendar","aria-label":"Calendar",onclick:function(){ go("cal"); }},[icon(I.cal,14)])
+    ])
+  ]);
+  if(!list.length){
+    box.appendChild(el("div",{class:"none",text: S.canEdit ? "No quiz dates set yet." : "Nothing scheduled."}));
+  } else {
+    var ul = el("ul",{});
+    list.forEach(function(d){
+      ul.appendChild(el("li",{},[ el("button",{onclick:function(){ openDeck(d.id); }},[
+        el("span",{class:"nm",text:d.name || "Untitled deck"}),
+        el("span",{class:"when " + whenClass(d.quiz),text:whenText(d.quiz)})
+      ]) ]));
+    });
+    box.appendChild(ul);
+  }
+  slot.appendChild(box);
 }
 
 /* ============================ views ============================ */
@@ -950,6 +1167,8 @@ function render(){
   if(!S.ready){ stage.appendChild(el("div",{class:"empty",html:"<h3>Loading decks…</h3><p>Fetching the shared card store.</p>"})); return; }
   if(S.view === "who") return renderWho();
   if(S.view === "connect") return renderConnect();
+  if(S.view === "cal" && S.ready && !S.loadError) return renderCal();
+  if(S.view === "print" && S.ready && !S.loadError) return renderPrint();
   if(S.loadError){
     stage.appendChild(el("div",{class:"empty"},[
       el("h3",{text:"Couldn't load the decks"}),
@@ -965,6 +1184,10 @@ function render(){
   if(v === "home") return renderHome();
   if(v === "learn") return renderLearn();
   if(v === "pos") return renderPos();
+  if(v === "cal") return renderCal();
+  if(v === "print") return renderPrint();
+  if(v === "test-setup") return renderTestSetup();
+  if(v === "test") return renderTest();
   if(v === "table") return renderTable();
   if(v === "flash") return renderFlash();
   if(v === "quiz") return renderQuiz();
@@ -1011,6 +1234,7 @@ function renderHome(){
     el("div",{},[
       el("h2",{text:d.name || "Untitled deck"}),
       d.subject ? el("p",{class:"deskdesc",style:"margin-bottom:0",text:d.subject}) : null,
+      d.quiz ? el("div",{style:"margin:8px 0 2px"},[ el("button",{class:"duetag " + whenClass(d.quiz),onclick:function(){ go("cal"); }},[icon(I.clock,13), "Quiz " + whenText(d.quiz)]) ]) : null,
       el("div",{class:"sub"}, crumbs.concat([
         kind === "conj" ? (cardsOf(d).length + (cardsOf(d).length === 1 ? " verb · " : " verbs · ") + n + (n === 1 ? " form" : " forms") + (d.tense ? " · " + d.tense : ""))
                         : n + (n === 1 ? " card" : " cards")
@@ -1018,6 +1242,7 @@ function renderHome(){
     ]),
     el("div",{class:"rowctl"},[
       S.canEdit ? el("button",{class:"btn",onclick:function(){ go("edit"); }},[icon(I.edit,15),"Edit cards"]) : el("button",{class:"btn",onclick:function(){ go("edit"); }},[icon(I.cards,15),"Browse all cards"]),
+      el("button",{class:"btn ghost",title:"Print this deck",onclick:function(){ S.printFolder = null; go("print"); }},[icon(I.print,15),"Print"]),
       el("button",{class:"btn ghost railtoggle",onclick:function(){ var r = $("rail"); r.hidden = !r.hidden; }},["Decks"])
     ])
   ]);
@@ -1053,7 +1278,8 @@ function renderHome(){
   var withPos = kind === "vocab" ? cardsOf(d).filter(function(c){ return (c.pos||"").trim(); }).length : 0;
   var posKinds = kind === "vocab" ? deckPos(d).length : 0;
   var verbs = kind === "conj" ? cardsOf(d).filter(hasForms).length : 0;
-  var tiles = [];
+  var tiles = [["test-setup","Simulated test", I.test,
+    "A timed run-through that mixes the question types, over this deck or the whole folder.", np >= 2, np < 2 ? "Needs 2+ cards" : null]];
   if(kind === "conj") tiles.push(["table","Fill the table", I.table,
     "The whole table for one verb at a time. Type every form, then see it marked row by row.", verbs >= 1, verbs ? null : "No verb has any forms yet"]);
   if(kind === "vocab") tiles.push(["pos","Parts of speech", I.tag,
@@ -1067,7 +1293,8 @@ function renderHome(){
   ]);
   var grid = el("div",{class:"modes"});
   tiles.forEach(function(t){
-    grid.appendChild(el("button",{class:"mode",disabled: t[4] ? null : "disabled", onclick:function(){ startMode(t[0]); }},[
+    grid.appendChild(el("button",{class:"mode",disabled: t[4] ? null : "disabled",
+      onclick: t[0] === "test-setup" ? function(){ go("test-setup"); } : function(){ startMode(t[0]); }},[
       el("span",{class:"mt"},[icon(t[2],17), t[1]]),
       el("span",{class:"md",text: t[5] || t[3]})
     ]));
@@ -1407,6 +1634,315 @@ function renderLearnDone(s){
       el("button",{class:"btn ghost",onclick:function(){ S.session = null; go("home"); }},["Back to deck"])
     ])
   ]));
+}
+
+/* ---------------- simulated test ----------------
+   Built out of the question types the app already grades: multiple choice, typing, and
+   on a vocabulary deck the part of speech. Scope can be one deck or a whole folder, so
+   it works as a real end-of-unit run-through rather than a single deck drill. */
+var testTimer = null;
+function testUnits(scope){
+  var decks = scope.folder ? decksUnder(scope.folder) : (deck() ? [deck()] : []);
+  var out = [];
+  decks.forEach(function(d){
+    unitsOf(d).forEach(function(u){ out.push({u:u, d:d}); });
+  });
+  return out;
+}
+function buildTest(scope, opts){
+  var pool = shuffled(testUnits(scope)), qs = [];
+  pool.forEach(function(it){
+    if(qs.length >= opts.count) return;
+    var kinds = [];
+    if(opts.choice) kinds.push("choice");
+    if(opts.type) kinds.push("type");
+    if(opts.pos && kindOf(it.d) === "vocab" && (it.u.pos || "").trim() && posAskable(it.d)) kinds.push("pos");
+    if(!kinds.length) return;
+    var kind = kinds[Math.floor(Math.random() * kinds.length)];
+    var all = unitsOf(it.d);
+    if(kind === "choice" && !canChoose(all)) kind = opts.type ? "type" : null;
+    if(!kind) return;
+    qs.push({
+      id: it.u.id, deck: it.d, unit: it.u, kind: kind,
+      ask: lask(it.u, kind === "pos" ? "pos" : kind === "type" ? "type" : "choice"),
+      right: lans(it.u, kind === "pos" ? "pos" : kind === "type" ? "type" : "choice"),
+      choices: kind === "choice" ? buildChoices(it.u, all) : kind === "pos" ? posChoices(it.u, all) : null,
+      given: null, ok: null
+    });
+  });
+  return qs;
+}
+function startTest(scope, opts){
+  var qs = buildTest(scope, opts);
+  if(!qs.length) return toast("Nothing to build a test from");
+  S.session = {mode:"test", qs:qs, i:0, scope:scope, opts:opts, left: opts.minutes * 60, over:false};
+  clearInterval(testTimer);
+  if(opts.minutes){
+    testTimer = setInterval(function(){
+      var s = S.session;
+      if(!s || s.mode !== "test" || s.over){ clearInterval(testTimer); return; }
+      s.left--;
+      var c = $("tclock");
+      if(c){ c.textContent = clockText(s.left); c.className = "tclock" + (s.left <= 30 ? " low" : ""); }
+      if(s.left <= 0){ clearInterval(testTimer); finishTest(true); }
+    }, 1000);
+  }
+  go("test");
+}
+function clockText(sec){
+  sec = Math.max(0, sec|0);
+  return Math.floor(sec/60) + ":" + ("0" + (sec % 60)).slice(-2);
+}
+function renderTestSetup(){
+  var d = deck();
+  var opts = S.testOpts || (S.testOpts = {count:15, minutes:10, choice:true, type:true, pos:true});
+  var scope = S.testScope || (S.testScope = {folder: null});
+  var fold = d && d.folder ? folderById(d.folder) : null;
+  var available = testUnits(scope).length;
+
+  stage.appendChild(el("div",{class:"stage-head"},[
+    el("div",{},[ el("h2",{text:"Simulated test"}),
+      el("div",{class:"sub",text:"A timed run-through that mixes the question types, scored at the end."}) ]),
+    el("button",{class:"btn ghost",onclick:function(){ go("home"); }},[icon(I.back,15),"Deck"])
+  ]));
+
+  function srow(label, kids){ return el("div",{class:"srow"},[ el("span",{class:"sl",text:label}), el("span",{class:"sv"}, kids) ]); }
+  function seg(values, cur, set, fmt){
+    var box = el("div",{class:"seg"});
+    values.forEach(function(v){
+      box.appendChild(el("button",{"aria-pressed": v === cur ? "true" : "false", text: fmt ? fmt(v) : String(v),
+        onclick:function(){ set(v); render(); }}));
+    });
+    return box;
+  }
+  function check(label, on, set){
+    var cb = el("input",{type:"checkbox"});
+    cb.checked = !!on;
+    cb.addEventListener("change", function(){ set(cb.checked); render(); });
+    return el("label",{class:"chk"},[cb, label]);
+  }
+
+  var box = el("div",{class:"setup"});
+  if(fold) box.appendChild(srow("Covering", [ seg([null, fold.id], scope.folder,
+      function(v){ S.testScope = {folder: v}; }, function(v){ return v ? "All of " + (fold.name || "the folder") : (d.name || "This deck"); }) ]));
+  box.appendChild(srow("Questions", [ seg([10, 15, 20, 30, 50], opts.count, function(v){ opts.count = v; }),
+    el("span",{class:"saveflag",text: available + " available"}) ]));
+  box.appendChild(srow("Time limit", [ seg([0, 5, 10, 20, 30], opts.minutes, function(v){ opts.minutes = v; },
+    function(v){ return v ? v + " min" : "None"; }) ]));
+  box.appendChild(srow("Question types", [
+    check("Multiple choice", opts.choice, function(v){ opts.choice = v; }),
+    check("Type the answer", opts.type, function(v){ opts.type = v; }),
+    check("Part of speech", opts.pos, function(v){ opts.pos = v; })
+  ]));
+  stage.appendChild(box);
+
+  var none = !opts.choice && !opts.type && !opts.pos;
+  stage.appendChild(el("div",{class:"rowctl",style:"justify-content:flex-start"},[
+    el("button",{class:"btn primary",disabled: (none || !available) ? "disabled" : null,
+      onclick:function(){ startTest(S.testScope, opts); }},[icon(I.test,15),"Start the test"]),
+    none ? el("span",{class:"saveflag",text:"Pick at least one question type."}) : null,
+    !available ? el("span",{class:"saveflag",text:"Nothing to test on yet."}) : null
+  ]));
+}
+function renderTest(){
+  var s = S.session; if(!s || s.mode !== "test") return go("home");
+  if(s.over) return renderTestDone(s);
+  var q = s.qs[s.i];
+  stage.appendChild(modeHead("Simulated test"));
+  stage.appendChild(el("div",{class:"testbar"},[
+    el("span",{class:"qnum",text:"Question " + (s.i+1) + " of " + s.qs.length}),
+    el("span",{class:"rowctl"},[
+      s.opts.minutes ? el("span",{class:"tclock" + (s.left <= 30 ? " low" : ""),id:"tclock",text:clockText(s.left)}) : null,
+      el("button",{class:"btn ghost sm",onclick:function(){ if(confirm("Hand the test in now? Anything unanswered is marked wrong.")) finishTest(false); }},["Hand in"])
+    ])
+  ]));
+  var tr = el("div",{class:"track"}); tr.appendChild(el("i",{style:"width:" + (s.i/s.qs.length*100) + "%"})); stage.appendChild(tr);
+  stage.appendChild(el("div",{class:"prompt"},[
+    el("div",{class:"role",text: q.kind === "pos" ? "What part of speech?" : q.unit.fixed ? "Which form?" : q.kind === "type" && typesTerm(q.unit) ? "Definition" : ASK_LABEL()}),
+    el("div",{class:"q",text:q.ask || "—"}),
+    s.scope.folder ? el("div",{style:"font-size:12px;color:var(--ink-faint);margin-top:10px",text:q.deck.name || ""}) : null
+  ]));
+
+  if(q.kind === "type"){
+    var inp = el("input",{class:"answer",type:"text",value:q.given || "",placeholder:"Type your answer…","aria-label":"Your answer",autocomplete:"off",autocapitalize:"off",spellcheck:"false"});
+    inp.addEventListener("input", function(ev){ q.given = ev.target.value; });
+    inp.addEventListener("keydown", function(ev){ if(ev.key === "Enter"){ ev.preventDefault(); nextTestQ(1); } });
+    stage.appendChild(inp);
+    setTimeout(function(){ inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length); }, 0);
+  } else {
+    var wrap = el("div",{class:"choices"});
+    q.choices.forEach(function(opt, idx){
+      wrap.appendChild(el("button",{class:"choice" + (q.given === opt ? " right" : ""),
+        onclick:function(){ q.given = opt; render(); setTimeout(function(){ nextTestQ(1); }, 160); }},[
+        el("span",{class:"key",text:String(idx+1)}), el("span",{text:opt})
+      ]));
+    });
+    stage.appendChild(wrap);
+  }
+
+  stage.appendChild(el("div",{class:"rowctl",style:"margin-top:16px;justify-content:space-between"},[
+    el("button",{class:"btn ghost",disabled: s.i ? null : "disabled",onclick:function(){ nextTestQ(-1); }},[icon(I.back,15),"Back"]),
+    el("span",{class:"saveflag",text: s.qs.filter(function(x){ return x.given !== null && x.given !== ""; }).length + " of " + s.qs.length + " answered"}),
+    el("button",{class:"btn primary",onclick:function(){ nextTestQ(1); }},[ s.i + 1 >= s.qs.length ? "Finish" : "Next", icon(I.chev,14)])
+  ]));
+}
+function nextTestQ(step){
+  var s = S.session; if(!s || s.mode !== "test") return;
+  if(step > 0 && s.i + 1 >= s.qs.length) return finishTest(false);
+  s.i = Math.max(0, Math.min(s.qs.length - 1, s.i + step));
+  render(); window.scrollTo(0,0);
+}
+function finishTest(ranOut){
+  var s = S.session; if(!s || s.over) return;
+  clearInterval(testTimer);
+  s.qs.forEach(function(q){
+    q.ok = q.kind === "type" ? (String(q.given || "").trim() ? grade(q.given, q.right) !== "no" : false)
+                             : q.given === q.right;
+    record(q.id, q.ok);
+  });
+  s.over = true; s.ranOut = !!ranOut;
+  render(); window.scrollTo(0,0);
+}
+function renderTestDone(s){
+  var right = s.qs.filter(function(q){ return q.ok; }).length;
+  var pct = Math.round(right / s.qs.length * 100);
+  stage.appendChild(modeHead("Simulated test"));
+  var body = el("div",{class:"result"},[
+    el("div",{class:"eyebrow",text: s.ranOut ? "Time's up" : "Test score"}),
+    el("div",{class:"score",text:pct + "%"}),
+    el("p",{style:"margin:2px 0 20px;color:var(--ink-soft);font-size:14px",
+      text: right + " of " + s.qs.length + " right" + (s.opts.minutes ? " · " + clockText(s.opts.minutes*60 - s.left) + " taken" : "")}),
+    el("div",{class:"rowctl"},[
+      el("button",{class:"btn primary",onclick:function(){ startTest(s.scope, s.opts); }},["Take another"]),
+      el("button",{class:"btn",onclick:function(){ S.session = null; go("test-setup"); }},["Change the settings"]),
+      el("button",{class:"btn ghost",onclick:function(){ S.session = null; go("home"); }},["Back to deck"])
+    ])
+  ]);
+  var ul = el("ul",{class:"review"});
+  s.qs.forEach(function(q, i){
+    ul.appendChild(el("li",{class: q.ok ? "ok" : "no"},[
+      el("span",{class:"mk",text: q.ok ? "\u2713" : "\u2717"}),
+      el("span",{},[
+        el("div",{class:"q",text:(i+1) + ". " + q.ask}),
+        el("div",{class:"a"}, q.ok ? [q.right] : [
+          "You put ", el("b",{text: String(q.given || "").trim() || "nothing"}), " — the answer is ", el("b",{style:"color:var(--good)",text:q.right})
+        ])
+      ])
+    ]));
+  });
+  body.appendChild(el("div",{class:"eyebrow",style:"margin-top:26px;text-align:left",text:"Every question"}));
+  body.appendChild(ul);
+  stage.appendChild(body);
+}
+
+/* ---------------- print ----------------
+   A plain list of what is in a deck or a folder, laid out to print cleanly. */
+function printScope(){
+  if(S.view === "print" && S.printFolder){
+    var f = folderById(S.printFolder);
+    return {title: f ? (f.name || "Untitled folder") : "Decks", decks: byQuiz(decksUnder(S.printFolder))};
+  }
+  var d = deck();
+  return {title: d ? (d.name || "Untitled deck") : "Deck", decks: d ? [d] : []};
+}
+function renderPrint(){
+  var sc = printScope(), total = 0;
+  sc.decks.forEach(function(d){ total += cardsOf(d).length; });
+  stage.appendChild(el("div",{class:"stage-head"},[
+    el("div",{},[ el("h2",{text:"Print"}), el("div",{class:"sub",text:sc.title + " · " + sc.decks.length + (sc.decks.length === 1 ? " deck · " : " decks · ") + total + (total === 1 ? " card" : " cards")}) ]),
+    el("div",{class:"rowctl"},[
+      el("button",{class:"btn primary",onclick:function(){ window.print(); }},[icon(I.print,15),"Print"]),
+      el("button",{class:"btn ghost",onclick:function(){ S.printFolder = null; go(S.deckId ? "home" : "cal"); }},[icon(I.back,15),"Back"])
+    ])
+  ]));
+  var sheet = el("div",{class:"sheet"},[
+    el("h3",{text:sc.title}),
+    el("div",{class:"meta",text:"Quizletish · " + total + (total === 1 ? " card" : " cards")})
+  ]);
+  sc.decks.forEach(function(d){
+    var cards = cardsOf(d);
+    if(!cards.length) return;
+    var sec = el("section",{},[ el("h4",{text:(d.name || "Untitled deck") + (d.quiz ? "  —  quiz " + d.quiz : "")}) ]);
+    var ul = el("ul",{class:"plist"});
+    if(kindOf(d) === "conj"){
+      cards.forEach(function(c){
+        personsOf(d).forEach(function(pp){
+          var f = formOf(c, pp.id).trim(); if(!f) return;
+          ul.appendChild(el("li",{},[ el("span",{class:"t",text:(c.term||"") + " · " + pp.label}), el("span",{class:"d",text:f}) ]));
+        });
+      });
+    } else {
+      cards.forEach(function(c){
+        ul.appendChild(el("li",{},[
+          el("span",{class:"t"},[ (c.term || "—"), c.pos ? el("span",{class:"pos",text:"  " + c.pos}) : null ]),
+          el("span",{class:"d",text:c.def || ""})
+        ]));
+      });
+    }
+    sec.appendChild(ul);
+    sheet.appendChild(sec);
+  });
+  stage.appendChild(sheet);
+}
+
+/* ---------------- calendar ---------------- */
+function renderCal(){
+  var base = S.calMonth ? parseDate(S.calMonth + "-01") : today();
+  if(!base) base = today();
+  var y = base.getFullYear(), m = base.getMonth(), now = today();
+  var first = new Date(y, m, 1), start = new Date(y, m, 1 - first.getDay());
+  var byDay = {};
+  S.decks.forEach(function(d){ if(parseDate(d.quiz)) (byDay[d.quiz] || (byDay[d.quiz] = [])).push(d); });
+
+  function shift(n){
+    var t = new Date(y, m + n, 1);
+    S.calMonth = t.getFullYear() + "-" + ("0" + (t.getMonth()+1)).slice(-2);
+    render();
+  }
+  stage.appendChild(el("div",{class:"stage-head"},[
+    el("div",{},[ el("h2",{text:"Calendar"}), el("div",{class:"sub",text:"Every deck with a quiz date. Click one to study it."}) ]),
+    el("button",{class:"btn ghost",onclick:function(){ go("home"); }},[icon(I.back,15),"Deck"])
+  ]));
+  stage.appendChild(el("div",{class:"calhead"},[
+    el("button",{class:"btn sm",onclick:function(){ shift(-1); },"aria-label":"Previous month"},["\u2039"]),
+    el("h3",{style:"font-family:var(--read);font-size:22px;min-width:12ch",text:MONTHS[m] + " " + y}),
+    el("button",{class:"btn sm",onclick:function(){ shift(1); },"aria-label":"Next month"},["\u203a"]),
+    el("button",{class:"btn ghost sm",onclick:function(){ S.calMonth = null; render(); }},["Today"])
+  ]));
+
+  var grid = el("div",{class:"calgrid"});
+  DOW.forEach(function(w){ grid.appendChild(el("div",{class:"caldow",text:w})); });
+  for(var i = 0; i < 42; i++){
+    var day = new Date(start.getFullYear(), start.getMonth(), start.getDate() + i);
+    var key = ymd(day), off = day.getMonth() !== m;
+    var cell = el("div",{class:"calday" + (off ? " off" : "") + (key === ymd(now) ? " now" : "")},[
+      el("span",{class:"dn",text:String(day.getDate())})
+    ]);
+    (byDay[key] || []).forEach(function(d){
+      cell.appendChild(el("button",{class:"calpill" + (daysUntil(d.quiz) < 0 ? " done" : ""),title:d.name,
+        onclick:function(){ openDeck(d.id); }},[d.name || "Untitled deck"]));
+    });
+    grid.appendChild(cell);
+  }
+  stage.appendChild(grid);
+
+  var soon = byQuiz(S.decks.filter(function(d){ return parseDate(d.quiz) && daysUntil(d.quiz) >= 0; }));
+  if(soon.length){
+    var listEl = el("div",{class:"flist callist"});
+    soon.forEach(function(d){
+      var cards = unitsOf(d), k = learnCounts(d, cards);
+      listEl.appendChild(el("button",{class:"frow",onclick:function(){ openDeck(d.id); }},[
+        el("span",{},[
+          el("span",{class:"t",text:d.name || "Untitled deck"}),
+          el("span",{class:"s",text:cards.length + (cards.length === 1 ? " card" : " cards")})
+        ]),
+        minibar(k, cards.length),
+        el("span",{class:"ct"},[ el("span",{class:"duetag " + whenClass(d.quiz),text:whenText(d.quiz)}) ])
+      ]));
+    });
+    stage.appendChild(el("div",{class:"eyebrow",style:"margin-top:26px",text:"Next up"}));
+    stage.appendChild(listEl);
+  }
 }
 
 /* ---------------- parts of speech ----------------
@@ -1879,7 +2415,7 @@ function renderEdit(){
          : el("input",{class:"text descin",type:"text",maxlength:"140",value:d.subject || "",placeholder:"Short description (optional) — shown under the title","aria-label":"Deck description",
              oninput:function(ev){ d.subject = ev.target.value; S.lastKeystroke = Date.now(); queueSave(d); }}),
       ro ? el("div",{class:"sub",text:"All " + cardsOf(d).length + " cards, read-only."})
-         : el("div",{class:"editmeta"},[ folderPicker(d), kindPicker(d), el("span",{class:"sub",style:"margin:0",text:"Edits are kept on this device until you publish."}) ])
+         : el("div",{class:"editmeta"},[ folderPicker(d), kindPicker(d), quizField(d), el("span",{class:"sub",style:"margin:0",text:"Edits are kept on this device until you publish."}) ])
     ]),
     el("button",{class:"btn ghost",onclick:function(){ go("home"); }},[icon(I.back,15),"Deck"])
   ]));
@@ -1994,6 +2530,16 @@ function addRow(d){
   }, 0);
 }
 /* ---------------- folders ---------------- */
+function quizField(d){
+  var inp = el("input",{class:"text",type:"date",value:d.quiz || "","aria-label":"Quiz date"});
+  inp.addEventListener("change", function(){
+    d.quiz = parseDate(inp.value) ? inp.value : "";
+    S.lastKeystroke = Date.now();
+    saveDraft(); renderRail(); render();
+    toast(d.quiz ? "Quiz set for " + whenText(d.quiz) : "Quiz date cleared");
+  });
+  return el("label",{class:"quizfield"},[icon(I.cal,15), "Quiz", inp]);
+}
 function kindPicker(d){
   var sel = el("select",{"aria-label":"Deck type"});
   [["cards","Cards"],["vocab","Vocabulary"],["conj","Conjugation"]].forEach(function(o){
@@ -2145,12 +2691,26 @@ function renderFolder(){
       ro ? el("h2",{text:f.name || "Untitled folder"})
          : el("input",{class:"text",id:"foldername",style:"font-size:24px;font-weight:600;padding:6px 10px;letter-spacing:-.02em;min-width:min(420px,100%)",value:f.name || "",placeholder:"Folder name","aria-label":"Folder name",
              oninput:function(ev){ f.name = ev.target.value; S.lastKeystroke = Date.now(); renderRail(); queueSave(f); }}),
-      ro ? null : el("div",{class:"editmeta"},[ parentPicker(f) ]),
+      ro ? null : el("div",{class:"editmeta"},[ parentPicker(f),
+        el("label",{class:"fpick",title:"Decks past their quiz date collect here"},[
+          (function(){
+            var cb = el("input",{type:"checkbox","aria-label":"Use as the Old folder"});
+            cb.checked = !!f.archive;
+            cb.addEventListener("change", function(){
+              S.folders.forEach(function(x){ x.archive = false; });
+              f.archive = cb.checked;
+              saveDraft(); renderRail(); render();
+              toast(cb.checked ? "Past-date decks will collect here" : "No longer the Old folder");
+            });
+            return cb;
+          })(), "Use as the Old folder" ])
+      ]),
       el("div",{class:"sub"}, sub)
     ]),
     el("div",{class:"rowctl"},[
       ro || !canNest ? null : el("button",{class:"btn",onclick:function(){ newFolder(f.id); }},[icon(I.folder,15),"New subfolder"]),
       ro ? null : el("button",{class:"btn",onclick:function(){ newDeck(f.id); }},[icon(I.plus,15),"New deck here"]),
+      el("button",{class:"btn ghost",title:"Print everything in this folder",onclick:function(){ S.printFolder = f.id; go("print"); }},[icon(I.print,15),"Print"]),
       el("button",{class:"btn ghost railtoggle",onclick:function(){ var r = $("rail"); r.hidden = !r.hidden; }},["Decks"])
     ])
   ]));
@@ -2280,6 +2840,19 @@ function pastePanel(d){
       ? "adamant\tadjective\tunyielding; firm in opinion\nsolitude\tnoun\tthe state of being alone"
       : "Fourth Amendment\tProtects against unreasonable searches and seizures\nStrict scrutiny\tCompelling interest, narrowly tailored, least restrictive means";
   box = el("textarea",{class:"paste",id:"pastebox",placeholder:ph,oninput:refresh});
+  var file = el("input",{type:"file",accept:".csv,.tsv,.txt,text/plain,text/csv",hidden:"hidden",id:"pastefile"});
+  file.addEventListener("change", function(){
+    var f = file.files && file.files[0]; if(!f) return;
+    var rd = new FileReader();
+    rd.onload = function(){
+      var txt = String(rd.result || "");
+      if(f.name.toLowerCase().slice(-4) === ".csv" && txt.indexOf("\t") === -1) txt = txt.replace(/,/g, "\t");
+      box.value = box.value ? box.value.replace(/\s*$/, "\n") + txt : txt;
+      refresh(); toast("Loaded " + f.name);
+    };
+    rd.readAsText(f);
+    file.value = "";
+  });
   sepSel = el("select",{"aria-label":"Separator",onchange:function(){ custom.hidden = sepSel.value !== "custom"; refresh(); }},[
     el("option",{value:"tab",text:"Tab (paste from a spreadsheet)"}),
     el("option",{value:"dash",text:"A dash  -  between them"}),
@@ -2299,6 +2872,7 @@ function pastePanel(d){
       : "One card per line, term first. Straight from a spreadsheet column pair, a Word table, or your outline."}),
     box,
     el("div",{class:"rowctl",style:"justify-content:flex-start;margin-top:12px"},[
+      el("button",{class:"btn sm",onclick:function(){ file.click(); }},[icon(I.upload,14),"From a file"]), file,
       el("span",{style:"font-size:12.5px;color:var(--ink-soft)",text:"Split on"}), sepSel, custom, preview,
       el("div",{style:"flex:1"}),
       el("button",{class:"btn",onclick:function(){ box.value=""; refresh(); }},["Clear"]),
@@ -2373,6 +2947,7 @@ function renderWho(){
       if(h !== ADMIN_HASH) return fail("That password doesn't match.");
       S.canEdit = true;
       if(!S.who) signInAs("ADMIN"); else refreshFoot();
+      autoArchive();
       renderRail(); toast("Editing unlocked"); go("home");
     }, function(){
       fail("This browser won't hash the password over an insecure connection. Open the site over https.");
@@ -2537,6 +3112,14 @@ document.addEventListener("keydown", function(ev){
     } else if((k === "Enter" || k === " ") && s.picked !== null){ ev.preventDefault(); nextQuiz(); }
   } else if(S.view === "write" && s && s.state && (k === "Enter" || k === " ")){
     ev.preventDefault(); nextWrite();
+  } else if(S.view === "test" && s && s.mode === "test" && !s.over){
+    var tq = s.qs[s.i];
+    if(tq.kind !== "type" && /^[1-4]$/.test(k)){
+      var ti = parseInt(k,10) - 1;
+      if(tq.choices && ti < tq.choices.length){ ev.preventDefault(); tq.given = tq.choices[ti]; render(); setTimeout(function(){ nextTestQ(1); }, 160); }
+    } else if(k === "Enter"){ ev.preventDefault(); nextTestQ(1); }
+    else if(k === "ArrowLeft"){ ev.preventDefault(); nextTestQ(-1); }
+    else if(k === "ArrowRight"){ ev.preventDefault(); nextTestQ(1); }
   } else if(S.view === "pos" && s && s.i < s.cards.length){
     if(s.picked === null && /^[1-4]$/.test(k)){
       var pi = parseInt(k,10) - 1;
@@ -2564,6 +3147,9 @@ try{ S.who = localStorage.getItem(WHO_KEY) || null; }catch(e){ S.who = null; }
 try{ S.token = localStorage.getItem(TOKEN_KEY) || null; }catch(e){ S.token = null; }
 if(S.token) keepStorage();
 S.open = ls(FOLD_KEY, {});
+try{ S.railShut = localStorage.getItem(RAIL_KEY) === "1"; }catch(e){ S.railShut = false; }
+setRail(S.railShut);
+$("reopen").addEventListener("click", function(){ setRail(false); });
 loadLocal();
 $("whobtn").addEventListener("click", function(){ go("who"); });
 refreshFoot();
@@ -2576,7 +3162,7 @@ function useStore(st){ st = copy(st || {folders:[], decks:[]}); S.folders = st.f
 // Accepts decks.json with or without folders, and drops a deck's folder if it points nowhere.
 function normalizeStore(raw){
   var folders = (raw && Array.isArray(raw.folders) ? raw.folders : []).map(function(f){
-    return {id: String(f.id || uid("f")), name: f.name || "Untitled folder", parent: f.parent ? String(f.parent) : ""};
+    return {id: String(f.id || uid("f")), name: f.name || "Untitled folder", parent: f.parent ? String(f.parent) : "", archive: !!f.archive};
   });
   var ids = {}, byId = {};
   folders.forEach(function(f){ ids[f.id] = true; byId[f.id] = f; });
@@ -2596,6 +3182,7 @@ function normalizeStore(raw){
       name: v.name || "Untitled deck",
       subject: v.subject || "",
       folder: ids[v.folder] ? v.folder : "",
+      quiz: parseDate(v.quiz) ? String(v.quiz) : "",
       kind: (v.kind === "vocab" || v.kind === "conj") ? v.kind : undefined,
       tense: v.tense ? String(v.tense) : "",
       persons: (Array.isArray(v.persons) && v.persons.length

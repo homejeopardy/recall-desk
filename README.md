@@ -38,6 +38,37 @@ start with a part of speech ("noun …") would mark a correct answer wrong.
 Learn progress is saved after every answer, per student name, in that browser — leaving
 mid-round loses nothing. The deck page's **Mastered** count is Learn's.
 
+## Quiz dates
+
+Give a deck a **Quiz** date in its editor and the rest follows:
+
+- **Coming up** in the sidebar lists the next four, counting down ("today", "in 3d").
+- Decks **sort by soonest first** everywhere, with undated ones last.
+- A **Calendar** page (the icon next to *Coming up*) shows the month with each quiz on its
+  day, and a "Next up" list underneath. Click any of it to go study that deck.
+- When a quiz date passes, the deck **moves itself into an Old folder**. This only runs
+  when you're signed in as the editor, because it's a change to the shared file and has
+  to be published like any other — a student's browser never rearranges anything. Tick
+  **Use as the Old folder** on any folder's page to choose where they go; otherwise one
+  called "Old" is made the first time it's needed.
+
+## Simulated test
+
+**Simulated test** on any deck builds a timed run-through: pick how many questions, a
+time limit, and which question types to mix (multiple choice, typing, and part of speech
+on a vocabulary deck). If the deck is in a folder you can cover the whole folder instead
+of one deck, which is what makes it useful for an end-of-unit review.
+
+It scores at the end and lists **every question** with what you put beside the right
+answer. The clock turns red in the last 30 seconds and hands the test in by itself when
+it runs out.
+
+## Print
+
+**Print** on a deck, or on a folder page, lays the cards out as a plain list — term,
+part of speech if it has one, definition — and strips the interface out of the printed
+page. A conjugation deck prints one line per form.
+
 ## Deck types
 
 Set this with the **Type** menu in the deck editor. It changes what you can type in and
