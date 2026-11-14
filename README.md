@@ -397,6 +397,46 @@ To change the password, hash the new one and replace `ADMIN_HASH` in `index.html
 node -e "console.log(require('crypto').createHash('sha256').update('recalldesk.v1.'+process.argv[1]).digest('hex'))" 'your-new-password'
 ```
 
+## Two editors at once
+
+This used to lose work, quietly. Publishing fetched whatever sha `decks.json` was on and
+wrote the whole local store over it, so if somebody else had published while you were
+editing, their decks went and nothing on screen said anything had happened.
+
+A publish now compares **three** versions — the decks your draft started from (the
+*base*), your draft, and what is in the repo at that second — and works out what each
+side did, instead of who happened to go last.
+
+- A field only one side changed takes that side's value. Your rename and their quiz date
+  both survive, on the same deck.
+- A field you both changed to different things goes to whoever is publishing, and the
+  toast names what to go and look at. Changing different cards in one deck is not a
+  clash and isn't reported as one.
+- Added decks, cards, folders and conjugation forms are kept from both sides. Forms merge
+  one cell at a time, so two people can fill in the same verb.
+- **Nothing is deleted for being merely absent.** A deck you deleted stays deleted only
+  if nobody else edited it in the meantime; if they did, it comes back and you're told.
+  That asymmetry is deliberate — a deck wrongly kept is a nuisance, one wrongly deleted
+  is somebody's evening.
+
+The base is stored next to the draft in `localStorage`, so this survives closing the
+chromebook. A draft saved before this existed has no base; the merge then falls back to a
+union, which can only ever add.
+
+While you're editing, the poll that already watches `decks.json` sets the bar to *someone
+else published while you were editing* rather than silently moving the ground. If the
+repo moves in the seconds between the read and the write, GitHub rejects the write and
+the whole thing — re-read, re-merge, re-send — runs again, up to twice.
+
+If the current `decks.json` can't be read or parsed, the publish **stops** instead of
+overwriting it.
+
+Every publish is still a commit, so even a merge that goes wrong is recoverable from the
+repo's history.
+
+What this does *not* do is show you who else is editing right now. There's nowhere for
+that to live yet — Supabase could hold it, but only signed-in editors would appear.
+
 ## Student scores
 
 Signing in as a student is a name, nothing more — it files scores under that name in

@@ -841,7 +841,7 @@ function cellsOf(d){
 
 /* ============================ state ============================ */
 var S = {
-  canEdit:false, ready:false, who:null, published:null, draft:false, token:null, busy:false, incoming:null,
+  canEdit:false, ready:false, who:null, published:null, base:null, remoteMoved:false, draft:false, token:null, busy:false, incoming:null,
   decks:[], deckId:null, view:"home",
   folders:[], folderId:null, open:{}, learn:{}, railShut:false, calMonth:null, user:null, profile:null, providers:null,
   conjMode:"forms", theme:"", custom:null,
@@ -854,7 +854,7 @@ var S = {
 };
 
 /* -------- per-viewer progress: browser-local, never sent anywhere -------- */
-var WHO_KEY = "recalldesk.who.v1", DRAFT_KEY = "recalldesk.draft.v1", TOKEN_KEY = "recalldesk.gh.v1", FOLD_KEY = "recalldesk.folders-open.v1", TOKEN_AT = "recalldesk.gh.at.v1", RAIL_KEY = "recalldesk.rail.v1", CONJ_KEY = "recalldesk.conjmode.v1", THEME_KEY = "recalldesk.theme.v1", CUSTOM_KEY = "recalldesk.theme-custom.v1";
+var WHO_KEY = "recalldesk.who.v1", DRAFT_KEY = "recalldesk.draft.v1", TOKEN_KEY = "recalldesk.gh.v1", FOLD_KEY = "recalldesk.folders-open.v1", TOKEN_AT = "recalldesk.gh.at.v1", RAIL_KEY = "recalldesk.rail.v1", CONJ_KEY = "recalldesk.conjmode.v1", THEME_KEY = "recalldesk.theme.v1", CUSTOM_KEY = "recalldesk.theme-custom.v1", BASE_KEY = "recalldesk.base.v1";
 // Scores are filed under whichever name is signed in, so a shared classroom machine
 // keeps them apart. Still browser-local: nothing about a score leaves the device.
 function slug(n){ return String(n||"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"") || "guest"; }
@@ -1076,7 +1076,17 @@ function deckPayload(){
     })
   };
 }
+/* The decks this draft started from. Kept beside the draft, because working out
+   who changed what needs all three versions and a chromebook gets closed. */
+function setBase(st){
+  S.base = st ? copy(st) : null;
+  try{
+    if(S.base) localStorage.setItem(BASE_KEY, JSON.stringify(S.base));
+    else localStorage.removeItem(BASE_KEY);
+  }catch(e){}
+}
 function saveDraft(){
+  if(!S.base && S.published) setBase(S.published);
   S.draft = true; STORE_VER++;
   try{ localStorage.setItem(DRAFT_KEY, JSON.stringify(deckPayload())); }catch(e){}
   if($("pubbar") && !S.busy) pubState("", unpublishedMsg(), S.token ? "Publish to everyone" : "Set up publishing");
@@ -1100,6 +1110,8 @@ function queueSave(d){
 function discardDraft(){
   if(!confirm("Throw away every change made since the last publish, and go back to the decks in the repo?")) return;
   try{ localStorage.removeItem(DRAFT_KEY); }catch(e){}
+  setBase(null);
+  S.remoteMoved = false;
   useStore(S.published);
   S.draft = false;
   if(!deck() && S.decks.length) S.deckId = S.decks[0].id;
@@ -1201,47 +1213,199 @@ function pubBar(){
   ]);
 }
 function unpublishedMsg(){
-  return el("span",{},[el("b",{text:"Unpublished changes."})," Students still see the last published decks."]);
+  return S.remoteMoved
+    ? el("span",{},[el("b",{text:"Someone else published while you were editing."}),
+                    " Publishing will keep both sets of changes."])
+    : el("span",{},[el("b",{text:"Unpublished changes."})," Students still see the last published decks."]);
+}
+
+/* ---------------- two editors at the same time ----------------
+   This used to quietly lose work. Publishing fetched whatever sha the repo was on
+   and wrote the entire local store over it, so if someone else had published while
+   you were editing, their decks went and nothing on screen said anything had.
+
+   A publish now looks at three versions — the decks your draft started from (the
+   base), your draft, and what is in the repo at this second — and works out what
+   each side did, rather than who happened to go last. Anything only one side
+   touched is kept. Where you both changed the same field, yours wins and you are
+   told which ones to look at. Nothing is deleted merely for being absent: a deck
+   you deleted stays deleted only if nobody else edited it in the meantime, which
+   is the asymmetry that matters — a wrongly kept deck is a nuisance, a wrongly
+   deleted one is somebody's evening.
+
+   Every publish is also a commit, so even a merge that goes wrong is recoverable
+   from the repo's history. */
+function sameJSON(a, b){
+  return JSON.stringify(a === undefined ? null : a) === JSON.stringify(b === undefined ? null : b);
+}
+function indexById(list){
+  var m = {}; (list || []).forEach(function(x){ if(x && x.id != null) m[x.id] = x; }); return m;
+}
+function quote(t){ return "\u201c" + t + "\u201d"; }
+/* Field by field: a side that changed it beats a side that didn't. Both changed
+   it to different things is the only true clash, and that is what gets reported —
+   a deck where one of you fixed the name and the other added a card is not one. */
+function mergeFields(base, mine, theirs, keys, out, log, label){
+  var clash = false;
+  keys.forEach(function(k){
+    var mineMoved = !sameJSON(mine[k], base[k]), theirsMoved = !sameJSON(theirs[k], base[k]);
+    if(mineMoved && theirsMoved && !sameJSON(mine[k], theirs[k])) clash = true;
+    out[k] = mineMoved ? mine[k] : theirs[k];
+  });
+  if(clash && log && label) log.both.push(label);
+  return out;
+}
+/* One list of things with ids: the folders, the decks, or the cards inside a deck. */
+function mergeById(base, mine, theirs, one, name, log){
+  var B = indexById(base), T = indexById(theirs), out = [], done = {};
+  (mine || []).forEach(function(m){
+    done[m.id] = true;
+    var b = B[m.id], t = T[m.id];
+    if(!t){
+      if(b && sameJSON(b, m)) return;                 // they deleted it; you hadn't touched it
+      if(b) log.both.push(name(m));                   // they deleted what you were changing
+      return out.push(m);                             // yours is new, or yours changed
+    }
+    out.push(one(b || t, m, t, log));                 // no base means nobody can have deleted it
+  });
+  (theirs || []).forEach(function(t){
+    if(done[t.id]) return;
+    var b = B[t.id];
+    if(!b) log.gained.push(name(t));                  // they added it
+    else if(sameJSON(b, t)) return;                   // you deleted it, they left it alone
+    else log.both.push(name(t));                      // you deleted what they were changing
+    out.push(t);
+  });
+  return out;
+}
+function mergeCard(b, m, t, log, where){
+  var label = quote(((m.term || t.term || "").trim()) || "a card") + where;
+  var c = mergeFields(b, m, t, ["term","def","pos"], {id: m.id || t.id}, log, label);
+  var keys = {}, clash = false, f = {}, any = false;
+  [b.forms, m.forms, t.forms].forEach(function(o){ if(o) Object.keys(o).forEach(function(k){ keys[k] = true; }); });
+  Object.keys(keys).forEach(function(k){               // a conjugation table, one form at a time
+    var bv = (b.forms||{})[k], mv = (m.forms||{})[k], tv = (t.forms||{})[k];
+    var mineMoved = !sameJSON(mv, bv), theirsMoved = !sameJSON(tv, bv);
+    if(mineMoved && theirsMoved && !sameJSON(mv, tv)) clash = true;
+    var v = mineMoved ? mv : tv;
+    if(v != null && String(v).trim()){ f[k] = String(v); any = true; }
+  });
+  if(clash) log.both.push(label);
+  if(any) c.forms = f;
+  return c;
+}
+var DECK_KEYS = ["name","subject","folder","quiz","kind","tense","persons","createdAt"];
+function mergeDeck(b, m, t, log){
+  var d = mergeFields(b, m, t, DECK_KEYS, {id: m.id || t.id}, log, quote(m.name || t.name || "a deck"));
+  var where = " in " + (d.name || "a deck");
+  d.cards = mergeById(b.cards, m.cards, t.cards,
+    function(cb, cm, ct, lg){ return mergeCard(cb, cm, ct, lg, where); },
+    function(c){ return quote(((c.term || "").trim()) || "a card") + where; }, log);
+  return d;
+}
+function mergeFolder(b, m, t, log){
+  return mergeFields(b, m, t, ["name","parent","archive"], {id: m.id || t.id}, log,
+                     quote(m.name || t.name || "a folder"));
+}
+function mergeStores(base, mine, theirs){
+  var log = {gained:[], both:[]};
+  var nm = function(x){ return quote(x.name || "untitled"); };
+  var store = {
+    folders: mergeById(base.folders, mine.folders, theirs.folders, mergeFolder, nm, log),
+    decks:   mergeById(base.decks,   mine.decks,   theirs.decks,   mergeDeck,   nm, log)
+  };
+  var seen = {};                                       // one mention each, however it was flagged
+  log.both = log.both.filter(function(x){ return seen[x] ? false : (seen[x] = true); });
+  return {store: store, log: log};
+}
+function mergeReport(log){
+  var bits = [];
+  if(log.gained.length) bits.push("kept " + log.gained.length + " thing" + (log.gained.length === 1 ? "" : "s") + " they added");
+  if(log.both.length){
+    var few = log.both.slice(0, 2).join(", ") + (log.both.length > 2 ? " and " + (log.both.length - 2) + " more" : "");
+    bits.push("you both changed " + few + " \u2014 yours was kept");
+  }
+  return "Published, and merged with someone else's work: " + (bits.join("; ") || "nothing clashed") + ".";
+}
+/* GitHub hands the file back base64'd; this is b64utf8 run backwards. */
+function unb64utf8(s64){
+  var bin = atob(String(s64 || "").replace(/\s/g, "")), bytes = new Uint8Array(bin.length);
+  for(var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return new TextDecoder().decode(bytes);
 }
 
 function publish(){
   if(!S.token){ return go("connect"); }
   if(S.busy) return;
-  var payload = deckPayload();
-  var json = JSON.stringify(payload, null, 2) + "\n";
   S.busy = true;
   pubState("busy", el("span",{text:"Publishing to GitHub…"}));
-
-  ghFetch(GH_API + "?ref=" + GH_BRANCH).then(function(res){
+  attemptPublish(0);
+}
+function attemptPublish(tries, carried){
+  var note = carried || null;
+  return ghFetch(GH_API + "?ref=" + GH_BRANCH).then(function(res){
     if(res.status === 404) return null;              // first publish, file not there yet
     if(!res.ok) throw new Error(ghError(res));
     return res.json();
   }).then(function(existing){
+    var theirs = null;
+    if(existing && existing.content){
+      try{ theirs = normalizeStore(JSON.parse(unb64utf8(existing.content))); }catch(e){ theirs = null; }
+    }
+    // Refusing to publish beats overwriting decks we were unable to read.
+    if(existing && existing.sha && !theirs){
+      throw new Error("couldn't read what's already published, so nothing was written over it. Try again in a minute.");
+    }
+    var mine = normalizeStore(deckPayload());
+    if(theirs && !sameJSON(theirs, mine)){
+      // With no base — a draft from before this existed — treat every deck as new
+      // to one side or the other, so the merge can only ever add.
+      var base = S.base || {folders:[], decks:[]};
+      if(!sameJSON(theirs, base)){
+        var r = mergeStores(base, mine, theirs);
+        var merged = normalizeStore(r.store);        // re-runs the folder checks over the result
+        if(!sameJSON(merged, mine)){
+          useStore(merged);
+          saveDraft();                                // the merge survives a crash before the PUT
+          note = note
+            ? {gained: note.gained.concat(r.log.gained), both: note.both.concat(r.log.both)}
+            : r.log;
+        }
+      }
+    }
+    var payload = deckPayload();
     var body = {
       message: "Update decks (" + payload.decks.length + " deck" + (payload.decks.length === 1 ? "" : "s") + ", " +
-               payload.decks.reduce(function(n,d){ return n + d.cards.length; }, 0) + " cards)",
-      content: b64utf8(json),
+               payload.decks.reduce(function(n,d){ return n + d.cards.length; }, 0) + " cards)" +
+               (note ? ", merged" : ""),
+      content: b64utf8(JSON.stringify(payload, null, 2) + "\n"),
       branch: GH_BRANCH
     };
     if(existing && existing.sha) body.sha = existing.sha;
     return ghFetch(GH_API, {method:"PUT", body: JSON.stringify(body)});
   }).then(function(res){
+    // Someone published in the seconds between the read and the write: go round again.
+    if((res.status === 409 || res.status === 422) && tries < 2) return attemptPublish(tries + 1, note);
     if(!res.ok) throw new Error(ghError(res));
-    return res.json();
-  }).then(function(){
-    S.busy = false;
-    S.published = copy(currentStore());
-    S.draft = false;
-    try{ localStorage.removeItem(DRAFT_KEY); }catch(e){}
-    var bar = $("pubbar"); if(bar) bar.hidden = true;
-    var f = $("saveflag"); if(f) f.textContent = "Matches what's published";
-    toast("Published — students see it in about a minute");
+    return res.json().then(function(){ finishPublish(note); });
   }).catch(function(err){
+    if(tries) throw err;                              // let the first attempt report it
     S.busy = false;
     var msg = String(err && err.message || err);
     if(/expired or been revoked/.test(msg)) setToken(null);   // don't leave a dead token in place
     pubState("fail", el("span",{},[el("b",{text:"Didn't publish. "}), msg]), S.token ? "Try again" : "Set up publishing");
   });
+}
+function finishPublish(note){
+  S.busy = false;
+  S.published = normalizeStore(deckPayload());
+  setBase(null);
+  S.draft = false; S.remoteMoved = false;
+  try{ localStorage.removeItem(DRAFT_KEY); }catch(e){}
+  var bar = $("pubbar"); if(bar) bar.hidden = true;
+  var f = $("saveflag"); if(f) f.textContent = "Matches what's published";
+  if(note){ renderRail(); render(); toast(mergeReport(note)); }
+  else toast("Published — students see it in about a minute");
 }
 
 function downloadJSON(){
@@ -4375,8 +4539,12 @@ fetch("decks.json", {cache:"no-store"})
     if(draft){
       useStore(normalizeStore(draft));
       S.draft = true;
+      var b = ls(BASE_KEY, null);
+      S.base = b ? normalizeStore(b) : null;          // a draft from before this existed has none
+      if(S.base && !sameJSON(S.base, S.published)) S.remoteMoved = true;
     } else {
       useStore(S.published);
+      setBase(null);
     }
     S.ready = true;
     if(!S.deckId && S.decks.length) S.deckId = S.decks[0].id;
@@ -4413,9 +4581,15 @@ function pollPublished(){
       var next = normalizeStore(raw);
       if(JSON.stringify(next) === JSON.stringify(S.published)) return;
       S.incoming = next;
-      if(S.draft){                      // the editor's own unpublished work wins
+      if(S.draft){
+        // Someone else published. Keep what students see up to date, but leave the
+        // base alone — it is the only record of what this draft started from, and
+        // the merge at publish time is useless without it.
         S.published = next; S.incoming = null;
-        return toast("The published decks changed somewhere else");
+        S.remoteMoved = true;
+        var m = $("pubmsg");
+        if(m && !S.busy){ m.textContent = ""; m.appendChild(unpublishedMsg()); }
+        return toast("Someone else published \u2014 your changes will be merged in when you publish");
       }
       if(S.session || S.view === "edit") return toast("New cards — they'll appear when you're done");
       applyIncoming();
