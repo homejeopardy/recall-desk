@@ -38,6 +38,25 @@ start with a part of speech ("noun …") would mark a correct answer wrong.
 Learn progress is saved after every answer, per student name, in that browser — leaving
 mid-round loses nothing. The deck page's **Mastered** count is Learn's.
 
+## Who can do what
+
+Three levels, set under **People** (owners only):
+
+- **Student** — study, and send decks in.
+- **Editor** — that, plus edit the decks, publish, and judge submissions.
+- **Owner** — that, plus decide who is what.
+
+Access can be given to someone who **has never signed in**: their profile doesn't exist
+until they do, so the email address is parked in `invites` and applied automatically the
+first time they arrive. Take it back any time before that.
+
+Only an owner can change a level, enforced by a database trigger rather than by hiding
+buttons — an editor who went looking for the API would still be refused. Stepping
+yourself down from owner asks first, since it's one-way if you're the only one.
+
+The first owner has to be set in the Supabase table editor, the same bootstrap problem
+every system of this kind has.
+
 ## Accounts
 
 Sign-in is **Continue with Google**, and it's optional — without it the app behaves as

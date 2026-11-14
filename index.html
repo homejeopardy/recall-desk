@@ -433,7 +433,10 @@ input.text:focus{border-color:var(--ink);outline:none}
 .railbar{display:flex;align-items:center;gap:4px}
 .icbtn{width:26px;height:26px;display:grid;place-items:center;border-radius:var(--r);color:var(--ink-faint);flex:none}
 .icbtn:hover{background:var(--surface-2);color:var(--ink)}
-.app.shut{grid-template-columns:0 1fr}
+/* the rail leaves the grid entirely, so the stage must become the only column —
+   with "0 1fr" it lands in the zero-width one and the page collapses */
+.app.shut{grid-template-columns:1fr}
+.app.shut .stage{padding-left:92px}
 .app.shut .rail{display:none}
 .reopen{position:fixed;left:0;top:14px;z-index:40;display:none;align-items:center;gap:7px;padding:9px 13px 9px 11px;
   border:1px solid var(--rule);border-left:0;border-radius:0 var(--r-lg) var(--r-lg) 0;background:var(--surface);box-shadow:var(--lift);font-size:13px;font-weight:500}
@@ -550,6 +553,17 @@ input.text:focus{border-color:var(--ink);outline:none}
 .swatch[aria-pressed="true"] .chip{box-shadow:0 0 0 2px var(--ink);border-color:var(--ink)}
 .swatch[aria-pressed="true"] span{color:var(--ink);font-weight:600}
 
+/* ---- people ---- */
+.people{border:1px solid var(--rule);border-radius:var(--r-lg);overflow:hidden;background:var(--surface);margin-bottom:18px}
+.prow{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;padding:12px 16px;border-bottom:1px solid var(--rule-soft)}
+.prow:last-child{border-bottom:0}
+.prow .nm{font-weight:600;font-size:14.5px}
+.prow .em{font-size:12.5px;color:var(--ink-soft)}
+.prow select{font-size:13px;padding:5px 9px}
+.prow .you{font-family:var(--mono);font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-faint);margin-left:7px}
+.invited{opacity:.75}
+.invited .nm{font-weight:500;font-style:italic}
+
 .railtoggle{display:none}
 @media (max-width:860px){
   .app{grid-template-columns:1fr}
@@ -601,7 +615,7 @@ input.text:focus{border-color:var(--ink);outline:none}
   </aside>
   <main class="stage" id="stage"></main>
 </div>
-<button class="reopen" id="reopen"><span aria-hidden="true">\u203a</span> Decks</button>
+<button class="reopen" id="reopen"><span aria-hidden="true">›</span> Decks</button>
 
 <script>
 (function(){
@@ -940,7 +954,7 @@ function setSync(state, msg){
 function whoLine(){
   // A signed-in account speaks for itself; ADMIN is only named when that is genuinely
   // what unlocked editing, with no account behind it.
-  if(S.user) return whoName(S.user) + (isEditor() ? " (editor)" : "");
+  if(S.user) return whoName(S.user) + (isOwner() ? " (owner)" : isEditor() ? " (editor)" : "");
   if(S.canEdit) return "Editing as ADMIN" + (S.token ? " · can publish" : " · publishing not set up");
   return S.who ? "Studying as " + S.who + " · this browser only" : "Not signed in · scores stay on this device";
 }
@@ -1211,7 +1225,10 @@ function renderRail(){
   }
   var ctl = $("railctl"); ctl.textContent = "";
   if(S.folders.length){
-    var anyOpen = S.folders.some(function(f){ return f.id in S.open ? S.open[f.id] : false; });
+    // Judge by what is actually showing, including folders opened because the current
+    // deck is inside them — otherwise the button offers to expand a sidebar that is
+    // visibly already open.
+    var anyOpen = S.folders.some(function(f){ return f.id in S.open ? S.open[f.id] : !!curPath[f.id]; });
     ctl.appendChild(el("button",{class:"icbtn",title: anyOpen ? "Collapse all folders" : "Expand all folders",
       "aria-label": anyOpen ? "Collapse all folders" : "Expand all folders",
       onclick:function(){ collapseAll(anyOpen); }},[icon(I.collapse,15)]));
@@ -1284,6 +1301,7 @@ function render(){
   if(S.view === "cal" && S.ready && !S.loadError) return renderCal();
   if(S.view === "print" && S.ready && !S.loadError) return renderPrint();
   if(S.view === "subs") return renderSubs();
+  if(S.view === "people") return renderPeople();
   if(S.loadError){
     stage.appendChild(el("div",{class:"empty"},[
       el("h3",{text:"Couldn't load the decks"}),
@@ -1304,6 +1322,7 @@ function render(){
   if(v === "test-setup") return renderTestSetup();
   if(v === "test") return renderTest();
   if(v === "subs") return renderSubs();
+  if(v === "people") return renderPeople();
   if(v === "table") return renderTable();
   if(v === "flash") return renderFlash();
   if(v === "quiz") return renderQuiz();
@@ -3127,7 +3146,7 @@ function setUser(u){
 }
 function loadProfile(){
   if(!sb || !S.user) return Promise.resolve(null);
-  return sb.from("profiles").select("id,name,email,is_editor").eq("id", S.user.id).maybeSingle()
+  return sb.from("profiles").select("id,name,email,avatar,is_editor,role").eq("id", S.user.id).maybeSingle()
     .then(function(r){
       S.profile = r.data || null;
       // An editor account is checked by the database, so it replaces the ADMIN password.
@@ -3223,6 +3242,111 @@ function loadSubs(){
       }).catch(function(){ return rows; });
     }).catch(function(){ return []; });
 }
+/* ---------------- who can do what ----------------
+   Access can be handed out before someone has ever signed in: it waits under their
+   email address and lands on the account the first time they arrive. */
+var ROLES = [["student","Student"],["editor","Editor"],["owner","Owner"]];
+function roleName(r){ for(var i=0;i<ROLES.length;i++) if(ROLES[i][0] === r) return ROLES[i][1]; return "Student"; }
+
+function loadPeople(){
+  if(!sb || !isOwner()) return Promise.resolve({people:[], invites:[]});
+  return Promise.all([
+    sb.from("profiles").select("id,name,email,avatar,role,is_editor").order("role",{ascending:true}),
+    sb.from("invites").select("email,role,created_at").order("created_at",{ascending:false})
+  ]).then(function(r){
+    return {people: (r[0] && r[0].data) || [], invites: (r[1] && r[1].data) || []};
+  }).catch(function(){ return {people:[], invites:[]}; });
+}
+function setRole(person, role){
+  if(!sb) return;
+  if(person.id === (S.user && S.user.id) && role !== "owner"){
+    if(!confirm("Step yourself down from owner? You won't be able to change anyone's access afterwards, including your own.")) return render();
+  }
+  sb.from("profiles").update({role: role}).eq("id", person.id).then(function(r){
+    if(r.error) return toast(r.error.message || "Couldn't change that");
+    toast((person.name || "They") + " is now " + roleName(role).toLowerCase());
+    if(person.id === (S.user && S.user.id)) loadProfile();
+    render();
+  });
+}
+function invite(email, role){
+  if(!sb) return Promise.reject(new Error("not connected"));
+  return sb.from("invites").upsert({email: email.trim().toLowerCase(), role: role, invited_by: S.user.id},
+                                   {onConflict:"email"});
+}
+function renderPeople(){
+  stage.appendChild(el("div",{class:"stage-head"},[
+    el("div",{},[ el("h2",{text:"People"}),
+      el("div",{class:"sub",text:"Who can edit the decks. Access can be given before someone has signed in — it waits for them."}) ]),
+    el("button",{class:"btn ghost",onclick:function(){ go("home"); }},[icon(I.back,15),"Deck"])
+  ]));
+  if(!isOwner()){
+    stage.appendChild(el("div",{class:"empty"},[
+      el("h3",{text:"Owners only"}),
+      el("p",{text:"Only an owner can change who has access. Ask whoever set the site up."})
+    ]));
+    return;
+  }
+
+  // invite someone who isn't here yet
+  var mail = el("input",{class:"text",type:"email",placeholder:"name@blackpinecircle.org",autocomplete:"off","aria-label":"Email address"});
+  var pick = el("select",{"aria-label":"Access level"});
+  [["editor","Editor"],["owner","Owner"]].forEach(function(o){ pick.appendChild(el("option",{value:o[0],text:o[1]})); });
+  function send(){
+    var addr = mail.value.trim();
+    if(!/.+@.+\..+/.test(addr)) return toast("That doesn't look like an email address");
+    invite(addr, pick.value).then(function(r){
+      if(r && r.error) return toast(r.error.message || "Couldn't save that");
+      mail.value = ""; toast("Saved — it applies the first time they sign in"); render();
+    });
+  }
+  mail.addEventListener("keydown", function(ev){ if(ev.key === "Enter"){ ev.preventDefault(); send(); } });
+  stage.appendChild(el("div",{class:"panel"},[
+    el("h3",{text:"Give someone access"}),
+    el("p",{text:"They don't need to be online. Put in the Google address they'll sign in with, and the moment they do, they arrive with this level already set."}),
+    el("div",{class:"rowctl",style:"justify-content:flex-start"},[ mail, pick,
+      el("button",{class:"btn primary",onclick:send},[icon(I.user,15),"Give access"]) ])
+  ]));
+
+  var box = el("div",{id:"peoplebox"},[ el("div",{class:"empty"},[el("h3",{text:"Loading…"})]) ]);
+  stage.appendChild(box);
+  loadPeople().then(function(d){
+    box.textContent = "";
+    if(d.invites.length){
+      var il = el("div",{class:"people"});
+      d.invites.forEach(function(v){
+        il.appendChild(el("div",{class:"prow invited"},[
+          avatarEl(v.email, "", "md"),
+          el("div",{},[ el("div",{class:"nm",text:v.email}), el("div",{class:"em",text:"Waiting for their first sign-in · " + roleName(v.role).toLowerCase()}) ]),
+          el("button",{class:"btn danger sm",onclick:function(){
+            sb.from("invites").delete().eq("email", v.email).then(function(){ toast("Taken back"); render(); });
+          }},["Take back"])
+        ]));
+      });
+      box.appendChild(el("div",{class:"eyebrow",style:"margin-bottom:8px",text:"Waiting"}));
+      box.appendChild(il);
+    }
+    var pl = el("div",{class:"people"});
+    if(!d.people.length) pl.appendChild(el("div",{class:"prow"},[el("div",{}),el("div",{class:"em",text:"Nobody has signed in yet."}),el("div",{})]));
+    d.people.forEach(function(x){
+      var sel = el("select",{"aria-label":"Access for " + (x.name || x.email)});
+      ROLES.forEach(function(o){ sel.appendChild(el("option",{value:o[0],text:o[1]})); });
+      sel.value = x.role || (x.is_editor ? "editor" : "student");
+      sel.addEventListener("change", function(){ setRole(x, sel.value); });
+      pl.appendChild(el("div",{class:"prow"},[
+        avatarEl(x.name || x.email, x.avatar, "md"),
+        el("div",{},[
+          el("div",{class:"nm"},[ (x.name || "Unnamed"), (S.user && x.id === S.user.id) ? el("span",{class:"you",text:"you"}) : null ]),
+          el("div",{class:"em",text:x.email || ""})
+        ]),
+        sel
+      ]));
+    });
+    box.appendChild(el("div",{class:"eyebrow",style:"margin:18px 0 8px",text:"Signed in before"}));
+    box.appendChild(pl);
+  });
+}
+
 function renderSubs(){
   stage.appendChild(el("div",{class:"stage-head"},[
     el("div",{},[ el("h2",{text:"Submitted decks"}),
@@ -3283,7 +3407,9 @@ function approveSub(r){
   toast("Added — publish when you're ready");
   go("edit");
 }
-function isEditor(){ return !!(S.profile && S.profile.is_editor); }
+function roleOf(){ return (S.profile && (S.profile.role || (S.profile.is_editor ? "editor" : "student"))) || "student"; }
+function isEditor(){ return roleOf() === "editor" || roleOf() === "owner"; }
+function isOwner(){ return roleOf() === "owner"; }
 
 /* ============================ sign in ============================ */
 var ADMIN_USER = "ADMIN";
@@ -3323,12 +3449,13 @@ function renderWho(){
         avatarEl(whoName(S.user), avatarUrl(S.user)),
         el("div",{style:"flex:1;min-width:0"},[
           el("h3",{text:whoName(S.user)}),
-          el("p",{style:"margin:2px 0 0",text:(S.user.email || "") + (isEditor() ? " · editor account" : "")})
+          el("p",{style:"margin:2px 0 0",text:(S.user.email || "") + (roleOf() !== "student" ? " · " + roleName(roleOf()).toLowerCase() : "")})
         ])
       ]),
       el("p",{style:"margin-top:12px",text:"Your scores are saved to your account, so they follow you to any device you sign in on."}),
       el("div",{class:"rowctl",style:"justify-content:flex-start"},[
         el("button",{class:"btn",onclick:function(){ go("subs"); }},[icon(I.cards,15), isEditor() ? "Submitted decks" : "What I've sent in"]),
+        isOwner() ? el("button",{class:"btn",onclick:function(){ go("people"); }},[icon(I.user,15),"People"]) : null,
         el("button",{class:"btn ghost",onclick:function(){
           if(sb) sb.auth.signOut().then(function(){ S.canEdit = false; S.profile = null; setUser(null); toast("Signed out"); });
         }},["Sign out"])
