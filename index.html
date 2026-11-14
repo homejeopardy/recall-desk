@@ -520,7 +520,11 @@ input.text:focus{border-color:var(--ink);outline:none}
 
 /* ---- accounts ---- */
 .acct{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.avatar{width:30px;height:30px;border-radius:50%;background:var(--accent-wash);display:grid;place-items:center;font-weight:600;font-size:13px;color:var(--ink);flex:none;border:1px solid var(--rule)}
+.avatar{width:30px;height:30px;border-radius:50%;background:var(--accent-wash);display:grid;place-items:center;font-weight:600;font-size:13px;color:var(--ink);flex:none;border:1px solid var(--rule);overflow:hidden}
+.avatar img{width:100%;height:100%;object-fit:cover;display:block}
+.avatar.sm{width:20px;height:20px;font-size:9px}
+.avatar.md{width:26px;height:26px;font-size:11px}
+.sender{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--ink-soft);margin-top:6px}
 .gbtn{display:inline-flex;align-items:center;gap:9px;padding:10px 18px;border:1px solid var(--rule);border-radius:var(--r);background:var(--surface);font-weight:500;font-size:14.5px}
 .gbtn:hover{border-color:var(--ink);background:var(--surface-2)}
 .gbtn svg{flex:none}
@@ -929,7 +933,8 @@ function grade(given, target){
    can change what anyone else sees without a commit — that is the real gate. */
 function setSync(state, msg){
   var dot = $("syncdot");
-  dot.className = "dot" + (state === "edit" ? " edit" : state ? "" : " off");
+  // Leave a profile picture alone; only the plain dot carries the status colour.
+  if(!dot.classList.contains("avatar")) dot.className = "dot" + (state === "edit" ? " edit" : state ? "" : " off");
   $("syncmsg").textContent = msg;
 }
 function whoLine(){
@@ -937,7 +942,19 @@ function whoLine(){
   if(S.user) return "Signed in as " + whoName(S.user) + (isEditor() ? " · editor" : "");
   return S.who ? "Studying as " + S.who + " · this browser only" : "Not signed in · scores stay on this device";
 }
-function refreshFoot(){ setSync(S.canEdit ? "edit" : !!S.who, whoLine()); }
+function refreshFoot(){
+  setSync(S.canEdit ? "edit" : !!S.who, whoLine());
+  var dot = $("syncdot"), isPic = dot.classList.contains("avatar");
+  if(S.user){
+    var a = avatarEl(whoName(S.user), avatarUrl(S.user), "sm");
+    a.id = "syncdot";
+    dot.parentNode.replaceChild(a, dot);
+  } else if(isPic){                       // signed out again: back to the status dot
+    var d = el("span",{class:"dot off",id:"syncdot"});
+    dot.parentNode.replaceChild(d, dot);
+    setSync(S.canEdit ? "edit" : !!S.who, whoLine());
+  }
+}
 
 function deckPayload(){
   return {
@@ -3077,6 +3094,22 @@ function whoName(u){
   var m = u.user_metadata || {};
   return m.full_name || m.name || (u.email || "").split("@")[0] || "Signed in";
 }
+function avatarUrl(u){
+  if(!u) return "";
+  var m = u.user_metadata || u;
+  return m.avatar_url || m.picture || m.avatar || "";
+}
+// The picture if Google gave us one, initials if it didn't or if it fails to load.
+function avatarEl(name, url, size){
+  var box = el("span",{class:"avatar" + (size ? " " + size : ""),text:initials(name)});
+  if(url){
+    var img = el("img",{src:url,alt:"",referrerpolicy:"no-referrer"});
+    img.addEventListener("error", function(){ img.remove(); box.textContent = initials(name); });
+    box.textContent = "";
+    box.appendChild(img);
+  }
+  return box;
+}
 function initials(n){
   var parts = String(n || "?").trim().split(/\s+/);
   return ((parts[0] || "?")[0] + (parts.length > 1 ? parts[parts.length-1][0] : "")).toUpperCase();
@@ -3098,6 +3131,10 @@ function loadProfile(){
       // An editor account is checked by the database, so it replaces the ADMIN password.
       if(isEditor() && !S.canEdit){ S.canEdit = true; autoArchive(); }
       if(isEditor()) pullKey();
+      var pic = avatarUrl(S.user);
+      if(pic && S.profile && S.profile.avatar !== pic){
+        sb.from("profiles").update({avatar: pic}).eq("id", S.user.id).then(function(){}, function(){});
+      }
       refreshFoot(); renderRail(); render();
       return S.profile;
     })
@@ -3171,7 +3208,18 @@ function submitDeck(d, note){
 function loadSubs(){
   if(!sb || !S.user) return Promise.resolve([]);
   return sb.from("submissions").select("id,deck_name,note,payload,status,created_at,user_id")
-    .order("created_at",{ascending:false}).then(function(r){ return r.data || []; }).catch(function(){ return []; });
+    .order("created_at",{ascending:false}).then(function(r){
+      var rows = r.data || [];
+      if(!rows.length || !isEditor()) return rows;
+      // The editor may read profiles, so a submission can show who actually sent it.
+      var ids = rows.map(function(x){ return x.user_id; }).filter(function(v,i,a){ return a.indexOf(v) === i; });
+      return sb.from("profiles").select("id,name,avatar").in("id", ids).then(function(pr){
+        var by = {};
+        (pr.data || []).forEach(function(x){ by[x.id] = x; });
+        rows.forEach(function(x){ x.who = by[x.user_id] || null; });
+        return rows;
+      }).catch(function(){ return rows; });
+    }).catch(function(){ return []; });
 }
 function renderSubs(){
   stage.appendChild(el("div",{class:"stage-head"},[
@@ -3197,6 +3245,7 @@ function renderSubs(){
         el("div",{},[
           el("div",{class:"t",text:r.deck_name}),
           el("div",{class:"m",text:n + (n === 1 ? " card · " : " cards · ") + String(r.created_at || "").slice(0,10)}),
+          r.who ? el("div",{class:"sender"},[ avatarEl(r.who.name, r.who.avatar, "md"), r.who.name || "Someone" ]) : null,
           r.note ? el("div",{class:"note",text:r.note}) : null
         ]),
         el("div",{class:"rowctl"},[
@@ -3269,7 +3318,7 @@ function renderWho(){
   if(S.user){
     wrap.appendChild(el("div",{class:"panel"},[
       el("div",{class:"acct"},[
-        el("span",{class:"avatar",text:initials(whoName(S.user))}),
+        avatarEl(whoName(S.user), avatarUrl(S.user)),
         el("div",{style:"flex:1;min-width:0"},[
           el("h3",{text:whoName(S.user)}),
           el("p",{style:"margin:2px 0 0",text:(S.user.email || "") + (isEditor() ? " · editor account" : "")})

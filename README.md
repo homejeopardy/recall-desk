@@ -60,6 +60,9 @@ actually protects the data is row level security, set up by `supabase/schema.sql
 - `is_editor` cannot be set from the app. A trigger blocks it — flip it in the Supabase
   table editor.
 
+Signing in brings your Google profile picture with it — it shows in the sidebar, on your
+account, and beside any deck a student sends in, so the editor can see who sent what.
+
 An editor account **unlocks the card editor on its own**, so the ADMIN password isn't
 needed any more and its box is gone from the sign-in page. That check is made by the
 database rather than by JavaScript anyone can read, which makes it the first real lock

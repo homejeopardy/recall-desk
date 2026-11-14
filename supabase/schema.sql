@@ -158,3 +158,26 @@ create policy "delete own key" on public.editor_keys for delete to authenticated
   using (user_id = (select auth.uid()));
 
 grant select, insert, update, delete on public.editor_keys to authenticated;
+
+-- ---------------------------------------------------------------- profile pictures
+-- Google hands over a picture with the sign-in. Storing it lets the editor see who sent
+-- a deck in, not just the account id.
+alter table public.profiles add column if not exists avatar text;
+
+create or replace function public.handle_new_user()
+returns trigger language plpgsql security definer set search_path = '' as $$
+begin
+  insert into public.profiles (id, name, email, avatar)
+  values (
+    new.id,
+    coalesce(
+      new.raw_user_meta_data ->> 'full_name',
+      new.raw_user_meta_data ->> 'name',
+      split_part(coalesce(new.email, ''), '@', 1)
+    ),
+    new.email,
+    coalesce(new.raw_user_meta_data ->> 'avatar_url', new.raw_user_meta_data ->> 'picture')
+  )
+  on conflict (id) do nothing;
+  return new;
+end; $$;
