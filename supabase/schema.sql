@@ -45,10 +45,17 @@ returns boolean language sql stable security definer set search_path = '' as $$
 $$;
 
 -- Nobody can make themselves the teacher. Flip is_editor in the Supabase table editor.
+-- The guard only applies to requests arriving as a signed-in user. In the dashboard
+-- (and anywhere else running as a privileged role) auth.uid() is null, so the flag can
+-- still be set there — which is the only place it is supposed to be set. Anonymous API
+-- callers cannot reach this at all: the update policy below is limited to authenticated
+-- users editing their own row.
 create or replace function public.lock_editor_flag()
 returns trigger language plpgsql security definer set search_path = '' as $$
 begin
-  if new.is_editor is distinct from old.is_editor and not public.is_editor() then
+  if new.is_editor is distinct from old.is_editor
+     and (select auth.uid()) is not null
+     and not public.is_editor() then
     raise exception 'is_editor can only be changed by an editor';
   end if;
   return new;
