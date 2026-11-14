@@ -969,13 +969,32 @@ function ghError(res){
   if(res.status === 409 || res.status === 422) return "The file changed on GitHub while you were editing. Reload the page, then redo this change.";
   return "GitHub returned " + res.status + ". Try again in a moment.";
 }
-function setToken(t){
+/* The publishing token, kept against the teacher's own account so it follows them to
+   any device they sign into. The row is readable only by its owner — not by students,
+   not by another teacher. Still falls back to this browser alone when signed out. */
+function pullKey(){
+  if(!sb || !S.user || !isEditor()) return Promise.resolve(null);
+  return sb.from("editor_keys").select("gh_token").eq("user_id", S.user.id).maybeSingle()
+    .then(function(r){
+      var t = r.data && r.data.gh_token;
+      if(t && t !== S.token){ setToken(t, true); toast("Publishing key loaded from your account"); render(); }
+      return t || null;
+    }).catch(function(){ return null; });
+}
+function pushKey(t){
+  if(!sb || !S.user || !isEditor()) return;
+  if(t) sb.from("editor_keys").upsert({user_id:S.user.id, gh_token:t, updated_at:new Date().toISOString()},
+                                      {onConflict:"user_id"}).then(function(){}, function(){});
+  else sb.from("editor_keys").delete().eq("user_id", S.user.id).then(function(){}, function(){});
+}
+function setToken(t, fromCloud){
   S.token = t || null;
   try{
     if(t){ localStorage.setItem(TOKEN_KEY, t); localStorage.setItem(TOKEN_AT, new Date().toISOString().slice(0,10)); }
     else { localStorage.removeItem(TOKEN_KEY); localStorage.removeItem(TOKEN_AT); }
   }catch(e){}
   if(t) keepStorage();
+  if(!fromCloud) pushKey(t || null);
   refreshFoot();
 }
 /* Browsers clear "script-written" storage on their own when a site looks idle — Safari
@@ -2973,6 +2992,7 @@ function loadProfile(){
       S.profile = r.data || null;
       // A teacher account is checked by the database, so it replaces the ADMIN password.
       if(isEditor() && !S.canEdit){ S.canEdit = true; autoArchive(); }
+      if(isEditor()) pullKey();
       refreshFoot(); renderRail(); render();
       return S.profile;
     })
@@ -3264,9 +3284,16 @@ function renderConnect(){
       el("h3",{text:"Connected"}),
       el("p",{text:"This browser can publish to " + GH_OWNER + "/" + GH_REPO + ". The token is stored here and nowhere else — it isn't in the site's code and never goes to anyone but GitHub."}),
       tokenAge() ? el("p",{class:"saveflag",style:"margin:-6px 0 12px",text:"Saved in this browser on " + tokenAge() + "."}) : null,
+      (S.user && isEditor())
+        ? el("p",{style:"margin:-4px 0 14px;font-size:13px;color:var(--good)",text:"Kept with your account too — sign in on any computer and it's already here. Nobody else can read it."})
+        : el("p",{class:"saveflag",style:"margin:-4px 0 14px",text:"Sign in as the teacher and this is kept with your account, so you won't have to paste it again."}),
       el("div",{class:"rowctl",style:"justify-content:flex-start"},[
         el("button",{class:"btn",id:"checktok",onclick:checkToken},["Check it still works"]),
-        el("button",{class:"btn",onclick:function(){ setToken(null); toast("Token removed from this browser"); render(); }},["Disconnect"]),
+        el("button",{class:"btn",onclick:function(){
+          var alsoCloud = S.user && isEditor();
+          if(alsoCloud && !confirm("Forget the publishing key everywhere, including your account on other computers?")) return;
+          setToken(null); toast(alsoCloud ? "Key forgotten everywhere" : "Token removed from this browser"); render();
+        }},["Disconnect"]),
         el("button",{class:"btn ghost",onclick:downloadJSON},[icon(I.upload,15),"Download decks.json instead"])
       ]),
       el("p",{class:"err",id:"tokcheck",hidden:"hidden",style:"margin:14px 0 0"})
@@ -3328,7 +3355,9 @@ function renderConnect(){
       el("button",{class:"btn primary",type:"submit"},["Connect"]),
       el("button",{class:"btn ghost",type:"button",onclick:downloadJSON},[icon(I.upload,15),"Download decks.json instead"])
     ]),
-    el("p",{class:"saveflag",style:"margin:14px 0 0",text:"Say yes when your browser offers to save it — then next time it fills itself in, and it follows you to your other devices."})
+    el("p",{class:"saveflag",style:"margin:14px 0 0",text: (S.user && isEditor())
+      ? "Signed in as the teacher, so this is saved to your account — paste it once and never again, on any computer."
+      : "Say yes when your browser offers to save it — then next time it fills itself in, and it follows you to your other devices."})
   ]));
 
   userIn.id = "ghuser"; tokIn.id = "ghtok";

@@ -128,3 +128,33 @@ grant usage on schema public to anon, authenticated;
 grant select, insert, update on public.profiles    to authenticated;
 grant select, insert, update, delete on public.progress    to authenticated;
 grant select, insert, update on public.submissions to authenticated;
+
+-- ---------------------------------------------------------------- publishing key
+-- The GitHub token that lets the teacher publish decks.json, kept against their own
+-- account so it follows them to any device instead of living in one browser.
+-- Readable only by the person it belongs to: there is deliberately no editor policy
+-- here, so not even another teacher can read someone else's key.
+create table if not exists public.editor_keys (
+  user_id    uuid primary key references auth.users on delete cascade,
+  gh_token   text not null,
+  updated_at timestamptz not null default now()
+);
+
+alter table public.editor_keys enable row level security;
+
+drop policy if exists "read own key"   on public.editor_keys;
+drop policy if exists "save own key"   on public.editor_keys;
+drop policy if exists "update own key" on public.editor_keys;
+drop policy if exists "delete own key" on public.editor_keys;
+
+create policy "read own key"   on public.editor_keys for select to authenticated
+  using (user_id = (select auth.uid()));
+create policy "save own key"   on public.editor_keys for insert to authenticated
+  with check (user_id = (select auth.uid()) and public.is_editor());
+create policy "update own key" on public.editor_keys for update to authenticated
+  using (user_id = (select auth.uid()) and public.is_editor())
+  with check (user_id = (select auth.uid()));
+create policy "delete own key" on public.editor_keys for delete to authenticated
+  using (user_id = (select auth.uid()));
+
+grant select, insert, update, delete on public.editor_keys to authenticated;

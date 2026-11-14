@@ -65,9 +65,15 @@ needed when signed in. That check is made by the database rather than by JavaScr
 anyone can read, which makes it the first real lock the app has had. The password stays
 as a fallback for editing without signing in.
 
-**Publishing still needs the GitHub token.** The decks live in `decks.json` in this repo,
-and only a GitHub credential can write there — being a teacher in Supabase grants nothing
-on GitHub.
+**Publishing still needs the GitHub token** — the decks live in `decks.json` in this repo,
+and only a GitHub credential can write there; being a teacher in Supabase grants nothing
+on GitHub. But you only paste it once: signed in as the teacher, the key is kept against
+your account in `editor_keys` and comes back on any computer you sign into. That row is
+readable only by the person it belongs to — there is deliberately no editor policy on it,
+so not even another teacher could read someone else's. Disconnect forgets it everywhere.
+
+Signed out, it falls back to the old behaviour: the browser alone, plus whatever your
+password manager saved.
 
 Setting it up from scratch: run `supabase/schema.sql` in the SQL editor, set your own
 row's `is_editor` to true under **profiles**, then add the site URL under
