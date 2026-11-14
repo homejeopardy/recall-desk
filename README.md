@@ -40,8 +40,8 @@ mid-round loses nothing. The deck page's **Mastered** count is Learn's.
 
 ## Accounts
 
-Signing in is optional — without it the app behaves exactly as it always has, saving
-scores to the browser. With it:
+Sign-in is **Continue with Google**, and it's optional — without it the app behaves as
+it always has, keeping scores in the browser. With it:
 
 - **Scores follow the student**, not the browser. Progress is merged field by field
   (the larger of each count, the higher Learn rung), so studying on a phone and then a
@@ -59,6 +59,15 @@ actually protects the data is row level security, set up by `supabase/schema.sql
   is the only one who can change their status.
 - `is_editor` cannot be set from the app. A trigger blocks it — flip it in the Supabase
   table editor.
+
+A teacher account **unlocks the card editor on its own**, so the ADMIN password isn't
+needed when signed in. That check is made by the database rather than by JavaScript
+anyone can read, which makes it the first real lock the app has had. The password stays
+as a fallback for editing without signing in.
+
+**Publishing still needs the GitHub token.** The decks live in `decks.json` in this repo,
+and only a GitHub credential can write there — being a teacher in Supabase grants nothing
+on GitHub.
 
 Setting it up from scratch: run `supabase/schema.sql` in the SQL editor, set your own
 row's `is_editor` to true under **profiles**, then add the site URL under

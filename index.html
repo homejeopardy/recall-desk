@@ -538,7 +538,7 @@ input.text:focus{border-color:var(--ink);outline:none}
 
 <div class="app">
   <aside class="rail" id="rail">
-    <div class="brand"><h1>Quizlet<em>ish</em></h1><span class="tag">v1</span></div>
+    <div class="brand"><h1>Quizlet<em>ish</em></h1><span class="tag">v2</span></div>
     <div class="rail-head"><span class="eyebrow">Decks</span><span class="railbar"><span id="newdeckslot"></span><span id="railctl"></span></span></div>
     <ul class="decks" id="decks"></ul>
     <div id="soonslot"></div>
@@ -878,7 +878,7 @@ function setSync(state, msg){
 function whoLine(){
   if(S.canEdit) return "Editing as ADMIN" + (S.token ? " · can publish" : " · publishing not set up");
   if(S.user) return "Signed in as " + whoName(S.user) + (isEditor() ? " · teacher" : "");
-  return S.who ? "Studying as " + S.who + " · this browser only" : "Not signed in — scores won't be kept";
+  return S.who ? "Studying as " + S.who + " · this browser only" : "Not signed in · scores stay on this device";
 }
 function refreshFoot(){ setSync(S.canEdit ? "edit" : !!S.who, whoLine()); }
 
@@ -2969,7 +2969,13 @@ function setUser(u){
 function loadProfile(){
   if(!sb || !S.user) return Promise.resolve(null);
   return sb.from("profiles").select("id,name,email,is_editor").eq("id", S.user.id).maybeSingle()
-    .then(function(r){ S.profile = r.data || null; refreshFoot(); return S.profile; })
+    .then(function(r){
+      S.profile = r.data || null;
+      // A teacher account is checked by the database, so it replaces the ADMIN password.
+      if(isEditor() && !S.canEdit){ S.canEdit = true; autoArchive(); }
+      refreshFoot(); renderRail(); render();
+      return S.profile;
+    })
     .catch(function(){ return null; });
 }
 /* ---- progress that follows the student between devices ----
@@ -3121,26 +3127,18 @@ function signInAs(name){
   refreshFoot(); renderRail();
 }
 function renderWho(){
-  var errBox, nameIn, userIn, passIn;
+  var errBox, userIn, passIn;
   function fail(msg){ errBox.textContent = msg; errBox.hidden = false; }
 
   stage.appendChild(el("div",{class:"stage-head"},[
     el("div",{},[
-      el("h2",{text: S.who ? "Signed in as " + S.who : "Who's studying?"}),
-      el("div",{class:"sub",text:"Your scores are filed under this name, in this browser only — nothing is sent anywhere."})
+      el("h2",{text: S.user ? "Signed in as " + whoName(S.user) : "Sign in"}),
+      el("div",{class:"sub",text: S.user ? "Your scores are saved to your account." : "Without an account your scores still work — they just stay in this browser."})
     ]),
     S.decks.length ? el("button",{class:"btn ghost",onclick:function(){ go("home"); }},[icon(I.back,15),"Decks"]) : null
   ]));
 
   var wrap = el("div",{class:"signin"});
-
-  nameIn = el("input",{class:"text",type:"text",id:"whoname",placeholder:"e.g. Jordan",value:S.who || "",autocomplete:"off"});
-  nameIn.addEventListener("keydown", function(ev){ if(ev.key === "Enter"){ ev.preventDefault(); start(); } });
-  function start(){
-    var n = nameIn.value.trim();
-    if(!n) return fail("Pick a name so your scores have somewhere to go.");
-    signInAs(n); toast("Studying as " + n); go("home");
-  }
 
   // ---- account panel (only when the sign-in layer is reachable) ----
   if(S.user){
@@ -3156,7 +3154,7 @@ function renderWho(){
       el("div",{class:"rowctl",style:"justify-content:flex-start"},[
         el("button",{class:"btn",onclick:function(){ go("subs"); }},[icon(I.cards,15), isEditor() ? "Submitted decks" : "What I've sent in"]),
         el("button",{class:"btn ghost",onclick:function(){
-          if(sb) sb.auth.signOut().then(function(){ setUser(null); toast("Signed out"); });
+          if(sb) sb.auth.signOut().then(function(){ S.canEdit = false; S.profile = null; setUser(null); toast("Signed out"); });
         }},["Sign out"])
       ])
     ]));
@@ -3164,7 +3162,7 @@ function renderWho(){
   } else if(S.providers){
     var acct = el("div",{class:"panel"},[
       el("h3",{text:"Sign in"}),
-      el("p",{text:"An account keeps your scores with you instead of with this browser, and lets you send decks you've made to your teacher."})
+      el("p",{text:"Sign in and your scores follow you to any device instead of living in one browser — and you can send decks you've made to your teacher."})
     ]);
     if(S.providers.google){
       acct.appendChild(el("button",{class:"gbtn",onclick:function(){
@@ -3187,36 +3185,12 @@ function renderWho(){
         "Continue with Google"
       ]));
     }
-    if(S.providers.email){
-      var mailIn = el("input",{class:"text",type:"email",placeholder:"you@blackpinecircle.org",autocomplete:"email","aria-label":"Email"});
-      acct.appendChild(el("div",{class:"field",style:"margin-top:14px"},[
-        el("label",{text: S.providers.google ? "Or get a link by email" : "Get a sign-in link by email"}), mailIn ]));
-      acct.appendChild(el("button",{class:"btn",onclick:function(){
-        var addr = mailIn.value.trim();
-        if(!/.+@.+\..+/.test(addr)) return toast("That doesn't look like an email address");
-        sbLoad().then(function(c){
-          return c.auth.signInWithOtp({email: addr, options:{emailRedirectTo: location.origin + location.pathname}});
-        }).then(function(r){
-          toast(r && r.error ? (r.error.message || "Couldn't send the link") : "Check your email for the link");
-        }).catch(function(){ toast("Couldn't reach the sign-in service"); });
-      }},["Email me a link"]));
-    }
-    if(!S.providers.google && !S.providers.email){
-      acct.appendChild(el("p",{class:"saveflag",text:"No sign-in method is switched on for this project yet."}));
+    if(!S.providers.google){
+      acct.appendChild(el("p",{class:"saveflag",text:"Google sign-in isn't switched on for this project yet."}));
     }
     wrap.appendChild(acct);
     wrap.appendChild(el("div",{class:"hr",text:"or"}));
   }
-
-  var studentPanel = el("div",{class:"panel"},[
-    el("h3",{text:"Study on this device"}),
-    el("p",{text:"Type a name and your progress, stars, and best times are kept for you. Two people sharing a laptop just use different names."}),
-    el("div",{class:"field"},[ el("label",{for:"whoname",text:"Your name"}), nameIn ]),
-    el("div",{class:"rowctl",style:"justify-content:flex-start"},[
-      el("button",{class:"btn primary",onclick:start},[icon(I.user,15),"Start studying"]),
-      S.who ? el("button",{class:"btn ghost",onclick:function(){ signInAs(null); toast("Signed out"); render(); }},["Sign out"]) : null
-    ])
-  ]);
 
   userIn = el("input",{class:"text",type:"text",placeholder:"Username",autocomplete:"username"});
   passIn = el("input",{class:"text",type:"password",placeholder:"Password",autocomplete:"current-password"});
@@ -3247,12 +3221,9 @@ function renderWho(){
 
   errBox = el("p",{class:"err",hidden:"hidden"});
 
-  wrap.appendChild(studentPanel);
-  wrap.appendChild(el("div",{class:"hr",text:"or"}));
   wrap.appendChild(editorPanel);
   wrap.appendChild(errBox);
   stage.appendChild(wrap);
-  setTimeout(function(){ (S.canEdit ? nameIn : nameIn).focus(); }, 0);
 }
 
 /* ============================ connect to GitHub ============================ */
@@ -3523,7 +3494,7 @@ fetch("decks.json", {cache:"no-store"})
     S.ready = true;
     if(!S.deckId && S.decks.length) S.deckId = S.decks[0].id;
     refreshFoot(); renderRail();
-    if(!S.who && S.decks.length) go("who"); else render();
+    render();
   })
   .catch(function(err){
     S.ready = true; S.loadError = err;
