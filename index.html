@@ -480,6 +480,23 @@ input.text:focus{border-color:var(--ink);outline:none}
 .review .a{font-family:var(--read);font-size:15px;color:var(--ink-soft)}
 .review .a b{color:var(--bad);font-weight:600}
 
+/* ---- accounts ---- */
+.acct{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.avatar{width:30px;height:30px;border-radius:50%;background:var(--accent-wash);display:grid;place-items:center;font-weight:600;font-size:13px;color:var(--ink);flex:none;border:1px solid var(--rule)}
+.gbtn{display:inline-flex;align-items:center;gap:9px;padding:10px 18px;border:1px solid var(--rule);border-radius:var(--r);background:var(--surface);font-weight:500;font-size:14.5px}
+.gbtn:hover{border-color:var(--ink);background:var(--surface-2)}
+.gbtn svg{flex:none}
+.cloud{font-family:var(--mono);font-size:10.5px;letter-spacing:.05em;color:var(--ink-faint)}
+.sublist{border:1px solid var(--rule);border-radius:var(--r-lg);overflow:hidden;background:var(--surface)}
+.subrow{display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center;padding:14px 18px;border-bottom:1px solid var(--rule-soft)}
+.subrow:last-child{border-bottom:0}
+.subrow .t{font-family:var(--read);font-size:18px;font-weight:600}
+.subrow .m{font-size:12.5px;color:var(--ink-soft);margin-top:2px}
+.subrow .note{font-family:var(--read);font-size:14px;color:var(--ink-soft);margin-top:5px;padding-left:10px;border-left:2px solid var(--rule)}
+.stat-pill{font-family:var(--mono);font-size:10px;letter-spacing:.07em;text-transform:uppercase;border:1px solid var(--rule);border-radius:99px;padding:2px 9px;color:var(--ink-soft)}
+.stat-pill.approved{border-color:var(--good);color:var(--good)}
+.stat-pill.declined{border-color:var(--bad);color:var(--bad)}
+
 .railtoggle{display:none}
 @media (max-width:860px){
   .app{grid-template-columns:1fr}
@@ -682,7 +699,7 @@ function cellsOf(d){
 var S = {
   canEdit:false, ready:false, who:null, published:null, draft:false, token:null, busy:false, incoming:null,
   decks:[], deckId:null, view:"home",
-  folders:[], folderId:null, open:{}, learn:{}, railShut:false, calMonth:null,
+  folders:[], folderId:null, open:{}, learn:{}, railShut:false, calMonth:null, user:null, profile:null, providers:null,
   dir:"t2d",        // t2d = term -> definition, d2t = definition -> term
   filter:"all",     // all | starred | missed
   shuffle:true,
@@ -708,6 +725,7 @@ function loadLocal(){
   S.learn = ls(LKEY(), {});
 }
 function saveLocal(){
+  if(S.deckId) queueSync(S.deckId);
   try{
     localStorage.setItem(PKEY(), JSON.stringify(S.progress));
     localStorage.setItem(BKEY(), JSON.stringify(S.bests));
@@ -859,7 +877,8 @@ function setSync(state, msg){
 }
 function whoLine(){
   if(S.canEdit) return "Editing as ADMIN" + (S.token ? " · can publish" : " · publishing not set up");
-  return S.who ? "Studying as " + S.who : "Not signed in — scores won't be kept";
+  if(S.user) return "Signed in as " + whoName(S.user) + (isEditor() ? " · teacher" : "");
+  return S.who ? "Studying as " + S.who + " · this browser only" : "Not signed in — scores won't be kept";
 }
 function refreshFoot(){ setSync(S.canEdit ? "edit" : !!S.who, whoLine()); }
 
@@ -1169,6 +1188,7 @@ function render(){
   if(S.view === "connect") return renderConnect();
   if(S.view === "cal" && S.ready && !S.loadError) return renderCal();
   if(S.view === "print" && S.ready && !S.loadError) return renderPrint();
+  if(S.view === "subs") return renderSubs();
   if(S.loadError){
     stage.appendChild(el("div",{class:"empty"},[
       el("h3",{text:"Couldn't load the decks"}),
@@ -1188,6 +1208,7 @@ function render(){
   if(v === "print") return renderPrint();
   if(v === "test-setup") return renderTestSetup();
   if(v === "test") return renderTest();
+  if(v === "subs") return renderSubs();
   if(v === "table") return renderTable();
   if(v === "flash") return renderFlash();
   if(v === "quiz") return renderQuiz();
@@ -1242,6 +1263,7 @@ function renderHome(){
     ]),
     el("div",{class:"rowctl"},[
       S.canEdit ? el("button",{class:"btn",onclick:function(){ go("edit"); }},[icon(I.edit,15),"Edit cards"]) : el("button",{class:"btn",onclick:function(){ go("edit"); }},[icon(I.cards,15),"Browse all cards"]),
+      isEditor() ? el("button",{class:"btn ghost",title:"Decks students sent in",onclick:function(){ go("subs"); }},[icon(I.cards,15),"Submitted"]) : null,
       el("button",{class:"btn ghost",title:"Print this deck",onclick:function(){ S.printFolder = null; go("print"); }},[icon(I.print,15),"Print"]),
       el("button",{class:"btn ghost railtoggle",onclick:function(){ var r = $("rail"); r.hidden = !r.hidden; }},["Decks"])
     ])
@@ -2426,6 +2448,7 @@ function renderEdit(){
     bar.appendChild(el("button",{class:"btn",onclick:function(){ var p = $("pastepanel"); p.hidden = !p.hidden; if(!p.hidden) $("pastebox").focus(); }},["Paste a list"]));
   }
   bar.appendChild(el("button",{class:"btn ghost",onclick:function(){ copyDeck(d); }},[icon(I.copy,15),"Copy as text"]));
+  if(S.user && !isEditor()) bar.appendChild(el("button",{class:"btn ghost",onclick:function(){ sendIn(d); }},[icon(I.upload,15),"Send to the teacher"]));
   if(!ro) bar.appendChild(el("button",{class:"btn ghost",onclick:function(){ go("connect"); }},[icon(I.upload,15), S.token ? "Publishing" : "Set up publishing"]));
   if(!ro){
     bar.appendChild(el("div",{style:"flex:1"}));
@@ -2766,6 +2789,15 @@ function removeDeck(d){
   S.deckId = S.decks.length ? S.decks[0].id : null; S.view = "home";
   renderRail(); render();
 }
+function sendIn(d){
+  var n = cardsOf(d).length;
+  if(!n) return toast("Add some cards first");
+  var note = prompt("Send \u201c" + (d.name || "Untitled deck") + "\u201d (" + n + (n === 1 ? " card" : " cards") + ") to your teacher?\n\nAnything you want to say about it:", "");
+  if(note === null) return;
+  submitDeck(d, note).then(function(r){
+    toast(r && r.error ? (r.error.message || "Couldn't send it") : "Sent — your teacher will see it");
+  }).catch(function(e){ toast(String(e && e.message || e)); });
+}
 function copyDeck(d){
   var kind = kindOf(d);
   var txt = cardsOf(d).map(function(c){
@@ -2889,6 +2921,188 @@ function pastePanel(d){
   return panel;
 }
 
+/* ============================ accounts (Supabase) ============================
+   The publishable key is meant to be public; every table is guarded by row level
+   security, so a student's browser can reach their own progress and nothing else.
+   The whole layer is optional: if the script or the project can't be reached the app
+   carries on exactly as it did before, saving to this browser only. */
+var SB_URL = "https://avjoqzclbohpzuftietn.supabase.co";
+var SB_KEY = "sb_publishable_dZ_Bqnh6wY14a6WOKsfDeg_uv5ouAzo";
+var SB_LIB = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.10/dist/umd/supabase.js";
+var sb = null, sbTried = false, syncTimer = null, pendingDecks = {};
+
+function sbLoad(){
+  if(sb) return Promise.resolve(sb);
+  if(sbTried) return Promise.reject(new Error("no client"));
+  return new Promise(function(resolve, reject){
+    var tag = document.createElement("script");
+    tag.src = SB_LIB;
+    tag.onload = function(){
+      sbTried = true;
+      try{
+        sb = window.supabase.createClient(SB_URL, SB_KEY, {auth:{persistSession:true, autoRefreshToken:true, detectSessionInUrl:true}});
+        resolve(sb);
+      }catch(e){ reject(e); }
+    };
+    tag.onerror = function(){ sbTried = true; reject(new Error("couldn't load the sign-in library")); };
+    document.head.appendChild(tag);
+  });
+}
+function whoName(u){
+  if(!u) return "";
+  var m = u.user_metadata || {};
+  return m.full_name || m.name || (u.email || "").split("@")[0] || "Signed in";
+}
+function initials(n){
+  var parts = String(n || "?").trim().split(/\s+/);
+  return ((parts[0] || "?")[0] + (parts.length > 1 ? parts[parts.length-1][0] : "")).toUpperCase();
+}
+function setUser(u){
+  S.user = u || null;
+  S.profile = S.profile && u ? S.profile : null;
+  if(u){
+    signInAs(whoName(u));                 // scores file under the account's name
+    loadProfile().then(pullProgress);
+  }
+  refreshFoot(); renderRail(); render();
+}
+function loadProfile(){
+  if(!sb || !S.user) return Promise.resolve(null);
+  return sb.from("profiles").select("id,name,email,is_editor").eq("id", S.user.id).maybeSingle()
+    .then(function(r){ S.profile = r.data || null; refreshFoot(); return S.profile; })
+    .catch(function(){ return null; });
+}
+/* ---- progress that follows the student between devices ----
+   Merged field by field, taking the larger of each count and the higher Learn rung, so
+   studying on a phone and then a laptop adds up instead of one overwriting the other. */
+function mergeCard(a, b){
+  a = a || {}; b = b || {};
+  return {
+    seen: Math.max(a.seen||0, b.seen||0), right: Math.max(a.right||0, b.right||0),
+    wrong: Math.max(a.wrong||0, b.wrong||0), star: !!(a.star || b.star),
+    last: (b.last || a.last) || null
+  };
+}
+function pullProgress(){
+  if(!sb || !S.user) return Promise.resolve();
+  return sb.from("progress").select("deck_id,payload").then(function(r){
+    if(r.error || !r.data) return;
+    r.data.forEach(function(row){
+      var pay = row.payload || {}, id = row.deck_id;
+      var mine = S.progress[id] || (S.progress[id] = {});
+      Object.keys(pay.progress || {}).forEach(function(cid){ mine[cid] = mergeCard(mine[cid], pay.progress[cid]); });
+      var l = S.learn[id] || (S.learn[id] = {});
+      Object.keys(pay.learn || {}).forEach(function(cid){ l[cid] = Math.max(l[cid] || 0, pay.learn[cid] || 0); });
+      if(pay.bests){
+        var bb = S.bests[id] || (S.bests[id] = {});
+        Object.keys(pay.bests).forEach(function(k){ bb[k] = bb[k] ? Math.min(bb[k], pay.bests[k]) : pay.bests[k]; });
+      }
+      pendingDecks[id] = true;            // push the merged version straight back
+    });
+    saveLocal(); queueSync(); render();
+  }).catch(function(){});
+}
+function queueSync(deckId){
+  if(deckId) pendingDecks[deckId] = true;
+  if(!sb || !S.user) return;
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(pushProgress, 1500);
+}
+function pushProgress(){
+  if(!sb || !S.user) return;
+  var ids = Object.keys(pendingDecks);
+  if(!ids.length) return;
+  pendingDecks = {};
+  var rows = ids.map(function(id){
+    return {user_id: S.user.id, deck_id: id, updated_at: new Date().toISOString(),
+      payload: {progress: S.progress[id] || {}, learn: S.learn[id] || {}, bests: S.bests[id] || {}}};
+  });
+  sb.from("progress").upsert(rows, {onConflict:"user_id,deck_id"}).then(function(r){
+    if(r.error) ids.forEach(function(id){ pendingDecks[id] = true; });   // try again next time
+  }).catch(function(){ ids.forEach(function(id){ pendingDecks[id] = true; }); });
+}
+
+/* ---- submissions ---- */
+function submitDeck(d, note){
+  if(!sb || !S.user) return Promise.reject(new Error("Sign in first"));
+  var payload = {
+    name: d.name || "Untitled deck", subject: d.subject || "", kind: kindOf(d) === "cards" ? undefined : d.kind,
+    tense: d.tense || undefined, persons: kindOf(d) === "conj" ? personsOf(d) : undefined,
+    cards: cardsOf(d).map(function(c){
+      var o = {id:c.id, term:c.term||"", def:c.def||""};
+      if(c.pos) o.pos = c.pos;
+      if(hasForms(c)) o.forms = c.forms;
+      return o;
+    })
+  };
+  return sb.from("submissions").insert({user_id:S.user.id, deck_name:payload.name, note:note||null, payload:payload});
+}
+function loadSubs(){
+  if(!sb || !S.user) return Promise.resolve([]);
+  return sb.from("submissions").select("id,deck_name,note,payload,status,created_at,user_id")
+    .order("created_at",{ascending:false}).then(function(r){ return r.data || []; }).catch(function(){ return []; });
+}
+function renderSubs(){
+  stage.appendChild(el("div",{class:"stage-head"},[
+    el("div",{},[ el("h2",{text:"Submitted decks"}),
+      el("div",{class:"sub",text: isEditor() ? "Decks students sent in. Approving adds one to your decks, ready to publish." : "Decks you've sent in."}) ]),
+    el("button",{class:"btn ghost",onclick:function(){ go("home"); }},[icon(I.back,15),"Deck"])
+  ]));
+  var box = el("div",{id:"subbox"},[ el("div",{class:"empty"},[el("h3",{text:"Loading…"})]) ]);
+  stage.appendChild(box);
+  loadSubs().then(function(list){
+    box.textContent = "";
+    if(!list.length){
+      box.appendChild(el("div",{class:"empty"},[
+        el("h3",{text:"Nothing here yet"}),
+        el("p",{text: isEditor() ? "When a student sends a deck in, it lands here." : "Build a deck, then use Send to the teacher in its editor."})
+      ]));
+      return;
+    }
+    var listEl = el("div",{class:"sublist"});
+    list.forEach(function(r){
+      var n = (r.payload && r.payload.cards || []).length;
+      listEl.appendChild(el("div",{class:"subrow"},[
+        el("div",{},[
+          el("div",{class:"t",text:r.deck_name}),
+          el("div",{class:"m",text:n + (n === 1 ? " card · " : " cards · ") + String(r.created_at || "").slice(0,10)}),
+          r.note ? el("div",{class:"note",text:r.note}) : null
+        ]),
+        el("div",{class:"rowctl"},[
+          el("span",{class:"stat-pill " + r.status,text:r.status}),
+          (isEditor() && r.status === "pending") ? el("button",{class:"btn primary sm",onclick:function(){ approveSub(r); }},["Approve"]) : null,
+          (isEditor() && r.status === "pending") ? el("button",{class:"btn sm",onclick:function(){ judgeSub(r,"declined"); }},["Decline"]) : null
+        ])
+      ]));
+    });
+    box.appendChild(listEl);
+  });
+}
+function judgeSub(r, status){
+  if(!sb) return;
+  sb.from("submissions").update({status:status, reviewed_at:new Date().toISOString()}).eq("id", r.id)
+    .then(function(){ toast("Marked " + status); render(); });
+}
+function approveSub(r){
+  var pay = r.payload || {};
+  var d = {
+    id: uid("d"), name: pay.name || r.deck_name || "Untitled deck", subject: pay.subject || "",
+    folder: "", createdAt: Date.now(), kind: pay.kind, tense: pay.tense, persons: pay.persons,
+    cards: (pay.cards || []).map(function(c){
+      var o = {id: uid(), term: c.term || "", def: c.def || ""};
+      if(c.pos) o.pos = c.pos;
+      if(c.forms) o.forms = c.forms;
+      return o;
+    })
+  };
+  S.decks.push(d); S.deckId = d.id;
+  saveDraft(); renderRail();
+  judgeSub(r, "approved");
+  toast("Added — publish when you're ready");
+  go("edit");
+}
+function isEditor(){ return !!(S.profile && S.profile.is_editor); }
+
 /* ============================ sign in ============================ */
 var ADMIN_USER = "ADMIN";
 var ADMIN_SALT = "recalldesk.v1.";
@@ -2926,6 +3140,72 @@ function renderWho(){
     var n = nameIn.value.trim();
     if(!n) return fail("Pick a name so your scores have somewhere to go.");
     signInAs(n); toast("Studying as " + n); go("home");
+  }
+
+  // ---- account panel (only when the sign-in layer is reachable) ----
+  if(S.user){
+    wrap.appendChild(el("div",{class:"panel"},[
+      el("div",{class:"acct"},[
+        el("span",{class:"avatar",text:initials(whoName(S.user))}),
+        el("div",{style:"flex:1;min-width:0"},[
+          el("h3",{text:whoName(S.user)}),
+          el("p",{style:"margin:2px 0 0",text:(S.user.email || "") + (isEditor() ? " · teacher account" : "")})
+        ])
+      ]),
+      el("p",{style:"margin-top:12px",text:"Your scores are saved to your account, so they follow you to any device you sign in on."}),
+      el("div",{class:"rowctl",style:"justify-content:flex-start"},[
+        el("button",{class:"btn",onclick:function(){ go("subs"); }},[icon(I.cards,15), isEditor() ? "Submitted decks" : "What I've sent in"]),
+        el("button",{class:"btn ghost",onclick:function(){
+          if(sb) sb.auth.signOut().then(function(){ setUser(null); toast("Signed out"); });
+        }},["Sign out"])
+      ])
+    ]));
+    wrap.appendChild(el("div",{class:"hr",text:"or"}));
+  } else if(S.providers){
+    var acct = el("div",{class:"panel"},[
+      el("h3",{text:"Sign in"}),
+      el("p",{text:"An account keeps your scores with you instead of with this browser, and lets you send decks you've made to your teacher."})
+    ]);
+    if(S.providers.google){
+      acct.appendChild(el("button",{class:"gbtn",onclick:function(){
+        sbLoad().then(function(c){ c.auth.signInWithOAuth({provider:"google", options:{redirectTo: location.origin + location.pathname}}); })
+          .catch(function(){ toast("Couldn't reach the sign-in service"); });
+      }},[
+        (function(){
+          var g = document.createElementNS("http://www.w3.org/2000/svg","svg");
+          g.setAttribute("viewBox","0 0 48 48"); g.setAttribute("width","17"); g.setAttribute("height","17");
+          [["#EA4335","M24 9.5c3.5 0 6.6 1.2 9 3.6l6.7-6.7C35.5 2.6 30.1 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.8 6.1C12.3 13.2 17.7 9.5 24 9.5z"],
+           ["#4285F4","M46.1 24.6c0-1.6-.1-3.2-.4-4.6H24v9.1h12.4c-.5 2.9-2.2 5.3-4.6 6.9l7.1 5.5c4.2-3.8 6.6-9.5 6.6-16.1z"],
+           ["#FBBC05","M10.4 28.7c-.5-1.4-.8-2.9-.8-4.7s.3-3.3.8-4.7l-7.8-6.1C1 16.4 0 20.1 0 24s1 7.6 2.6 10.8l7.8-6.1z"],
+           ["#34A853","M24 48c6.1 0 11.3-2 15.1-5.5l-7.1-5.5c-2 1.4-4.6 2.2-8 2.2-6.3 0-11.7-3.7-13.6-9.3l-7.8 6.1C6.5 42.6 14.6 48 24 48z"]]
+            .forEach(function(d){
+              var pth = document.createElementNS("http://www.w3.org/2000/svg","path");
+              pth.setAttribute("fill", d[0]); pth.setAttribute("d", d[1]); g.appendChild(pth);
+            });
+          return g;
+        })(),
+        "Continue with Google"
+      ]));
+    }
+    if(S.providers.email){
+      var mailIn = el("input",{class:"text",type:"email",placeholder:"you@blackpinecircle.org",autocomplete:"email","aria-label":"Email"});
+      acct.appendChild(el("div",{class:"field",style:"margin-top:14px"},[
+        el("label",{text: S.providers.google ? "Or get a link by email" : "Get a sign-in link by email"}), mailIn ]));
+      acct.appendChild(el("button",{class:"btn",onclick:function(){
+        var addr = mailIn.value.trim();
+        if(!/.+@.+\..+/.test(addr)) return toast("That doesn't look like an email address");
+        sbLoad().then(function(c){
+          return c.auth.signInWithOtp({email: addr, options:{emailRedirectTo: location.origin + location.pathname}});
+        }).then(function(r){
+          toast(r && r.error ? (r.error.message || "Couldn't send the link") : "Check your email for the link");
+        }).catch(function(){ toast("Couldn't reach the sign-in service"); });
+      }},["Email me a link"]));
+    }
+    if(!S.providers.google && !S.providers.email){
+      acct.appendChild(el("p",{class:"saveflag",text:"No sign-in method is switched on for this project yet."}));
+    }
+    wrap.appendChild(acct);
+    wrap.appendChild(el("div",{class:"hr",text:"or"}));
   }
 
   var studentPanel = el("div",{class:"panel"},[
@@ -3146,6 +3426,30 @@ document.addEventListener("keydown", function(ev){
 try{ S.who = localStorage.getItem(WHO_KEY) || null; }catch(e){ S.who = null; }
 try{ S.token = localStorage.getItem(TOKEN_KEY) || null; }catch(e){ S.token = null; }
 if(S.token) keepStorage();
+
+/* Which sign-in methods the project has switched on, so no dead buttons are shown.
+   Everything below is best-effort: the app works unchanged if it all fails. */
+fetch(SB_URL + "/auth/v1/settings", {headers:{apikey: SB_KEY}})
+  .then(function(r){ return r.ok ? r.json() : null; })
+  .then(function(cfg){
+    if(!cfg) return;
+    S.providers = {google: !!(cfg.external && cfg.external.google), email: !!(cfg.external && cfg.external.email)};
+    var hasSession = /access_token=|[?&]code=/.test(location.hash + location.search);
+    var stored = false;
+    try{ stored = Object.keys(localStorage).some(function(k){ return k.indexOf("sb-") === 0 && k.indexOf("-auth-token") > -1; }); }catch(e){}
+    if(!hasSession && !stored) return render();
+    return sbLoad().then(function(c){
+      return c.auth.getSession().then(function(r){
+        if(r.data && r.data.session) setUser(r.data.session.user); else render();
+        c.auth.onAuthStateChange(function(ev, sess){
+          if(ev === "SIGNED_IN" && sess && (!S.user || S.user.id !== sess.user.id)) setUser(sess.user);
+          if(ev === "SIGNED_OUT") setUser(null);
+        });
+        if(location.hash.indexOf("access_token") > -1) history.replaceState(null, "", location.pathname);
+      });
+    });
+  })
+  .catch(function(){});
 S.open = ls(FOLD_KEY, {});
 try{ S.railShut = localStorage.getItem(RAIL_KEY) === "1"; }catch(e){ S.railShut = false; }
 setRail(S.railShut);

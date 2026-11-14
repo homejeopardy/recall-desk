@@ -38,6 +38,34 @@ start with a part of speech ("noun …") would mark a correct answer wrong.
 Learn progress is saved after every answer, per student name, in that browser — leaving
 mid-round loses nothing. The deck page's **Mastered** count is Learn's.
 
+## Accounts
+
+Signing in is optional — without it the app behaves exactly as it always has, saving
+scores to the browser. With it:
+
+- **Scores follow the student**, not the browser. Progress is merged field by field
+  (the larger of each count, the higher Learn rung), so studying on a phone and then a
+  laptop adds up instead of one overwriting the other.
+- **Students can send decks in.** A signed-in student builds a deck and uses **Send to
+  the teacher** in its editor. It lands under **Submitted**, where the teacher approves
+  it into their own decks — ready to publish like anything else — or declines it.
+
+The backend is Supabase (free tier). Its URL and **publishable** key are in `index.html`
+and are meant to be public; the secret key is not used anywhere and must never be. What
+actually protects the data is row level security, set up by `supabase/schema.sql`:
+
+- A student can read and write **only their own** progress. The teacher cannot read it.
+- A student can send submissions and see **their own**; the teacher sees all of them and
+  is the only one who can change their status.
+- `is_editor` cannot be set from the app. A trigger blocks it — flip it in the Supabase
+  table editor.
+
+Setting it up from scratch: run `supabase/schema.sql` in the SQL editor, set your own
+row's `is_editor` to true under **profiles**, then add the site URL under
+**Authentication → URL Configuration** or sign-in links will bounce. Google sign-in needs
+the Google provider switched on in Supabase; until it is, the app offers only the
+email-link option, and shows nothing at all if the project can't be reached.
+
 ## Quiz dates
 
 Give a deck a **Quiz** date in its editor and the rest follows:
