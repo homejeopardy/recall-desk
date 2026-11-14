@@ -61,9 +61,14 @@ actually protects the data is row level security, set up by `supabase/schema.sql
   table editor.
 
 An editor account **unlocks the card editor on its own**, so the ADMIN password isn't
-needed when signed in. That check is made by the database rather than by JavaScript
-anyone can read, which makes it the first real lock the app has had. The password stays
-as a fallback for editing without signing in.
+needed any more and its box is gone from the sign-in page. That check is made by the
+database rather than by JavaScript anyone can read, which makes it the first real lock
+the app has had.
+
+The password still works, as a way back in if the account route ever fails — the project
+being unreachable, or an account that hasn't been given the editor flag. Add `#editor`
+to the site's address and the box reappears. It shows on its own if the sign-in service
+can't be reached at all.
 
 **Publishing still needs the GitHub token** — the decks live in `decks.json` in this repo,
 and only a GitHub credential can write there; being an editor in Supabase grants nothing

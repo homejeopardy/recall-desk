@@ -3334,8 +3334,10 @@ function renderWho(){
   }
 
   var editorPanel = el("div",{class:"panel"},[
-    el("h3",{text:"Course editor"}),
-    el("p",{text:"Unlocks the card editor on this device. Changes stay here until you publish a new decks.json to the repo, so a student who got past this box still couldn't change anyone else's cards."}),
+    el("h3",{text: S.providers ? "Course editor (fallback)" : "Course editor"}),
+    el("p",{text: S.providers
+      ? "Normally you'd just sign in above — an editor account unlocks editing by itself. This password is only here as a way back in if that isn't working."
+      : "Unlocks the card editor on this device. Changes stay here until you publish a new decks.json to the repo, so a student who got past this box still couldn't change anyone else's cards."}),
     el("div",{class:"field"},[ el("label",{text:"Username"}), userIn ]),
     el("div",{class:"field"},[ el("label",{text:"Password"}), passIn ]),
     el("div",{class:"rowctl",style:"justify-content:flex-start"},[
@@ -3352,7 +3354,8 @@ function renderWho(){
     themePicker()
   ]));
 
-  wrap.appendChild(editorPanel);
+  var locked = /(^|[#&?])editor\b/.test(location.hash + location.search);
+  if(locked || !S.providers) wrap.appendChild(editorPanel);
   wrap.appendChild(errBox);
   stage.appendChild(wrap);
 }
