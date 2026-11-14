@@ -172,10 +172,34 @@ page. A conjugation deck prints one line per form.
 
 ## Themes
 
-Eight of them, on the **Sign in** page under *Look*: Auto (follows the computer), Paper,
-Blueprint, Pine, Rose, Ink, Dusk and Midnight. A theme only swaps the palette — nothing
-moves — and is remembered per device. It's applied before the page paints, so there's no
-flash of the wrong colour on load.
+Eight ready-made, on the **Sign in** page under *Look*: Auto (follows the computer),
+Paper, Blueprint, Pine, Rose, Ink, Dusk and Midnight. A theme only swaps the palette —
+nothing moves — and is remembered per device. It's applied before the page paints, so
+there's no flash of the wrong colour on load.
+
+**Make one** is the ninth. You pick three colours — paper, ink and the highlight used on
+the small labels — and the other sixteen variables are worked out from them: surfaces,
+the two rule weights, the soft and faint inks, the washes behind green and red. Picking
+sixteen colours by hand is not something anyone would finish, and a theme where only
+some of them changed would look broken.
+
+The three are stored with the palette they produce, as plain CSS text, so the script at
+the top of `<body>` can paint a custom theme before the page draws without the colour
+maths having to exist yet. Inline variables on `<html>` outrank every stylesheet rule,
+which is why this overrides a theme cleanly and why clearing them hands the page back.
+
+Light or dark is **decided, not chosen**: the paper's luminance picks the direction every
+derived colour moves in, and sets `color-scheme` so the browser's own scrollbars and form
+controls follow. Pick a dark paper and you get a dark theme without saying so.
+
+Contrast is checked as you type (WCAG, against the paper) and anything under 4.5:1 says
+so in red with the actual ratio. It still applies it — being able to see how unreadable
+it is beats an argument with a disabled button.
+
+Each theme has a **code** — `fff7e8-23304a-b07a2a`, the three colours — with Copy and
+Use code beside it, so one person's theme travels to a friend by text message. Pasting
+accepts any separators; a code that doesn't parse is refused and the box goes back to
+what it was.
 
 ## Deck types
 
