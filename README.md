@@ -47,30 +47,30 @@ it always has, keeping scores in the browser. With it:
   (the larger of each count, the higher Learn rung), so studying on a phone and then a
   laptop adds up instead of one overwriting the other.
 - **Students can send decks in.** A signed-in student builds a deck and uses **Send to
-  the teacher** in its editor. It lands under **Submitted**, where the teacher approves
+  the editor** in its editor. It lands under **Submitted**, where the editor approves
   it into their own decks — ready to publish like anything else — or declines it.
 
 The backend is Supabase (free tier). Its URL and **publishable** key are in `index.html`
 and are meant to be public; the secret key is not used anywhere and must never be. What
 actually protects the data is row level security, set up by `supabase/schema.sql`:
 
-- A student can read and write **only their own** progress. The teacher cannot read it.
-- A student can send submissions and see **their own**; the teacher sees all of them and
+- A student can read and write **only their own** progress. The editor cannot read it.
+- A student can send submissions and see **their own**; the editor sees all of them and
   is the only one who can change their status.
 - `is_editor` cannot be set from the app. A trigger blocks it — flip it in the Supabase
   table editor.
 
-A teacher account **unlocks the card editor on its own**, so the ADMIN password isn't
+An editor account **unlocks the card editor on its own**, so the ADMIN password isn't
 needed when signed in. That check is made by the database rather than by JavaScript
 anyone can read, which makes it the first real lock the app has had. The password stays
 as a fallback for editing without signing in.
 
 **Publishing still needs the GitHub token** — the decks live in `decks.json` in this repo,
-and only a GitHub credential can write there; being a teacher in Supabase grants nothing
-on GitHub. But you only paste it once: signed in as the teacher, the key is kept against
+and only a GitHub credential can write there; being an editor in Supabase grants nothing
+on GitHub. But you only paste it once: signed in as the editor, the key is kept against
 your account in `editor_keys` and comes back on any computer you sign into. That row is
 readable only by the person it belongs to — there is deliberately no editor policy on it,
-so not even another teacher could read someone else's. Disconnect forgets it everywhere.
+so not even another editor could read someone else's. Disconnect forgets it everywhere.
 
 Signed out, it falls back to the old behaviour: the browser alone, plus whatever your
 password manager saved.
@@ -112,6 +112,13 @@ it runs out.
 part of speech if it has one, definition — and strips the interface out of the printed
 page. A conjugation deck prints one line per form.
 
+## Themes
+
+Eight of them, on the **Sign in** page under *Look*: Auto (follows the computer), Paper,
+Blueprint, Pine, Rose, Ink, Dusk and Midnight. A theme only swaps the palette — nothing
+moves — and is remembered per device. It's applied before the page paints, so there's no
+flash of the wrong colour on load.
+
 ## Deck types
 
 Set this with the **Type** menu in the deck editor. It changes what you can type in and
@@ -136,7 +143,12 @@ the rows (yo, tú, él/ella/usted, nosotros, vosotros, ellos/ellas/ustedes by de
 rename or delete rows, or add your own, for another language). Each card holds the verb,
 its meaning, and one form per row.
 
-A conjugation deck is studied two ways:
+A verb deck can be drilled two ways, chosen with the **Conjugation / Meaning** switch
+above the modes: *Conjugation* drills the forms, *Meaning* drills what the verbs mean
+(`recordar → to remember`), using the meaning on each card. The two keep separate
+progress, because they are separate things to know.
+
+In Conjugation it is studied two ways:
 
 - **Fill the table** — one verb at a time. Type every form, then the table is marked row
   by row, with the right answer shown beside anything missed.

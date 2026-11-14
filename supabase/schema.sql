@@ -38,13 +38,13 @@ create trigger on_auth_user_created
   after insert on auth.users
   for each row execute function public.handle_new_user();
 
--- Is the person making this request the teacher? Used by the policies below.
+-- Is the person making this request the editor? Used by the policies below.
 create or replace function public.is_editor()
 returns boolean language sql stable security definer set search_path = '' as $$
   select coalesce((select p.is_editor from public.profiles p where p.id = (select auth.uid())), false);
 $$;
 
--- Nobody can make themselves the teacher. Flip is_editor in the Supabase table editor.
+-- Nobody can make themselves the editor. Flip is_editor in the Supabase table editor.
 -- The guard only applies to requests arriving as a signed-in user. In the dashboard
 -- (and anywhere else running as a privileged role) auth.uid() is null, so the flag can
 -- still be set there — which is the only place it is supposed to be set. Anonymous API
@@ -77,7 +77,7 @@ create table if not exists public.progress (
 );
 
 -- ---------------------------------------------------------------- submissions
--- A deck a student built and sent in. The teacher approves it into decks.json.
+-- A deck a student built and sent in. The editor approves it into decks.json.
 create table if not exists public.submissions (
   id          uuid primary key default gen_random_uuid(),
   user_id     uuid not null references auth.users on delete cascade,
@@ -106,17 +106,17 @@ drop policy if exists "read own submission"    on public.submissions;
 drop policy if exists "editor reads all"       on public.submissions;
 drop policy if exists "editor updates"         on public.submissions;
 
--- profiles: you see yourself; the teacher sees everyone.
+-- profiles: you see yourself; the editor sees everyone.
 create policy "read own profile"      on public.profiles for select to authenticated using (id = (select auth.uid()));
 create policy "editor reads profiles" on public.profiles for select to authenticated using (public.is_editor());
 create policy "update own profile"    on public.profiles for update to authenticated
   using (id = (select auth.uid())) with check (id = (select auth.uid()));
 
--- progress: yours and nobody else's, in either direction. The teacher cannot read it.
+-- progress: yours and nobody else's, in either direction. The editor cannot read it.
 create policy "own progress" on public.progress for all to authenticated
   using (user_id = (select auth.uid())) with check (user_id = (select auth.uid()));
 
--- submissions: send your own, see your own; the teacher sees and judges all of them.
+-- submissions: send your own, see your own; the editor sees and judges all of them.
 create policy "insert own submission" on public.submissions for insert to authenticated
   with check (user_id = (select auth.uid()));
 create policy "read own submission"   on public.submissions for select to authenticated using (user_id = (select auth.uid()));
@@ -130,10 +130,10 @@ grant select, insert, update, delete on public.progress    to authenticated;
 grant select, insert, update on public.submissions to authenticated;
 
 -- ---------------------------------------------------------------- publishing key
--- The GitHub token that lets the teacher publish decks.json, kept against their own
+-- The GitHub token that lets the editor publish decks.json, kept against their own
 -- account so it follows them to any device instead of living in one browser.
 -- Readable only by the person it belongs to: there is deliberately no editor policy
--- here, so not even another teacher can read someone else's key.
+-- here, so not even another editor can read someone else's key.
 create table if not exists public.editor_keys (
   user_id    uuid primary key references auth.users on delete cascade,
   gh_token   text not null,

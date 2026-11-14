@@ -63,6 +63,44 @@
     --lift:3px 3px 0 var(--rule);
   }
 }
+/* ---- more paper ----
+   Each one is the same desk in different stock and ink; nothing moves, only the colour.
+   A theme redefines the whole palette, so none of them half-inherit another. */
+:root[data-theme="blueprint"]{
+  color-scheme:light;
+  --paper:#E7EDF3; --surface:#F7FAFC; --surface-2:#DBE4ED; --ink:#0F2438; --ink-soft:#4A6076;
+  --ink-faint:#7E91A4; --rule:#B7C6D5; --rule-soft:#D2DCE7; --accent:#0F2438; --accent-ink:#F7FAFC;
+  --accent-wash:#D2DCE7; --brass:#8A6714; --brass-wash:#F0E4C6; --good:#2F6B52; --good-wash:#DBEAE2;
+  --bad:#A8321F; --bad-wash:#F5DFD9;
+}
+:root[data-theme="pine"]{
+  color-scheme:light;
+  --paper:#E8EDE3; --surface:#F8FAF5; --surface-2:#DDE4D5; --ink:#15231A; --ink-soft:#4B5C4F;
+  --ink-faint:#7D8C80; --rule:#BCC8B6; --rule-soft:#D5DDCE; --accent:#15231A; --accent-ink:#F8FAF5;
+  --accent-wash:#D5DDCE; --brass:#856512; --brass-wash:#EFE3C4; --good:#2E6B3E; --good-wash:#DBEBDC;
+  --bad:#A8321F; --bad-wash:#F5DFD9;
+}
+:root[data-theme="rose"]{
+  color-scheme:light;
+  --paper:#F2E9E6; --surface:#FBF7F5; --surface-2:#E8DAD5; --ink:#2A1A18; --ink-soft:#6B5450;
+  --ink-faint:#9B8580; --rule:#D4BDB6; --rule-soft:#E4D3CD; --accent:#2A1A18; --accent-ink:#FBF7F5;
+  --accent-wash:#E4D3CD; --brass:#9A6B1E; --brass-wash:#F3E6CB; --good:#3F6B4A; --good-wash:#DFEADF;
+  --bad:#A33049; --bad-wash:#F6DEE3;
+}
+:root[data-theme="dusk"]{
+  color-scheme:dark;
+  --paper:#191411; --surface:#241D18; --surface-2:#2E261E; --ink:#F0E3D2; --ink-soft:#B2A08A;
+  --ink-faint:#7D6F5F; --rule:#413627; --rule-soft:#31281E; --accent:#F0E3D2; --accent-ink:#191411;
+  --accent-wash:#382E22; --brass:#E0AC54; --brass-wash:#33280F; --good:#8CB37A; --good-wash:#1F2A18;
+  --bad:#E07A5F; --bad-wash:#2F1C16;
+}
+:root[data-theme="midnight"]{
+  color-scheme:dark;
+  --paper:#0F1217; --surface:#181C22; --surface-2:#20262E; --ink:#E4EAF2; --ink-soft:#96A3B4;
+  --ink-faint:#6A7788; --rule:#2B323B; --rule-soft:#222830; --accent:#E4EAF2; --accent-ink:#0F1217;
+  --accent-wash:#272F38; --brass:#D2A94A; --brass-wash:#2A2415; --good:#72B48C; --good-wash:#16261D;
+  --bad:#E0736A; --bad-wash:#2C1A19;
+}
 :root[data-theme="dark"]{
   --paper:#151310;
   --surface:#1E1A15;
@@ -497,6 +535,17 @@ input.text:focus{border-color:var(--ink);outline:none}
 .stat-pill.approved{border-color:var(--good);color:var(--good)}
 .stat-pill.declined{border-color:var(--bad);color:var(--bad)}
 
+/* ---- theme picker ---- */
+.themes{display:flex;gap:9px;flex-wrap:wrap}
+.swatch{display:flex;flex-direction:column;align-items:stretch;gap:5px;width:78px;padding:0;background:none}
+.swatch .chip{height:40px;border:1px solid var(--rule);border-radius:var(--r);overflow:hidden;display:flex}
+.swatch .chip i{display:block;flex:1}
+.swatch .chip .b{flex:0 0 34%}
+.swatch span{font-size:11.5px;color:var(--ink-soft);text-align:center}
+.swatch:hover .chip{border-color:var(--ink)}
+.swatch[aria-pressed="true"] .chip{box-shadow:0 0 0 2px var(--ink);border-color:var(--ink)}
+.swatch[aria-pressed="true"] span{color:var(--ink);font-weight:600}
+
 .railtoggle{display:none}
 @media (max-width:860px){
   .app{grid-template-columns:1fr}
@@ -535,6 +584,8 @@ input.text:focus{border-color:var(--ink);outline:none}
 
 </head>
 <body>
+
+<script>try{var t=localStorage.getItem("recalldesk.theme.v1");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
 
 <div class="app">
   <aside class="rail" id="rail">
@@ -700,6 +751,7 @@ var S = {
   canEdit:false, ready:false, who:null, published:null, draft:false, token:null, busy:false, incoming:null,
   decks:[], deckId:null, view:"home",
   folders:[], folderId:null, open:{}, learn:{}, railShut:false, calMonth:null, user:null, profile:null, providers:null,
+  conjMode:"forms", theme:"",
   dir:"t2d",        // t2d = term -> definition, d2t = definition -> term
   filter:"all",     // all | starred | missed
   shuffle:true,
@@ -709,7 +761,7 @@ var S = {
 };
 
 /* -------- per-viewer progress: browser-local, never sent anywhere -------- */
-var WHO_KEY = "recalldesk.who.v1", DRAFT_KEY = "recalldesk.draft.v1", TOKEN_KEY = "recalldesk.gh.v1", FOLD_KEY = "recalldesk.folders-open.v1", TOKEN_AT = "recalldesk.gh.at.v1", RAIL_KEY = "recalldesk.rail.v1";
+var WHO_KEY = "recalldesk.who.v1", DRAFT_KEY = "recalldesk.draft.v1", TOKEN_KEY = "recalldesk.gh.v1", FOLD_KEY = "recalldesk.folders-open.v1", TOKEN_AT = "recalldesk.gh.at.v1", RAIL_KEY = "recalldesk.rail.v1", CONJ_KEY = "recalldesk.conjmode.v1", THEME_KEY = "recalldesk.theme.v1";
 // Scores are filed under whichever name is signed in, so a shared classroom machine
 // keeps them apart. Still browser-local: nothing about a score leaves the device.
 function slug(n){ return String(n||"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"") || "guest"; }
@@ -818,7 +870,12 @@ function folderTree(){                         // depth-first, for indented menu
 function indent(depth){ return new Array(depth + 1).join("\u2003"); }
 function cardsOf(d){ return (d && Array.isArray(d.cards)) ? d.cards.filter(function(c){ return (c.term||"").trim() || (c.def||"").trim() || hasForms(c); }) : []; }
 // What the study modes actually drill: cards, except conjugation decks, which drill cells.
-function unitsOf(d){ return kindOf(d) === "conj" ? cellsOf(d) : cardsOf(d); }
+function unitsOf(d){
+  if(kindOf(d) !== "conj") return cardsOf(d);
+  // A verb deck can be drilled two ways: what the verb means, or how it conjugates.
+  if(S.conjMode === "meaning") return cardsOf(d).filter(function(c){ return (c.def || "").trim(); });
+  return cellsOf(d);
+}
 function pool(){
   var d = deck(); if(!d) return [];
   var all = unitsOf(d);
@@ -877,7 +934,7 @@ function setSync(state, msg){
 }
 function whoLine(){
   if(S.canEdit) return "Editing as ADMIN" + (S.token ? " · can publish" : " · publishing not set up");
-  if(S.user) return "Signed in as " + whoName(S.user) + (isEditor() ? " · teacher" : "");
+  if(S.user) return "Signed in as " + whoName(S.user) + (isEditor() ? " · editor" : "");
   return S.who ? "Studying as " + S.who + " · this browser only" : "Not signed in · scores stay on this device";
 }
 function refreshFoot(){ setSync(S.canEdit ? "edit" : !!S.who, whoLine()); }
@@ -969,9 +1026,9 @@ function ghError(res){
   if(res.status === 409 || res.status === 422) return "The file changed on GitHub while you were editing. Reload the page, then redo this change.";
   return "GitHub returned " + res.status + ". Try again in a moment.";
 }
-/* The publishing token, kept against the teacher's own account so it follows them to
+/* The publishing token, kept against the editor's own account so it follows them to
    any device they sign into. The row is readable only by its owner — not by students,
-   not by another teacher. Still falls back to this browser alone when signed out. */
+   not by another editor. Still falls back to this browser alone when signed out. */
 function pullKey(){
   if(!sb || !S.user || !isEditor()) return Promise.resolve(null);
   return sb.from("editor_keys").select("gh_token").eq("user_id", S.user.id).maybeSingle()
@@ -1276,7 +1333,7 @@ function renderHome(){
       d.subject ? el("p",{class:"deskdesc",style:"margin-bottom:0",text:d.subject}) : null,
       d.quiz ? el("div",{style:"margin:8px 0 2px"},[ el("button",{class:"duetag " + whenClass(d.quiz),onclick:function(){ go("cal"); }},[icon(I.clock,13), "Quiz " + whenText(d.quiz)]) ]) : null,
       el("div",{class:"sub"}, crumbs.concat([
-        kind === "conj" ? (cardsOf(d).length + (cardsOf(d).length === 1 ? " verb · " : " verbs · ") + n + (n === 1 ? " form" : " forms") + (d.tense ? " · " + d.tense : ""))
+        kind === "conj" ? (cardsOf(d).length + (cardsOf(d).length === 1 ? " verb · " : " verbs · ") + n + (S.conjMode === "meaning" ? (n === 1 ? " meaning" : " meanings") : (n === 1 ? " form" : " forms")) + (d.tense && S.conjMode !== "meaning" ? " · " + d.tense : ""))
                         : n + (n === 1 ? " card" : " cards")
       ]))
     ]),
@@ -1305,8 +1362,10 @@ function renderHome(){
   stage.appendChild(el("div",{class:"learn"},[
     el("div",{},[
       el("h3",{},[icon(I.learn,19),"Learn"]),
-      el("p",{text: kind === "conj"
-        ? "Short rounds that adapt to you. Every form in the table is drilled on its own — picked from a lineup first, then typed from memory. Misses come straight back."
+      el("p",{text: kind === "conj" && S.conjMode === "meaning"
+        ? "Short rounds that adapt to you. Each verb starts as multiple choice and counts as mastered once you can name it from its meaning. Switch to Conjugation above to drill the forms instead."
+        : kind === "conj"
+        ? "Short rounds that adapt to you. Every form in the table is drilled on its own — picked from a lineup first, then typed from memory. Switch to Meaning above to drill what the verbs mean instead."
         : posAskable(d)
         ? "Short rounds that adapt to you. Pick the definition, type the word, then say what part of speech it is. Only all three count as mastered, and misses come straight back."
         : "Short rounds that adapt to you. Each card starts as multiple choice, and only counts as mastered once you can see the definition and type the term. Misses come straight back."}),
@@ -1343,14 +1402,24 @@ function renderHome(){
   stage.appendChild(grid);
 
   if(S.filter !== "all"){
-    stage.appendChild(el("div",{class:"notice"},[icon(I.shuffle,15), "Studying " + np + " of " + n + (kind === "conj" ? " forms — " : " cards — ") + (S.filter === "starred" ? "starred only." : "cards you've missed and not yet re-answered correctly.")]));
+    stage.appendChild(el("div",{class:"notice"},[icon(I.shuffle,15), "Studying " + np + " of " + n + (kind === "conj" && S.conjMode !== "meaning" ? " forms — " : " cards — ") + (S.filter === "starred" ? "starred only." : "cards you've missed and not yet re-answered correctly.")]));
   }
 }
 
 function optsBar(withFilter){
   var bar = el("div",{class:"opts"});
-  // A conjugation deck is always asked verb+person -> form, so the direction toggle is moot.
-  if(kindOf(deck()) !== "conj"){
+  if(kindOf(deck()) === "conj"){
+    bar.appendChild(el("div",{class:"seg"},[
+      el("button",{"aria-pressed": S.conjMode !== "meaning" ? "true":"false", text:"Conjugation",
+        title:"Drill each form: recordar · nosotros → recordamos",
+        onclick:function(){ setConjMode("forms"); }}),
+      el("button",{"aria-pressed": S.conjMode === "meaning" ? "true":"false", text:"Meaning",
+        title:"Drill what the verb means: recordar → to remember",
+        onclick:function(){ setConjMode("meaning"); }})
+    ]));
+  }
+  // Asked verb+person -> form, so the direction toggle only means something for meanings.
+  if(kindOf(deck()) !== "conj" || S.conjMode === "meaning"){
     bar.appendChild(el("div",{class:"seg"},[
       el("button",{"aria-pressed": S.dir === "t2d" ? "true":"false", text:"Term → Definition", onclick:function(){ S.dir="t2d"; S.session=null; render(); }}),
       el("button",{"aria-pressed": S.dir === "d2t" ? "true":"false", text:"Definition → Term", onclick:function(){ S.dir="d2t"; S.session=null; render(); }})
@@ -1369,10 +1438,46 @@ function optsBar(withFilter){
   return bar;
 }
 
+var THEMES = [
+  {id:"",          name:"Auto",      paper:"#EFE9DE", ink:"#14110D"},
+  {id:"light",     name:"Paper",     paper:"#EFE9DE", ink:"#14110D"},
+  {id:"blueprint", name:"Blueprint", paper:"#E7EDF3", ink:"#0F2438"},
+  {id:"pine",      name:"Pine",      paper:"#E8EDE3", ink:"#15231A"},
+  {id:"rose",      name:"Rose",      paper:"#F2E9E6", ink:"#2A1A18"},
+  {id:"dark",      name:"Ink",       paper:"#151310", ink:"#EDE6D8"},
+  {id:"dusk",      name:"Dusk",      paper:"#191411", ink:"#F0E3D2"},
+  {id:"midnight",  name:"Midnight",  paper:"#0F1217", ink:"#E4EAF2"}
+];
+function applyTheme(id){
+  S.theme = id || "";
+  if(S.theme) document.documentElement.setAttribute("data-theme", S.theme);
+  else document.documentElement.removeAttribute("data-theme");
+  try{ localStorage.setItem(THEME_KEY, S.theme); }catch(e){}
+}
+function themePicker(){
+  var box = el("div",{class:"themes"});
+  THEMES.forEach(function(t){
+    box.appendChild(el("button",{class:"swatch","aria-pressed": S.theme === t.id ? "true" : "false",
+      title:t.name, onclick:function(){ applyTheme(t.id); render(); }},[
+      el("span",{class:"chip","aria-hidden":"true"},[
+        el("i",{style:"background:" + t.paper}), el("i",{class:"b",style:"background:" + t.ink})
+      ]),
+      el("span",{text:t.name})
+    ]));
+  });
+  return box;
+}
+function setConjMode(m){
+  if(S.conjMode === m) return;
+  S.conjMode = m;
+  try{ localStorage.setItem(CONJ_KEY, m); }catch(e){}
+  S.session = null; render();
+  toast(m === "meaning" ? "Drilling what the verbs mean" : "Drilling the forms");
+}
 function modeHead(title, extra){
   return el("div",{class:"stage-head"},[
     el("div",{},[ el("h2",{text:title}), el("div",{class:"sub",text:(deck().name || "Untitled deck") + " · " +
-      (kindOf(deck()) === "conj" ? (deck().tense || "Conjugation") : ASK_LABEL() + " → " + ANS_LABEL())}) ]),
+      (kindOf(deck()) === "conj" && S.conjMode !== "meaning" ? (deck().tense || "Conjugation") : ASK_LABEL() + " → " + ANS_LABEL())}) ]),
     el("div",{class:"rowctl"},[ extra || null, el("button",{class:"btn ghost",onclick:function(){ S.session=null; go("home"); }},[icon(I.back,15),"Deck"]) ])
   ]);
 }
@@ -1665,7 +1770,7 @@ function renderLearnDone(s){
     el("div",{class:"eyebrow",text:"Learn complete"}),
     el("div",{class:"score",text:s.all.length + "/" + s.all.length}),
     el("p",{style:"margin:2px 0 16px;color:var(--ink-soft);font-size:14px",
-      text: kindOf(d) === "conj" ? "Every form mastered — picked out of a lineup, then typed from memory."
+      text: kindOf(d) === "conj" && S.conjMode !== "meaning" ? "Every form mastered — picked out of a lineup, then typed from memory."
           : kindOf(d) === "vocab" ? "Every word mastered — defined, typed, and named by part of speech."
           : "Every card mastered — picked out of a lineup, then named from its definition."}),
     learnMeter(d, s.all),
@@ -2467,7 +2572,7 @@ function renderEdit(){
     bar.appendChild(el("button",{class:"btn",onclick:function(){ var p = $("pastepanel"); p.hidden = !p.hidden; if(!p.hidden) $("pastebox").focus(); }},["Paste a list"]));
   }
   bar.appendChild(el("button",{class:"btn ghost",onclick:function(){ copyDeck(d); }},[icon(I.copy,15),"Copy as text"]));
-  if(S.user && !isEditor()) bar.appendChild(el("button",{class:"btn ghost",onclick:function(){ sendIn(d); }},[icon(I.upload,15),"Send to the teacher"]));
+  if(S.user && !isEditor()) bar.appendChild(el("button",{class:"btn ghost",onclick:function(){ sendIn(d); }},[icon(I.upload,15),"Send to the editor"]));
   if(!ro) bar.appendChild(el("button",{class:"btn ghost",onclick:function(){ go("connect"); }},[icon(I.upload,15), S.token ? "Publishing" : "Set up publishing"]));
   if(!ro){
     bar.appendChild(el("div",{style:"flex:1"}));
@@ -2811,10 +2916,10 @@ function removeDeck(d){
 function sendIn(d){
   var n = cardsOf(d).length;
   if(!n) return toast("Add some cards first");
-  var note = prompt("Send \u201c" + (d.name || "Untitled deck") + "\u201d (" + n + (n === 1 ? " card" : " cards") + ") to your teacher?\n\nAnything you want to say about it:", "");
+  var note = prompt("Send \u201c" + (d.name || "Untitled deck") + "\u201d (" + n + (n === 1 ? " card" : " cards") + ") to the editor?\n\nAnything you want to say about it:", "");
   if(note === null) return;
   submitDeck(d, note).then(function(r){
-    toast(r && r.error ? (r.error.message || "Couldn't send it") : "Sent — your teacher will see it");
+    toast(r && r.error ? (r.error.message || "Couldn't send it") : "Sent — the editor will see it");
   }).catch(function(e){ toast(String(e && e.message || e)); });
 }
 function copyDeck(d){
@@ -2990,7 +3095,7 @@ function loadProfile(){
   return sb.from("profiles").select("id,name,email,is_editor").eq("id", S.user.id).maybeSingle()
     .then(function(r){
       S.profile = r.data || null;
-      // A teacher account is checked by the database, so it replaces the ADMIN password.
+      // An editor account is checked by the database, so it replaces the ADMIN password.
       if(isEditor() && !S.canEdit){ S.canEdit = true; autoArchive(); }
       if(isEditor()) pullKey();
       refreshFoot(); renderRail(); render();
@@ -3081,7 +3186,7 @@ function renderSubs(){
     if(!list.length){
       box.appendChild(el("div",{class:"empty"},[
         el("h3",{text:"Nothing here yet"}),
-        el("p",{text: isEditor() ? "When a student sends a deck in, it lands here." : "Build a deck, then use Send to the teacher in its editor."})
+        el("p",{text: isEditor() ? "When a student sends a deck in, it lands here." : "Build a deck, then use Send to the editor from the deck editor."})
       ]));
       return;
     }
@@ -3167,7 +3272,7 @@ function renderWho(){
         el("span",{class:"avatar",text:initials(whoName(S.user))}),
         el("div",{style:"flex:1;min-width:0"},[
           el("h3",{text:whoName(S.user)}),
-          el("p",{style:"margin:2px 0 0",text:(S.user.email || "") + (isEditor() ? " · teacher account" : "")})
+          el("p",{style:"margin:2px 0 0",text:(S.user.email || "") + (isEditor() ? " · editor account" : "")})
         ])
       ]),
       el("p",{style:"margin-top:12px",text:"Your scores are saved to your account, so they follow you to any device you sign in on."}),
@@ -3182,7 +3287,7 @@ function renderWho(){
   } else if(S.providers){
     var acct = el("div",{class:"panel"},[
       el("h3",{text:"Sign in"}),
-      el("p",{text:"Sign in and your scores follow you to any device instead of living in one browser — and you can send decks you've made to your teacher."})
+      el("p",{text:"Sign in and your scores follow you to any device instead of living in one browser — and you can send decks you've made to the editor."})
     ]);
     if(S.providers.google){
       acct.appendChild(el("button",{class:"gbtn",onclick:function(){
@@ -3241,6 +3346,12 @@ function renderWho(){
 
   errBox = el("p",{class:"err",hidden:"hidden"});
 
+  wrap.appendChild(el("div",{class:"panel"},[
+    el("h3",{text:"Look"}),
+    el("p",{text:"Auto follows whatever your computer is set to. The rest stay put on this device."}),
+    themePicker()
+  ]));
+
   wrap.appendChild(editorPanel);
   wrap.appendChild(errBox);
   stage.appendChild(wrap);
@@ -3286,7 +3397,7 @@ function renderConnect(){
       tokenAge() ? el("p",{class:"saveflag",style:"margin:-6px 0 12px",text:"Saved in this browser on " + tokenAge() + "."}) : null,
       (S.user && isEditor())
         ? el("p",{style:"margin:-4px 0 14px;font-size:13px;color:var(--good)",text:"Kept with your account too — sign in on any computer and it's already here. Nobody else can read it."})
-        : el("p",{class:"saveflag",style:"margin:-4px 0 14px",text:"Sign in as the teacher and this is kept with your account, so you won't have to paste it again."}),
+        : el("p",{class:"saveflag",style:"margin:-4px 0 14px",text:"Sign in as the editor and this is kept with your account, so you won't have to paste it again."}),
       el("div",{class:"rowctl",style:"justify-content:flex-start"},[
         el("button",{class:"btn",id:"checktok",onclick:checkToken},["Check it still works"]),
         el("button",{class:"btn",onclick:function(){
@@ -3356,7 +3467,7 @@ function renderConnect(){
       el("button",{class:"btn ghost",type:"button",onclick:downloadJSON},[icon(I.upload,15),"Download decks.json instead"])
     ]),
     el("p",{class:"saveflag",style:"margin:14px 0 0",text: (S.user && isEditor())
-      ? "Signed in as the teacher, so this is saved to your account — paste it once and never again, on any computer."
+      ? "Signed in as the editor, so this is saved to your account — paste it once and never again, on any computer."
       : "Say yes when your browser offers to save it — then next time it fills itself in, and it follows you to your other devices."})
   ]));
 
@@ -3452,6 +3563,8 @@ fetch(SB_URL + "/auth/v1/settings", {headers:{apikey: SB_KEY}})
   .catch(function(){});
 S.open = ls(FOLD_KEY, {});
 try{ S.railShut = localStorage.getItem(RAIL_KEY) === "1"; }catch(e){ S.railShut = false; }
+try{ S.conjMode = localStorage.getItem(CONJ_KEY) === "meaning" ? "meaning" : "forms"; }catch(e){}
+try{ S.theme = localStorage.getItem(THEME_KEY) || ""; }catch(e){ S.theme = ""; }
 setRail(S.railShut);
 $("reopen").addEventListener("click", function(){ setRail(false); });
 loadLocal();
