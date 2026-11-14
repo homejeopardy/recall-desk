@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated": "2026-11-13",
+  "updated": "2026-11-14",
   "folders": [
     {
       "id": "f56mcnn0z5",
@@ -905,6 +905,7 @@
       "name": "Mechanics IX",
       "subject": "",
       "folder": "f56mcnn0z5",
+      "quiz": "2026-11-18",
       "createdAt": 1794593975745,
       "kind": "vocab",
       "cards": [
