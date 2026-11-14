@@ -201,6 +201,27 @@ Use code beside it, so one person's theme travels to a friend by text message. P
 accepts any separators; a code that doesn't parse is refused and the box goes back to
 what it was.
 
+## Two meanings
+
+A word can mean two things — *gall* is nerve and also bitterness; *bank* is the land by a
+river and also to rely on something. **+ second meaning** under the definition box opens a
+second one. It stays **one card**: asked once, mastered once, counted once. Both meanings
+are shown together, numbered, wherever one would have been — the flashcard, the multiple
+choice option, the typed prompt, the print-out.
+
+On a vocabulary deck the second meaning gets **its own part of speech**, because that is
+the case that needs it. Where the part of speech is the question, **either answer counts**
+and both are on the screen, so a student answering about the second meaning isn't marked
+wrong for it. The part-of-speech question also prints the numbered meanings under the
+word, so it is clear what is being asked about. Getting it wrong says *"it's either an
+adjective or a verb"*.
+
+The pair is stored as `def2` and `pos2` next to `def` and `pos`, left out of `decks.json`
+entirely when there is no second meaning, so nothing changes for the decks that have one.
+
+**Copy as text** puts both meanings in the one definition column, numbered. Pasting that
+back in reads them as a single definition — the paste format is still three columns.
+
 ## Deck types
 
 Set this with the **Type** menu in the deck editor. It changes what you can type in and
