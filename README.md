@@ -38,6 +38,17 @@ start with a part of speech ("noun …") would mark a correct answer wrong.
 Learn progress is saved after every answer, per student name, in that browser — leaving
 mid-round loses nothing. The deck page's **Mastered** count is Learn's.
 
+## Home
+
+The wordmark in the sidebar goes home. Someone who has never been here gets a short
+welcome explaining what the site is, with **Sign in** in the corner; everyone else gets
+a dashboard — what's due with countdowns, a Review button, how much of everything is
+mastered, and every deck as a card.
+
+Arriving at the bare address lands on home, **unless you were studying a deck within the
+last twelve hours**, in which case it reopens that. A shared `#deck=` link always wins
+over both.
+
 ## Links, review, offline
 
 **Links.** Every deck has one: the **Link** button on a deck copies

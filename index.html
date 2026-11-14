@@ -137,9 +137,11 @@ kbd{font-family:var(--mono);font-size:11px;background:var(--surface-2);border:1p
 .eyebrow{font-family:var(--mono);font-size:10.5px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint)}
 
 /* ---- chrome ---- */
-.app{display:grid;grid-template-columns:var(--rail) 1fr;min-height:100vh}
-.rail{border-right:1px solid var(--rule);background:var(--surface);display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
-.brand{padding:20px 18px 15px;border-bottom:2px solid var(--ink);display:flex;align-items:baseline;gap:8px}
+.app{display:grid;grid-template-columns:var(--rail) 1fr;min-height:100vh;transition:grid-template-columns .2s ease}
+.rail{border-right:1px solid var(--rule);background:var(--surface);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow:hidden;min-width:0;transition:transform .2s ease,border-color .2s ease}
+.brand{padding:20px 18px 15px;border-bottom:2px solid var(--ink);display:flex;align-items:baseline;gap:8px;width:100%;text-align:left;border-radius:0}
+.brand:hover h1{color:var(--bad)}
+.brand h1{transition:color .12s}
 .brand h1{font-family:var(--read);font-size:24px;font-weight:600;letter-spacing:-.02em;line-height:1}
 .brand h1 em{font-style:italic;color:var(--bad)}
 .brand .tag{font-family:var(--mono);font-size:10px;color:var(--ink-faint);letter-spacing:.04em}
@@ -222,6 +224,10 @@ kbd{font-family:var(--mono);font-size:11px;background:var(--surface-2);border:1p
 .face.back .facetext{font-size:21px;max-width:46ch;line-height:1.55}
 .hintline{position:absolute;bottom:15px;left:0;right:0;text-align:center;font-family:var(--mono);font-size:10.5px;letter-spacing:.05em;color:var(--ink-faint)}
 @media (prefers-reduced-motion:reduce){.card{transition:none}}
+@media (prefers-reduced-motion:reduce){
+  .app,.rail,.reopen,.fwrap,.fold-tog svg{transition:none!important}
+  .mode,.btn,.choice,.deck-btn{transition:none!important}
+}
 
 .rowctl{display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap}
 .judge{display:flex;gap:10px;justify-content:center;margin-top:4px}
@@ -329,7 +335,7 @@ input.text:focus{border-color:var(--ink);outline:none}
 
 /* ---- folders: drawer dividers in the rail ---- */
 #newdeckslot{display:flex;gap:2px}
-.fgroup{list-style:none}
+.fgroup{list-style:none;margin-bottom:3px}
 .folder{display:flex;align-items:stretch;border-radius:var(--r)}
 .folder:hover{background:var(--surface-2)}
 .folder.on{background:var(--surface-2);box-shadow:inset 3px 0 0 var(--bad)}
@@ -341,7 +347,10 @@ input.text:focus{border-color:var(--ink);outline:none}
 .fold-nm svg{color:var(--ink-soft);flex:none}
 .fold-nm .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .fold-nm .ct{font-family:var(--mono);font-size:11px;color:var(--ink-faint);font-weight:400}
-.fdecks{list-style:none;margin:1px 0 5px 16px;padding:0 0 0 5px;border-left:1px solid var(--rule);display:flex;flex-direction:column;gap:1px}
+/* Height is animated from its measured value rather than with a 0fr/1fr grid, which
+   does not interpolate everywhere, or a guessed max-height, which eases wrongly. */
+.fwrap{overflow:hidden;height:0;transition:height .18s ease;margin:0}
+.fdecks{list-style:none;margin:0 0 0 16px;padding:0 0 0 5px;border-left:1px solid var(--rule);display:flex;flex-direction:column;gap:1px}
 .fdecks .deck-btn{padding:7px 9px;font-size:14px}
 .fdecks .fdecks{margin-left:12px}
 .fdecks .fold-nm{font-weight:500;font-size:14px;padding-top:7px;padding-bottom:7px}
@@ -438,13 +447,18 @@ input.text:focus{border-color:var(--ink);outline:none}
 .icbtn:hover{background:var(--surface-2);color:var(--ink)}
 /* the rail leaves the grid entirely, so the stage must become the only column —
    with "0 1fr" it lands in the zero-width one and the page collapses */
-.app.shut{grid-template-columns:1fr}
+/* The rail stays a grid item and its column shrinks to nothing, so the two can be
+   animated. Taking it out of the grid instead would drop the stage into column one. */
+.app.shut{grid-template-columns:0 1fr}
 .app.shut .stage{padding-left:92px}
-.app.shut .rail{display:none}
-.reopen{position:fixed;left:0;top:14px;z-index:40;display:none;align-items:center;gap:7px;padding:9px 13px 9px 11px;
-  border:1px solid var(--rule);border-left:0;border-radius:0 var(--r-lg) var(--r-lg) 0;background:var(--surface);box-shadow:var(--lift);font-size:13px;font-weight:500}
+.app.shut .rail{transform:translateX(-100%);border-right-color:transparent}
+/* Always present so it can slide; pushed out of the way and made unclickable instead
+   of being display:none, which cannot be transitioned. */
+.reopen{position:fixed;left:0;top:14px;z-index:40;display:inline-flex;align-items:center;gap:7px;padding:9px 13px 9px 11px;
+  border:1px solid var(--rule);border-left:0;border-radius:0 var(--r-lg) var(--r-lg) 0;background:var(--surface);box-shadow:var(--lift);font-size:13px;font-weight:500;
+  transform:translateX(-101%);opacity:0;pointer-events:none;transition:transform .2s ease,opacity .16s ease}
 .reopen:hover{background:var(--surface-2)}
-.app.shut + .reopen{display:inline-flex}
+.app.shut + .reopen{transform:none;opacity:1;pointer-events:auto}
 
 /* ---- what's coming up ---- */
 .soon{border-top:1px solid var(--rule);padding:11px 14px 12px}
@@ -573,6 +587,40 @@ input.text:focus{border-color:var(--ink);outline:none}
 .revbtn .n{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--ink-faint)}
 .fromdeck{font-size:12px;color:var(--ink-faint);margin-top:10px}
 
+/* ---- home ---- */
+.startbar{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;margin-bottom:26px}
+.signincorner{display:inline-flex;align-items:center;gap:9px;padding:7px 14px 7px 8px;border:1px solid var(--rule);border-radius:99px;background:var(--surface);font-size:13.5px;font-weight:500}
+.signincorner:hover{border-color:var(--ink);background:var(--surface-2)}
+.hero{max-width:60ch}
+.hero h1{font-family:var(--read);font-size:44px;font-weight:600;letter-spacing:-.03em;line-height:1.05;margin-bottom:12px}
+.hero h1 em{font-style:italic;color:var(--bad)}
+.hero p{font-size:16.5px;line-height:1.6;color:var(--ink-soft);margin:0 0 14px}
+.hero .lede{font-size:18.5px;color:var(--ink)}
+.herobtns{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
+.feats{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:0;border:1px solid var(--rule);border-radius:var(--r-lg);overflow:hidden;margin-top:34px;background:var(--surface)}
+.feat{padding:16px 18px;box-shadow:0 0 0 .5px var(--rule)}
+.feat h4{font-size:14.5px;font-weight:600;display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.feat h4 svg{color:var(--bad)}
+.feat p{font-size:12.5px;color:var(--ink-soft);line-height:1.5;margin:0}
+.dashrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-bottom:26px}
+.bigcard{border:1px solid var(--ink);border-radius:var(--r-lg);background:var(--surface);box-shadow:var(--lift);padding:18px 20px}
+.bigcard h3{font-family:var(--read);font-size:20px;margin-bottom:3px;display:flex;align-items:center;gap:9px}
+.bigcard h3 svg{color:var(--bad)}
+.bigcard p{font-size:13px;color:var(--ink-soft);margin:0 0 14px;line-height:1.5}
+.duelist{list-style:none;margin:0;padding:0}
+.duelist li{border-bottom:1px solid var(--rule-soft)}
+.duelist li:last-child{border-bottom:0}
+.duelist button{width:100%;display:flex;align-items:center;gap:10px;padding:9px 2px;text-align:left}
+.duelist button:hover .t{text-decoration:underline}
+.duelist .t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500;font-size:14px}
+.deckgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(216px,1fr));gap:12px}
+.dcard{border:1px solid var(--rule);border-radius:var(--r-lg);background:var(--surface);padding:14px 15px;text-align:left;display:flex;flex-direction:column;gap:8px;transition:border-color .12s,background .12s}
+.dcard:hover{border-color:var(--ink);background:var(--surface-2)}
+.dcard .nm{font-weight:600;font-size:15px;line-height:1.25}
+.dcard .meta{font-size:12px;color:var(--ink-faint)}
+.dcard .foot{display:flex;align-items:center;gap:8px;margin-top:auto}
+@media (max-width:860px){ .hero h1{font-size:33px} .startbar{flex-direction:column;gap:14px} }
+
 .railtoggle{display:none}
 @media (max-width:860px){
   .app{grid-template-columns:1fr}
@@ -616,7 +664,7 @@ input.text:focus{border-color:var(--ink);outline:none}
 
 <div class="app">
   <aside class="rail" id="rail">
-    <div class="brand"><h1>Quizlet<em>ish</em></h1><span class="tag">v2</span></div>
+    <button class="brand" id="homebtn" title="Home"><h1>Quizlet<em>ish</em></h1><span class="tag">v2</span></button>
     <div class="rail-head"><span class="eyebrow">Decks</span><span class="railbar"><span id="newdeckslot"></span><span id="railctl"></span></span></div>
     <ul class="decks" id="decks"></ul>
     <div id="soonslot"></div>
@@ -1209,20 +1257,29 @@ function renderRail(){
     var group = el("li",{class:"fgroup"},[
       el("div",{class:"folder" + (S.view === "folder" && S.folderId === f.id ? " on" : "")},[
         el("button",{class:"fold-tog","aria-expanded": open ? "true" : "false","aria-label":(open ? "Collapse " : "Expand ") + (f.name || "folder"),
-          onclick:function(){ S.open[f.id] = !open; saveFolds(); renderRail(); }},[icon(I.chev,13)]),
+          onclick:function(ev){
+            var tog = ev.currentTarget, wrap = tog.closest(".fgroup").querySelector(":scope > .folder + .fwrap");
+            open = !open;
+            S.open[f.id] = open; saveFolds();
+            tog.setAttribute("aria-expanded", open ? "true" : "false");
+            tog.setAttribute("aria-label", (open ? "Collapse " : "Expand ") + (f.name || "folder"));
+            if(wrap) slideFolder(wrap, open); else renderRail();
+            refreshRailCtl();
+          }},[icon(I.chev,13)]),
         el("button",{class:"fold-nm",onclick:function(){ openFolder(f.id); }},[
           icon(I.folder,15), el("span",{class:"nm",text:f.name || "Untitled folder"}),
           el("span",{class:"ct",title:"Decks inside, including subfolders",text:String(decksUnder(f.id).length)})
         ])
       ])
     ]);
-    if(open){
-      var ul = el("ul",{class:"fdecks"});
-      if(!inside.length && !kids.length) ul.appendChild(el("li",{class:"fempty",text:"Empty"}));
-      kids.forEach(function(k){ ul.appendChild(folderGroup(k)); });
-      byQuiz(inside).forEach(function(d){ ul.appendChild(deckItem(d)); });
-      group.appendChild(ul);
-    }
+    // Built whether or not it is showing, so opening and closing can be animated.
+    var ul = el("ul",{class:"fdecks"});
+    if(!inside.length && !kids.length) ul.appendChild(el("li",{class:"fempty",text:"Empty"}));
+    kids.forEach(function(k){ ul.appendChild(folderGroup(k)); });
+    byQuiz(inside).forEach(function(d){ ul.appendChild(deckItem(d)); });
+    var wrap = el("div",{class:"fwrap" + (open ? " open" : "")},[ul]);
+    wrap.style.height = open ? "auto" : "0px";
+    group.appendChild(wrap);
     return group;
   }
   childFolders("").forEach(function(f){ list.appendChild(folderGroup(f)); });
@@ -1235,7 +1292,16 @@ function renderRail(){
     slot.appendChild(el("button",{class:"btn ghost sm",onclick:function(){ newFolder(""); },title:"New folder"},[icon(I.folder,14),"Folder"]));
     slot.appendChild(el("button",{class:"btn ghost sm",onclick:function(){ newDeck(""); },title:"New deck"},[icon(I.plus,14),"Deck"]));
   }
-  var ctl = $("railctl"); ctl.textContent = "";
+  refreshRailCtl();
+  renderSoon();
+}
+// Split out so toggling one folder can update the collapse-all button without
+// rebuilding the rail and interrupting the animation.
+function refreshRailCtl(){
+  var ctl = $("railctl"); if(!ctl) return;
+  ctl.textContent = "";
+  var cur = deck(), curPath = {};
+  if(cur) folderPath(cur.folder).forEach(function(a){ curPath[a.id] = true; });
   if(S.folders.length){
     // Judge by what is actually showing, including folders opened because the current
     // deck is inside them — otherwise the button offers to expand a sidebar that is
@@ -1247,7 +1313,30 @@ function renderRail(){
   }
   ctl.appendChild(el("button",{class:"icbtn",title:"Hide the sidebar","aria-label":"Hide the sidebar",
     onclick:function(){ setRail(true); }},[icon(I.panel,15)]));
-  renderSoon();
+}
+// Measure, then animate to the measured height, then hand the height back to the
+// content so a deck added later doesn't get clipped by a stale pixel value.
+function slideFolder(wrap, open){
+  wrap.classList.toggle("open", open);
+  if(matchMedia("(prefers-reduced-motion: reduce)").matches){
+    wrap.style.height = open ? "auto" : "0px";
+    return;
+  }
+  var from = wrap.getBoundingClientRect().height;
+  wrap.style.height = from + "px";
+  var to = open ? wrap.scrollHeight : 0;
+  void wrap.offsetHeight;                       // make the start value stick
+  requestAnimationFrame(function(){ wrap.style.height = to + "px"; });
+  var settle = function(){
+    wrap.removeEventListener("transitionend", onEnd);
+    clearTimeout(wrap._slide);
+    // Back to auto so a deck added to this folder later isn't clipped by a stale pixel.
+    if(wrap.classList.contains("open")) wrap.style.height = "auto";
+  };
+  var onEnd = function(ev){ if(ev.target === wrap && ev.propertyName === "height") settle(); };
+  wrap.addEventListener("transitionend", onEnd);
+  clearTimeout(wrap._slide);
+  wrap._slide = setTimeout(settle, 400);        // in case the transition never fires
 }
 function collapseAll(shut){
   S.folders.forEach(function(f){ S.open[f.id] = !shut; });
@@ -1321,6 +1410,7 @@ function routeHash(){
   if(m){ var d = findDeck(m[1]); if(d){ openDeck(d.id); return true; } return false; }
   m = /^folder=(.+)$/.exec(h);
   if(m){ var f = findFolder(m[1]); if(f){ openFolder(f.id); return true; } return false; }
+  if(h === "home"){ go("start"); return true; }
   if(h === "cal"){ go("cal"); return true; }
   if(h === "review"){ startReview(); return true; }
   return false;
@@ -1328,11 +1418,13 @@ function routeHash(){
 function go(view){
   if((view === "home" || view === "folder") && !S.session && S.incoming) applyIncoming();
   if(view === "cal") setHash("cal");
+  else if(view === "start") setHash("home");
   else if(view === "home" && deck()) setHash("deck=" + deck().id);
   S.view = view; render(); window.scrollTo(0,0);
 }
 function openDeck(id){
   S.deckId = id; S.session = null; S.view = "home";
+  markSeen(); S.firstVisit = false; rememberDeck(id);
   var dd = deck(); if(dd) setHash("deck=" + dd.id);
   var d = deck(); if(d && d.folder) openPath(d.folder);
   renderRail(); render(); window.scrollTo(0,0);
@@ -1359,6 +1451,7 @@ function render(){
   if(S.view === "subs") return renderSubs();
   if(S.view === "people") return renderPeople();
   if(S.view === "review" && S.ready && !S.loadError) return renderReview();
+  if(S.view === "start" && S.ready && !S.loadError) return renderStart();
   if(S.loadError){
     stage.appendChild(el("div",{class:"empty"},[
       el("h3",{text:"Couldn't load the decks"}),
@@ -1381,6 +1474,7 @@ function render(){
   if(v === "subs") return renderSubs();
   if(v === "people") return renderPeople();
   if(v === "review") return renderReview();
+  if(v === "start") return renderStart();
   if(v === "table") return renderTable();
   if(v === "flash") return renderFlash();
   if(v === "quiz") return renderQuiz();
@@ -3307,6 +3401,103 @@ function loadSubs(){
       }).catch(function(){ return rows; });
     }).catch(function(){ return []; });
 }
+/* ---------------- home ----------------
+   A welcome for anyone who has never been here, and from then on a dashboard: what is
+   due, one way into review, and every deck. */
+var SEEN_KEY = "recalldesk.seen.v1", LAST_KEY = "recalldesk.lastdeck.v1";
+function markSeen(){ try{ localStorage.setItem(SEEN_KEY, "1"); }catch(e){} }
+function hasSeen(){ try{ return localStorage.getItem(SEEN_KEY) === "1"; }catch(e){ return false; } }
+function rememberDeck(id){ try{ localStorage.setItem(LAST_KEY, JSON.stringify({id:id, at:Date.now()})); }catch(e){} }
+function recentDeck(){
+  var v = ls(LAST_KEY, null);
+  if(!v || !v.id) return null;
+  if(Date.now() - (v.at || 0) > 12 * 3600 * 1000) return null;   // only if you were at it today
+  for(var i=0;i<S.decks.length;i++) if(S.decks[i].id === v.id) return S.decks[i];
+  return null;
+}
+function signInCorner(){
+  if(S.user) return el("button",{class:"signincorner",onclick:function(){ go("who"); }},[
+    avatarEl(whoName(S.user), avatarUrl(S.user), "sm"), whoName(S.user)
+  ]);
+  return el("button",{class:"signincorner",onclick:function(){ go("who"); }},[icon(I.user,15),"Sign in"]);
+}
+function renderStart(){
+  // Decided once for the visit: renderStart runs again on all sorts of updates, and
+  // checking the stored flag here would let the second run erase the first.
+  var welcome = S.firstVisit && !S.user;
+  stage.appendChild(el("div",{class:"startbar"},[
+    el("div",{},[ el("span",{class:"eyebrow",text: welcome ? "" : "Home"}) ]),
+    signInCorner()
+  ]));
+
+  if(welcome){
+    stage.appendChild(el("div",{class:"hero"},[
+      el("h1",{},["Quizlet",el("em",{text:"ish"})]),
+      el("p",{class:"lede",text:"Flashcards for the things you actually get quizzed on, with the quiz dates built in."}),
+      el("p",{text:"Every deck here is made by someone in your class. Pick one and study it however suits you — flip through it, get quizzed on it, type the answers, or race the clock. It remembers what you keep missing and asks you that more often."}),
+      el("p",{text:"You don't need an account. Sign in only if you want your scores to follow you from a chromebook to your phone, or to send in a deck of your own."}),
+      el("div",{class:"herobtns"},[
+        el("button",{class:"btn primary",onclick:function(){ var d = S.decks[0]; if(d) openDeck(d.id); }},[icon(I.cards,15),"Browse the decks"]),
+        S.providers && S.providers.google && !S.user ? el("button",{class:"btn",onclick:function(){ go("who"); }},[icon(I.user,15),"Sign in"]) : null
+      ])
+    ]));
+    var fs = el("div",{class:"feats"});
+    [[I.learn,"Learn","Short rounds that adapt. Cards you miss come straight back."],
+     [I.test,"Practice tests","Timed, mixed, and over a whole unit if you want."],
+     [I.cal,"Quiz dates","Everything sorts by whatever is due soonest."],
+     [I.print,"Print","Any deck as a plain list, for studying on paper."]].forEach(function(f){
+      fs.appendChild(el("div",{class:"feat"},[ el("h4",{},[icon(f[0],15), f[1]]), el("p",{text:f[2]}) ]));
+    });
+    stage.appendChild(fs);
+    return;
+  }
+
+  // ---- dashboard ----
+  var due = upcoming(5), weak = weakEverywhere(20).length;
+  var mastered = 0, total = 0;
+  S.decks.forEach(function(d){
+    var u = unitsOf(d); total += u.length;
+    u.forEach(function(x){ if(isMastered(d, x)) mastered++; });
+  });
+  stage.appendChild(el("div",{class:"dashrow"},[
+    el("div",{class:"bigcard"},[
+      el("h3",{},[icon(I.cal,18),"Coming up"]),
+      due.length ? el("ul",{class:"duelist"}, due.map(function(d){
+        return el("li",{},[ el("button",{onclick:function(){ openDeck(d.id); }},[
+          el("span",{class:"t",text:d.name || "Untitled deck"}),
+          el("span",{class:"duetag " + whenClass(d.quiz),text:whenText(d.quiz)})
+        ]) ]);
+      })) : el("p",{text:"No quiz dates set. Add one in a deck's editor and everything lines up by date."}),
+      due.length ? el("button",{class:"btn ghost sm",style:"margin-top:10px",onclick:function(){ go("cal"); }},[icon(I.cal,14),"Calendar"]) : null
+    ]),
+    el("div",{class:"bigcard"},[
+      el("h3",{},[icon(I.learn,18),"Review"]),
+      el("p",{text: weak ? "The " + weak + " cards you keep missing, from every deck, soonest quiz first."
+                         : "Nothing needs reviewing yet — study a deck and the stragglers collect here."}),
+      el("button",{class:"btn primary",disabled: weak ? null : "disabled",onclick:startReview},[icon(I.learn,15),"Start reviewing"]),
+      el("div",{style:"margin-top:14px"},[
+        el("div",{class:"saveflag",text: mastered + " of " + total + " cards mastered"}),
+        el("div",{class:"minibar",style:"margin-top:6px"},[ el("i",{style:"background:var(--ink);width:" + (total ? mastered/total*100 : 0) + "%"}) ])
+      ])
+    ])
+  ]));
+
+  stage.appendChild(el("div",{class:"eyebrow",style:"margin-bottom:10px",text:"All decks"}));
+  var grid = el("div",{class:"deckgrid"});
+  byQuiz(S.decks).forEach(function(d){
+    var cards = unitsOf(d), k = learnCounts(d, cards), f = folderById(d.folder);
+    grid.appendChild(el("button",{class:"dcard",onclick:function(){ openDeck(d.id); }},[
+      el("span",{class:"nm",text:d.name || "Untitled deck"}),
+      el("span",{class:"meta",text:(f ? (f.name || "") + " · " : "") + cards.length + (cards.length === 1 ? " card" : " cards")}),
+      el("span",{class:"foot"},[
+        minibar(k, cards.length),
+        d.quiz ? el("span",{class:"duetag " + whenClass(d.quiz),text:whenText(d.quiz)}) : null
+      ])
+    ]));
+  });
+  stage.appendChild(grid);
+}
+
 /* ---------------- review ----------------
    Learn works a deck at a time, which is no help the evening before three quizzes.
    This gathers the shaky cards from every deck and puts the soonest quiz first. */
@@ -3944,6 +4135,8 @@ fetch(SB_URL + "/auth/v1/settings", {headers:{apikey: SB_KEY}})
   })
   .catch(function(){});
 S.open = ls(FOLD_KEY, {});
+S.firstVisit = !hasSeen();
+markSeen();
 try{ S.railShut = localStorage.getItem(RAIL_KEY) === "1"; }catch(e){ S.railShut = false; }
 try{ S.conjMode = localStorage.getItem(CONJ_KEY) === "meaning" ? "meaning" : "forms"; }catch(e){}
 try{ S.theme = localStorage.getItem(THEME_KEY) || ""; }catch(e){ S.theme = ""; }
@@ -3951,6 +4144,7 @@ setRail(S.railShut);
 $("reopen").addEventListener("click", function(){ setRail(false); });
 loadLocal();
 $("whobtn").addEventListener("click", function(){ go("who"); });
+$("homebtn").addEventListener("click", function(){ go("start"); });
 refreshFoot();
 renderRail();
 render();
@@ -4018,7 +4212,11 @@ fetch("decks.json", {cache:"no-store"})
     S.ready = true;
     if(!S.deckId && S.decks.length) S.deckId = S.decks[0].id;
     refreshFoot(); renderRail();
-    if(!routeHash()) render();
+    if(!routeHash()){
+      var back = recentDeck();
+      if(back) openDeck(back.id);
+      else { S.view = "start"; setHash("home"); render(); }
+    }
   })
   .catch(function(err){
     S.ready = true; S.loadError = err;
