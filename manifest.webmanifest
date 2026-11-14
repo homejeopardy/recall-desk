@@ -1,0 +1,12 @@
+{
+  "name": "Quizletish",
+  "short_name": "Quizletish",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#EFE9DE",
+  "theme_color": "#EFE9DE",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

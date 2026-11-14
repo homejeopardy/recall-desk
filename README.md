@@ -38,6 +38,26 @@ start with a part of speech ("noun …") would mark a correct answer wrong.
 Learn progress is saved after every answer, per student name, in that browser — leaving
 mid-round loses nothing. The deck page's **Mastered** count is Learn's.
 
+## Links, review, offline
+
+**Links.** Every deck has one: the **Link** button on a deck copies
+`…/#deck=<id>`, which opens straight into it — handy for "study this before Tuesday".
+`#folder=<id>`, `#cal` and `#review` work too, a folder or deck name works in place of
+the id, and the back button behaves.
+
+**Review** gathers the shaky cards from *every* deck instead of one at a time, which is
+what you actually want the night before three quizzes. It ranks by how wrong you've been
+and how close the quiz is: a card you got wrong and haven't fixed outranks one you merely
+started, and anything with a quiz in the next two days jumps the queue. Each question
+says which deck it came from. It's in the sidebar under *Coming up*, with a count.
+
+**Offline.** The site keeps a copy of itself and of `decks.json`, so it still opens on a
+chromebook with no wifi, and can be added to a home screen. Both are fetched from the
+network **first** — the cached copy is only the fallback — so a publish is never hidden
+behind a stale cache. The Supabase and GitHub calls are never cached, so a failed save
+stays a visible failure rather than a fake success. If it ever misbehaves, add `?nosw`
+to the address to tear it down.
+
 ## Who can do what
 
 Three levels, set under **People** (owners only):

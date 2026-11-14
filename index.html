@@ -6,6 +6,9 @@
 <title>Quizletish</title>
 <meta name="description" content="Term drills for a law course — flashcards, multiple choice, typed recall, and timed matching.">
 <meta name="color-scheme" content="light dark">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#EFE9DE">
+<link rel="apple-touch-icon" href="icon.svg">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='3' y='6' width='26' height='21' fill='%23FBF8F1' stroke='%2314110D' stroke-width='2.5'/%3E%3Cpath d='M3 13h26' stroke='%23A8321F' stroke-width='2.5'/%3E%3Cpath d='M9 19h14M9 23h9' stroke='%2314110D' stroke-width='2'/%3E%3C/svg%3E">
 <style>[hidden]{display:none!important}</style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -564,6 +567,12 @@ input.text:focus{border-color:var(--ink);outline:none}
 .invited{opacity:.75}
 .invited .nm{font-weight:500;font-style:italic}
 
+/* ---- review ---- */
+.revbtn{width:100%;display:flex;align-items:center;gap:8px;padding:8px 9px;margin-top:7px;border:1px solid var(--rule);border-radius:var(--r);background:var(--surface);font-size:13px;font-weight:500;text-align:left}
+.revbtn:hover{border-color:var(--ink);background:var(--surface-2)}
+.revbtn .n{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--ink-faint)}
+.fromdeck{font-size:12px;color:var(--ink-faint);margin-top:10px}
+
 .railtoggle{display:none}
 @media (max-width:860px){
   .app{grid-template-columns:1fr}
@@ -664,6 +673,7 @@ var I = {
   collapse:"M5 8l4 4-4 4M19 8l-4 4 4 4",
   panel:"M4 5h16v14H4zM9.5 5v14",
   cal:"M4 6h16v14H4zM4 10h16M8 3v4M16 3v4",
+  link:"M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1",
   clock:"M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18M12 7v5l3 2",
   test:"M7 4h10v16H7zM10 9h4M10 13h4M10 17h2",
   print:"M7 9V4h10v5M7 18H5v-6h14v6h-2M8 15h8v5H8z",
@@ -807,9 +817,11 @@ function prog(deckId, cardId){
   var d = S.progress[deckId] || (S.progress[deckId] = {});
   return d[cardId] || (d[cardId] = {seen:0, right:0, wrong:0, star:false, last:null});
 }
-function record(cardId, ok){
-  var p = prog(S.deckId, cardId);
+function record(cardId, ok){ recordIn(S.deckId, cardId, ok); }
+function recordIn(deckId, cardId, ok){
+  var p = prog(deckId, cardId);
   p.seen++; if(ok){ p.right++; p.last = "right"; } else { p.wrong++; p.last = "wrong"; }
+  queueSync(deckId);
   saveLocal();
 }
 function toggleStar(cardId){
@@ -1269,16 +1281,59 @@ function renderSoon(){
     });
     box.appendChild(ul);
   }
+  var weak = weakEverywhere(20).length;
+  if(weak) box.appendChild(el("button",{class:"revbtn",onclick:startReview,title:"Mixed practice from every deck"},[
+    icon(I.learn,15), "Review", el("span",{class:"n",text:String(weak)})
+  ]));
   slot.appendChild(box);
 }
 
 /* ============================ views ============================ */
+/* ---- links you can send someone ----
+   #deck=<id|slug>, #folder=<id|slug>, #cal, #review. The id never changes, so that is
+   what gets copied; a slug is accepted too, for a link typed by hand. */
+var hashBusy = false;
+function deckSlug(d){ return slug(d.name) || d.id; }
+function findDeck(key){
+  key = decodeURIComponent(key || "");
+  for(var i=0;i<S.decks.length;i++) if(S.decks[i].id === key) return S.decks[i];
+  for(i=0;i<S.decks.length;i++) if(deckSlug(S.decks[i]) === slug(key)) return S.decks[i];
+  return null;
+}
+function findFolder(key){
+  key = decodeURIComponent(key || "");
+  for(var i=0;i<S.folders.length;i++) if(S.folders[i].id === key) return S.folders[i];
+  for(i=0;i<S.folders.length;i++) if(slug(S.folders[i].name) === slug(key)) return S.folders[i];
+  return null;
+}
+function setHash(h){
+  if(location.hash.slice(1) === h) return;
+  hashBusy = true;
+  try{ location.hash = h; }catch(e){}
+  setTimeout(function(){ hashBusy = false; }, 0);
+}
+function deckLink(d){ return location.origin + location.pathname + "#deck=" + d.id; }
+// Returns true when the address bar asked for something and we went there.
+function routeHash(){
+  var h = location.hash.slice(1);
+  if(!h || h === "editor" || h.indexOf("access_token") > -1 || h.indexOf("error=") > -1) return false;
+  var m = /^deck=(.+)$/.exec(h);
+  if(m){ var d = findDeck(m[1]); if(d){ openDeck(d.id); return true; } return false; }
+  m = /^folder=(.+)$/.exec(h);
+  if(m){ var f = findFolder(m[1]); if(f){ openFolder(f.id); return true; } return false; }
+  if(h === "cal"){ go("cal"); return true; }
+  if(h === "review"){ startReview(); return true; }
+  return false;
+}
 function go(view){
   if((view === "home" || view === "folder") && !S.session && S.incoming) applyIncoming();
+  if(view === "cal") setHash("cal");
+  else if(view === "home" && deck()) setHash("deck=" + deck().id);
   S.view = view; render(); window.scrollTo(0,0);
 }
 function openDeck(id){
   S.deckId = id; S.session = null; S.view = "home";
+  var dd = deck(); if(dd) setHash("deck=" + dd.id);
   var d = deck(); if(d && d.folder) openPath(d.folder);
   renderRail(); render(); window.scrollTo(0,0);
 }
@@ -1289,6 +1344,7 @@ function openPath(folderId){
 }
 function openFolder(id){
   S.folderId = id; S.session = null; S.view = "folder";
+  setHash("folder=" + id);
   openPath(id);
   renderRail(); render(); window.scrollTo(0,0);
 }
@@ -1302,6 +1358,7 @@ function render(){
   if(S.view === "print" && S.ready && !S.loadError) return renderPrint();
   if(S.view === "subs") return renderSubs();
   if(S.view === "people") return renderPeople();
+  if(S.view === "review" && S.ready && !S.loadError) return renderReview();
   if(S.loadError){
     stage.appendChild(el("div",{class:"empty"},[
       el("h3",{text:"Couldn't load the decks"}),
@@ -1323,6 +1380,7 @@ function render(){
   if(v === "test") return renderTest();
   if(v === "subs") return renderSubs();
   if(v === "people") return renderPeople();
+  if(v === "review") return renderReview();
   if(v === "table") return renderTable();
   if(v === "flash") return renderFlash();
   if(v === "quiz") return renderQuiz();
@@ -1378,6 +1436,13 @@ function renderHome(){
     el("div",{class:"rowctl"},[
       S.canEdit ? el("button",{class:"btn",onclick:function(){ go("edit"); }},[icon(I.edit,15),"Edit cards"]) : el("button",{class:"btn",onclick:function(){ go("edit"); }},[icon(I.cards,15),"Browse all cards"]),
       isEditor() ? el("button",{class:"btn ghost",title:"Decks students sent in",onclick:function(){ go("subs"); }},[icon(I.cards,15),"Submitted"]) : null,
+      el("button",{class:"btn ghost",title:"Copy a link straight to this deck",onclick:function(){
+        var url = deckLink(d);
+        if(navigator.clipboard && navigator.clipboard.writeText){
+          navigator.clipboard.writeText(url).then(function(){ toast("Link copied — it opens this deck"); },
+                                                  function(){ prompt("Copy this link:", url); });
+        } else prompt("Copy this link:", url);
+      }},[icon(I.link,15),"Link"]),
       el("button",{class:"btn ghost",title:"Print this deck",onclick:function(){ S.printFolder = null; go("print"); }},[icon(I.print,15),"Print"]),
       el("button",{class:"btn ghost railtoggle",onclick:function(){ var r = $("rail"); r.hidden = !r.hidden; }},["Decks"])
     ])
@@ -3242,6 +3307,136 @@ function loadSubs(){
       }).catch(function(){ return rows; });
     }).catch(function(){ return []; });
 }
+/* ---------------- review ----------------
+   Learn works a deck at a time, which is no help the evening before three quizzes.
+   This gathers the shaky cards from every deck and puts the soonest quiz first. */
+function urgency(d){
+  var n = daysUntil(d.quiz);
+  if(n === null) return 0.8;          // no date set: still worth seeing, just not first
+  if(n < 0) return 0.3;               // already happened
+  if(n <= 2) return 3;
+  if(n <= 7) return 2;
+  return 1.2;
+}
+function weakEverywhere(limit){
+  var out = [];
+  S.decks.forEach(function(d){
+    var soon = urgency(d), all = unitsOf(d);
+    all.forEach(function(u){
+      var pr = prog(d.id, u.id), st = lstage(d.id, u.id), mx = maxStage(d, u), base = 0;
+      if(pr.wrong > 0 && pr.last !== "right") base = 3;        // got it wrong, not yet fixed
+      else if(st > 0 && st < mx) base = 2;                      // started, not finished
+      else if(pr.star) base = 1.5;                              // you flagged it yourself
+      else if(!pr.seen && soon >= 2) base = 1;                  // never seen, quiz is close
+      if(!base) return;
+      out.push({deck:d, unit:u, score: base * soon, all: all});
+    });
+  });
+  out.sort(function(a,b){ return b.score - a.score; });
+  return out.slice(0, limit || 20);
+}
+function startReview(){
+  var items = weakEverywhere(20);
+  if(!items.length) return toast("Nothing needs reviewing — go and enjoy yourself");
+  S.session = {mode:"review", items: shuffled(items), i:0, answer:null, correct:0};
+  setHash("review");
+  S.view = "review"; render(); window.scrollTo(0,0);
+}
+function renderReview(){
+  var s = S.session;
+  if(!s || s.mode !== "review") return go("home");
+  if(s.i >= s.items.length) return renderReviewDone(s);
+  var it = s.items[s.i], u = it.unit, d = it.deck, a = s.answer;
+  if(s.kindFor !== s.i){
+    s.kind = canChoose(it.all) ? "choice" : "type";
+    s.choices = s.kind === "choice" ? buildChoices(u, it.all) : null;
+    s.kindFor = s.i;
+  }
+  var right = ans(u);
+
+  stage.appendChild(el("div",{class:"stage-head"},[
+    el("div",{},[ el("h2",{text:"Review"}),
+      el("div",{class:"sub",text:"The cards you keep missing, from every deck, soonest quiz first."}) ]),
+    el("button",{class:"btn ghost",onclick:function(){ S.session = null; go("home"); }},[icon(I.back,15),"Done"])
+  ]));
+  stage.appendChild(el("div",{class:"deskrow"},[
+    el("span",{class:"counter",text:(s.i+1) + " / " + s.items.length}),
+    el("span",{class:"counter",text:s.correct + " right"})
+  ]));
+  var tr = el("div",{class:"track"}); tr.appendChild(el("i",{style:"width:" + (s.i/s.items.length*100) + "%"})); stage.appendChild(tr);
+  stage.appendChild(el("div",{class:"prompt"},[
+    el("div",{class:"role",text: u.fixed ? "Which form?" : ASK_LABEL()}),
+    el("div",{class:"q",text:ask(u) || "—"}),
+    el("div",{class:"fromdeck",text:(d.name || "Untitled deck") + (d.quiz ? " · quiz " + whenText(d.quiz) : "")})
+  ]));
+
+  if(s.kind === "choice"){
+    var wrap = el("div",{class:"choices"});
+    s.choices.forEach(function(opt, idx){
+      var cls = "choice";
+      if(a){ if(opt === right) cls += " right"; else if(idx === a.picked) cls += " wrong"; }
+      wrap.appendChild(el("button",{class:cls, disabled: a ? "disabled" : null,
+        onclick:function(){ answerReview({picked:idx, ok: opt === right}); }},[
+        el("span",{class:"key",text:String(idx+1)}), el("span",{text:opt})
+      ]));
+    });
+    stage.appendChild(wrap);
+  } else {
+    var inp = el("input",{class:"answer",type:"text",placeholder:"Type the answer…","aria-label":"Your answer",autocomplete:"off",autocapitalize:"off",spellcheck:"false"});
+    if(a){ inp.value = a.given || ""; inp.disabled = true; }
+    else {
+      inp.addEventListener("keydown", function(ev){
+        if(ev.key === "Enter"){ ev.preventDefault(); answerReview({given: inp.value, ok: grade(inp.value, right) !== "no"}); }
+      });
+      setTimeout(function(){ inp.focus(); }, 0);
+    }
+    stage.appendChild(inp);
+  }
+
+  if(!a){
+    stage.appendChild(el("div",{class:"rowctl",style:"margin-top:14px;justify-content:space-between"},[
+      el("span",{style:"font-size:11.5px;color:var(--ink-faint)",
+        html: s.kind === "choice" ? 'Press <kbd>1</kbd>–<kbd>' + s.choices.length + '</kbd>' : 'Press <kbd>Enter</kbd> to check'}),
+      el("button",{class:"linkbtn",onclick:function(){ answerReview({given:"", ok:false, skipped:true}); }},["Don't know?"])
+    ]));
+    return;
+  }
+  stage.appendChild(el("div",{class:"verdict " + (a.ok ? "ok" : "no")},[
+    el("span",{}, a.ok ? ["Correct."] : [a.skipped ? "The answer is " : "Not quite — the answer is ", el("b",{text:right})]),
+    el("button",{class:"btn sm",onclick:nextReview},[ s.i + 1 >= s.items.length ? "Finish" : "Next", icon(I.chev,14)])
+  ]));
+}
+function answerReview(a){
+  var s = S.session; if(!s || s.answer) return;
+  var it = s.items[s.i];
+  s.answer = a;
+  if(a.ok) s.correct++;
+  recordIn(it.deck.id, it.unit.id, a.ok);
+  render();
+  if(a.ok){ clearTimeout(learnTimer); learnTimer = setTimeout(function(){ if(S.session === s && s.answer === a) nextReview(); }, 900); }
+}
+function nextReview(){
+  clearTimeout(learnTimer);
+  var s = S.session; if(!s || !s.answer) return;
+  s.i++; s.answer = null; render(); window.scrollTo(0,0);
+}
+function renderReviewDone(s){
+  var pct = Math.round(s.correct / s.items.length * 100);
+  stage.appendChild(el("div",{class:"stage-head"},[
+    el("div",{},[ el("h2",{text:"Review"}), el("div",{class:"sub",text:"Across every deck"}) ]),
+    el("button",{class:"btn ghost",onclick:function(){ S.session = null; go("home"); }},[icon(I.back,15),"Done"])
+  ]));
+  stage.appendChild(el("div",{class:"result"},[
+    el("div",{class:"eyebrow",text:"Review done"}),
+    el("div",{class:"score",text:pct + "%"}),
+    el("p",{style:"margin:2px 0 20px;color:var(--ink-soft);font-size:14px",text:s.correct + " of " + s.items.length + " right"}),
+    el("div",{class:"rowctl"},[
+      el("button",{class:"btn primary",onclick:startReview},["Another round"]),
+      el("button",{class:"btn ghost",onclick:function(){ S.session = null; go("home"); }},["Back to deck"])
+    ])
+  ]));
+}
+
 /* ---------------- who can do what ----------------
    Access can be handed out before someone has ever signed in: it waits under their
    email address and lands on the account the first time they arrive. */
@@ -3684,6 +3879,12 @@ document.addEventListener("keydown", function(ev){
     } else if((k === "Enter" || k === " ") && s.picked !== null){ ev.preventDefault(); nextQuiz(); }
   } else if(S.view === "write" && s && s.state && (k === "Enter" || k === " ")){
     ev.preventDefault(); nextWrite();
+  } else if(S.view === "review" && s && s.mode === "review" && s.i < s.items.length){
+    if(!s.answer && s.kind === "choice" && /^[1-4]$/.test(k)){
+      var ri = parseInt(k,10) - 1;
+      if(s.choices && ri < s.choices.length){ ev.preventDefault(); answerReview({picked:ri, ok: s.choices[ri] === ans(s.items[s.i].unit)}); }
+    } else if(s.answer && (k === "Enter" || k === " ")){ ev.preventDefault(); nextReview(); }
+    if(k === "Escape"){ S.session = null; go("home"); }
   } else if(S.view === "test" && s && s.mode === "test" && !s.over){
     var tq = s.qs[s.i];
     if(tq.kind !== "type" && /^[1-4]$/.test(k)){
@@ -3817,7 +4018,7 @@ fetch("decks.json", {cache:"no-store"})
     S.ready = true;
     if(!S.deckId && S.decks.length) S.deckId = S.decks[0].id;
     refreshFoot(); renderRail();
-    render();
+    if(!routeHash()) render();
   })
   .catch(function(err){
     S.ready = true; S.loadError = err;
@@ -3855,6 +4056,26 @@ function pollPublished(){
       toast("Decks updated");
     })
     .catch(function(){});
+}
+window.addEventListener("hashchange", function(){
+  if(hashBusy) return;                       // our own update, not the reader's
+  if(!routeHash() && !location.hash) { S.view = "home"; render(); }
+});
+/* Offline. Registered last and wrapped, so a browser that refuses it changes nothing.
+   Add ?nosw to the address to tear it down if it ever misbehaves. */
+if("serviceWorker" in navigator && location.protocol !== "file:"){
+  if(/[?&]nosw\b/.test(location.search)){
+    navigator.serviceWorker.getRegistrations().then(function(rs){
+      return Promise.all(rs.map(function(r){ return r.unregister(); }));
+    }).then(function(){
+      // clear the stored copies from here too: the worker is already gone by now
+      return window.caches ? caches.keys().then(function(k){ return Promise.all(k.map(function(n){ return caches.delete(n); })); }) : null;
+    }).then(function(){ toast("Offline support switched off"); });
+  } else {
+    window.addEventListener("load", function(){
+      navigator.serviceWorker.register("sw.js").catch(function(){});
+    });
+  }
 }
 setInterval(pollPublished, 60000);
 document.addEventListener("visibilitychange", function(){ if(!document.hidden) pollPublished(); });
