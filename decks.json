@@ -924,9 +924,10 @@
     },
     {
       "id": "dcjv3zvy4x",
-      "name": "Conjugation",
+      "name": "1° Persona Irregular",
       "subject": "",
-      "folder": "f41i7c5shp",
+      "folder": "f9tuc8lobh",
+      "quiz": "2026-11-17",
       "createdAt": 1794596719679,
       "kind": "conj",
       "tense": "All",
@@ -1144,145 +1145,6 @@
           "forms": {
             "yo": "vengo"
           }
-        }
-      ]
-    },
-    {
-      "id": "dd79sms8rw",
-      "name": "Meaning",
-      "subject": "",
-      "folder": "f41i7c5shp",
-      "createdAt": 1794597811798,
-      "cards": [
-        {
-          "id": "cd7eov6fru",
-          "term": "agradecer",
-          "def": "to be grateful / thank "
-        },
-        {
-          "id": "cd7eovwc7s",
-          "term": "caber",
-          "def": "to fit "
-        },
-        {
-          "id": "cd7eovyhw8",
-          "term": "caer",
-          "def": "to fall "
-        },
-        {
-          "id": "cd7eovwlia",
-          "term": "conducir",
-          "def": "to drive / conduct "
-        },
-        {
-          "id": "cd7eovmpdv",
-          "term": "conocer",
-          "def": "to know / meet (person/place)"
-        },
-        {
-          "id": "cd7eovmjr8",
-          "term": "dar",
-          "def": "to give"
-        },
-        {
-          "id": "cd7eov7t87",
-          "term": "decir",
-          "def": "to say / tell"
-        },
-        {
-          "id": "cd7eowmsse",
-          "term": "dirigir",
-          "def": "to direct "
-        },
-        {
-          "id": "cd7eowogny",
-          "term": "elegir",
-          "def": "to chose "
-        },
-        {
-          "id": "cd7eowhkna",
-          "term": "escoger",
-          "def": "to choose "
-        },
-        {
-          "id": "cd7eowth6n",
-          "term": "estar",
-          "def": "to be (condition / location) "
-        },
-        {
-          "id": "cd7eowrtru",
-          "term": "hacer",
-          "def": "to do / make "
-        },
-        {
-          "id": "cd7eown4nh",
-          "term": "ir",
-          "def": "to go "
-        },
-        {
-          "id": "cd7eowbtau",
-          "term": "obedecer",
-          "def": "to obey "
-        },
-        {
-          "id": "cd7eowljot",
-          "term": "ofrecer",
-          "def": "to offer "
-        },
-        {
-          "id": "cd7eowwe6n",
-          "term": "oír",
-          "def": "to hear "
-        },
-        {
-          "id": "cd7eowzwbp",
-          "term": "parecer",
-          "def": "to seem / look like "
-        },
-        {
-          "id": "cd7eowj43j",
-          "term": "poner",
-          "def": "to put / place"
-        },
-        {
-          "id": "cd7eowgg9g",
-          "term": "saber",
-          "def": "to know (facts / how to)"
-        },
-        {
-          "id": "cd7eowiu8s",
-          "term": "salir",
-          "def": "to leave / go"
-        },
-        {
-          "id": "cd7eow3tbu",
-          "term": "ser",
-          "def": "to be (permanent / identity)"
-        },
-        {
-          "id": "cd7eowuwwx",
-          "term": "tener",
-          "def": "to have"
-        },
-        {
-          "id": "cd7eowrnj6",
-          "term": "traducir",
-          "def": "to translate"
-        },
-        {
-          "id": "cd7eowgil4",
-          "term": "traer",
-          "def": "to bring "
-        },
-        {
-          "id": "cd7eowvqit",
-          "term": "valer",
-          "def": "to be worth "
-        },
-        {
-          "id": "cd7eow1uw9",
-          "term": "venir",
-          "def": "to come "
         }
       ]
     }
