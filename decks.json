@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated": "2026-11-14",
+  "updated": "2026-11-15",
   "folders": [
     {
       "id": "f56mcnn0z5",
@@ -912,7 +912,65 @@
         {
           "id": "cax1vlrr2x",
           "term": "alliance",
-          "def": "a partnership bet",
+          "def": "a partnership between two or more people, groups, countries \nto work towards a common goal",
+          "pos": "noun"
+        },
+        {
+          "id": "cvwgg56bxj",
+          "term": "barricade",
+          "def": "an improvised barrier to prevent movement",
+          "def2": "to block or prevent with a barrier",
+          "pos2": "verb",
+          "pos": "noun"
+        },
+        {
+          "id": "cvx3ejawdg",
+          "term": "capitulate",
+          "def": "to stop resisting an opponent; surrender",
+          "pos": "verb"
+        },
+        {
+          "id": "cvx49kf6cc",
+          "term": "deter",
+          "def": "to discourage ",
+          "pos": "verb"
+        },
+        {
+          "id": "cwakbz9ccr",
+          "term": "eradicate",
+          "def": "to destroy completely; to put an end to",
+          "pos": "verb"
+        },
+        {
+          "id": "cwakwty5l3",
+          "term": "incite",
+          "def": "to encourage often poor or violent behavior",
+          "pos": "verb"
+        },
+        {
+          "id": "cwam58mije",
+          "term": "liberate",
+          "def": "to set free from a situation",
+          "pos": "verb"
+        },
+        {
+          "id": "cwamtsgvo9",
+          "term": "marginalize",
+          "def": "to treat a person or group as insignificant or unimportant",
+          "pos": "verb"
+        },
+        {
+          "id": "cwanj8uxj2",
+          "term": "sanction",
+          "def": "a threatened penalty for disobeying",
+          "def2": "to give official permission or approval",
+          "pos2": "verb",
+          "pos": "noun"
+        },
+        {
+          "id": "cwaoiv79fx",
+          "term": "truce",
+          "def": "an agreement to stop fighting",
           "pos": "noun"
         }
       ]
