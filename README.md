@@ -400,6 +400,53 @@ answers can be separated with `/`; typed answers also forgive spelling slips.
 If you edit both by hand and in the browser, the browser publishes whatever it has and
 the app will tell you when the file changed underneath it. Reload before a big edit.
 
+## Something's wrong with this card
+
+A flag sits beside every card in **Browse all cards**, and in the bottom corner of a
+flipped flashcard. It asks what's wrong and sends the report to the same inbox as
+submitted decks, so there is one place to look.
+
+It copies the card's **term and definition into the report**, not just its id, so the
+report still reads sensibly after the card has been edited or the deck renamed. The
+editor gets **Open the card** — which jumps to that row in the deck editor and puts the
+cursor in it — plus **Fixed** and **Dismiss**.
+
+Reporting needs an account: a report nobody can reply to is worth less than no report.
+Rather than hiding the flag from signed-out students, it offers them the sign-in. The
+flag shows whenever the project answers at all — the sign-in library itself is only
+fetched once somebody actually signs in, so gating on the client would have hidden it
+from exactly the people it is for.
+
+Needs the `reports` table from `supabase/schema.sql`.
+
+## Pasting a list
+
+**Work it out** is the default, and it does. Per line it finds the divider itself — a
+tab, an em or en dash, a hyphen with spaces, a colon, a pipe, a bullet — trying the
+unambiguous ones first and a comma last, because definitions are full of commas. Leading
+bullets and numbering (`- `, `• `, `1. `, `1) `) are stripped, so a list copied straight
+out of a Google Doc imports as it stands.
+
+On a vocabulary deck it also pulls a part of speech off the front of the definition when
+one is there: `adamant — adjective — unyielding`, `adamant: (adj.) unyielding` and
+`adamant <tab> adj. unyielding` all land in the right three fields. Short forms (`adj`, `n`,
+`v`, `prep`) are expanded.
+
+A definition written `1. nerve 2. bitterness` becomes a card with **two meanings**
+rather than one definition with numbers in it.
+
+The old fixed separators are still in the menu for a list that needs forcing, and the
+preview under the box says what it made of your text before anything is added.
+
+## Duplicating a deck
+
+**Duplicate** in the deck editor copies the whole deck — cards, type, folder,
+conjugation rows — under a new name, and opens it. Every id is new, deck and cards
+alike, so the two can never be mistaken for each other or merged into one another.
+
+The **quiz date is not copied**. It belonged to the deck you copied from, and a date
+that's already passed would file the new deck straight into the archive.
+
 ## Who can actually change the cards
 
 Two separate things, worth keeping straight:

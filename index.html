@@ -307,6 +307,13 @@ kbd{font-family:var(--mono);font-size:11px;background:var(--surface-2);border:1p
 .row textarea:focus{border-color:var(--ink);outline:none;background:var(--surface-2)}
 .row .del{color:var(--ink-faint);padding:8px;border-radius:var(--r);line-height:0}
 .row .del:hover{color:var(--bad);background:var(--bad-wash)}
+.row .rep{color:var(--ink-faint);padding:8px;border-radius:var(--r);line-height:0;opacity:.45;transition:opacity .12s}
+.row:hover .rep,.row .rep:focus-visible{opacity:1}
+.row .rep:hover{color:var(--brass);background:var(--brass-wash)}
+.face .rep{position:absolute;left:16px;bottom:12px;color:var(--ink-faint);padding:6px;border-radius:var(--r);line-height:0;opacity:.55}
+.face .rep:hover{opacity:1;color:var(--brass)}
+.reprow .what{font-family:var(--read);font-size:15px}
+.reprow .card{font-size:13px;color:var(--ink-soft);margin-top:3px;background:none;border:0;padding:0}
 
 .panel{border:1px solid var(--rule);border-radius:var(--r-lg);background:var(--surface);padding:20px;margin-bottom:16px}
 .panel h3{font-family:var(--read);font-size:19px;margin-bottom:5px;font-weight:600}
@@ -751,6 +758,7 @@ var I = {
   link:"M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1",
   clock:"M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18M12 7v5l3 2",
   test:"M7 4h10v16H7zM10 9h4M10 13h4M10 17h2",
+  flag:"M5 21V4M5 5h11l-2 3 2 3H5",
   print:"M7 9V4h10v5M7 18H5v-6h14v6h-2M8 15h8v5H8z",
   table:"M4 5h16v14H4zM4 10h16M10 10v9",
   tag:"M4 5h8l8 8-7 7-8-8zM8.5 9.5h.01"
@@ -2843,6 +2851,7 @@ function renderFlash(){
     ]),
     el("div",{class:"face back"},[
       el("span",{class:"role",text:ANS_LABEL()}), starBtn2,
+      reportsOn() ? reportBtn(d, c) : null,
       el("div",{class:"facetext",text:ans(c) || "—"}),
       el("div",{class:"hintline",text:"How did that go?"})
     ])
@@ -3121,6 +3130,26 @@ function newDeck(folderId){
   S.decks.push(d); S.deckId = d.id; S.view = "edit";
   pushDeck(d); renderRail(); render();
 }
+/* A copy to build the next unit from, rather than retyping twenty cards. New ids all
+   the way down, so the two decks can't be confused for each other afterwards, and no
+   quiz date — the old one belongs to the deck it was copied from. */
+function duplicateDeck(d){
+  if(!S.canEdit) return;
+  var n = copy({name:d.name || "Untitled deck", subject:d.subject || "", folder:d.folder || "",
+                kind:d.kind, tense:d.tense, persons:d.persons, cards:cardsOf(d)});
+  n.id = uid("d");
+  n.name = n.name + " (copy)";
+  n.quiz = "";
+  n.createdAt = Date.now();
+  n.cards = (n.cards || []).map(function(c){ var x = copy(c); x.id = uid(); return x; });
+  if(!n.cards.length) n.cards = [{id:uid(), term:"", def:""}];
+  S.decks.push(n);
+  S.deckId = n.id; S.view = "edit";
+  if(n.folder){ S.open[n.folder] = true; saveFolds(); }
+  saveDraft(); renderRail(); render();
+  var k = cardsOf(n).length;
+  toast("Copied " + k + (k === 1 ? " card" : " cards") + " — rename it and set a quiz date");
+}
 function renderEdit(){
   var d = deck(), ro = !S.canEdit;
   stage.appendChild(el("div",{class:"stage-head"},[
@@ -3142,6 +3171,8 @@ function renderEdit(){
     bar.appendChild(el("button",{class:"btn",onclick:function(){ var p = $("pastepanel"); p.hidden = !p.hidden; if(!p.hidden) $("pastebox").focus(); }},["Paste a list"]));
   }
   bar.appendChild(el("button",{class:"btn ghost",onclick:function(){ copyDeck(d); }},[icon(I.copy,15),"Copy as text"]));
+  if(!ro) bar.appendChild(el("button",{class:"btn ghost",title:"Build the next one from this one",
+    onclick:function(){ duplicateDeck(d); }},[icon(I.plus,15),"Duplicate"]));
   if(S.user && !isEditor()) bar.appendChild(el("button",{class:"btn ghost",onclick:function(){ sendIn(d); }},[icon(I.upload,15),"Send to the editor"]));
   if(!ro) bar.appendChild(el("button",{class:"btn ghost",onclick:function(){ go("connect"); }},[icon(I.upload,15), S.token ? "Publishing" : "Set up publishing"]));
   if(!ro){
@@ -3213,7 +3244,7 @@ function renderEdit(){
       mkta("term","term"),
       kind === "vocab" ? posSelect(c, i, ro, function(){ queueSave(d); }) : null,
       defCell,
-      ro ? el("span",{}) : el("button",{class:"del","aria-label":"Delete card " + (i+1),onclick:function(){ d.cards.splice(i,1); if(!d.cards.length) d.cards.push({id:uid(),term:"",def:""}); queueSave(d); render(); }},[icon(I.trash,15)])
+      ro ? (reportsOn() ? reportBtn(d, c) : el("span",{})) : el("button",{class:"del","aria-label":"Delete card " + (i+1),onclick:function(){ d.cards.splice(i,1); if(!d.cards.length) d.cards.push({id:uid(),term:"",def:""}); queueSave(d); render(); }},[icon(I.trash,15)])
     ]));
   });
   stage.appendChild(rows);
@@ -3530,6 +3561,42 @@ function copyDeck(d){
 }
 function pastePanel(d){
   var sepSel, custom, box, preview;
+  /* Works out the separator line by line, so a list copied out of a document imports
+     without anyone having to pick anything. Order matters: a tab is unambiguous, a dash
+     or a colon is nearly always the divider, a comma is the last resort because
+     definitions are full of them. */
+  var AUTO_SEPS = ["\t", " \u2014 ", " \u2013 ", " -- ", " - ", "\u2014", "\u2013", " : ", ": ", " | ", " \u2022 ", ","];
+  function unbullet(line){ return line.replace(/^\s*(?:[-\u2013\u2014\u2022*]|\(?\d+[.)])\s+/, ""); }
+  function autoParts(line){
+    for(var i = 0; i < AUTO_SEPS.length; i++){
+      var at = line.indexOf(AUTO_SEPS[i]);
+      if(at > 0 && line.slice(at + AUTO_SEPS[i].length).trim())
+        return [line.slice(0, at).trim(), line.slice(at + AUTO_SEPS[i].length).trim()];
+    }
+    return [line.trim()];
+  }
+  var POS_SHORT = {adj:"adjective", adv:"adverb", n:"noun", v:"verb", prep:"preposition",
+                   conj:"conjunction", pron:"pronoun", interj:"interjection", phr:"phrase"};
+  // "adamant — adjective — unyielding" and "adamant: (adj.) unyielding" both work
+  function splitPos(rest){
+    var m = String(rest || "").match(/^\(?([A-Za-z]+)\.?\)?\s*(?:[\u2014\u2013\-:|,]\s*|\s+)([\s\S]+)$/);
+    if(!m) return null;
+    var p = m[1].toLowerCase();
+    p = POS_SHORT[p] || p;
+    return POS.indexOf(p) > -1 ? {pos:p, def:m[2].trim()} : null;
+  }
+  // "1. nerve  2. bitterness" in one definition becomes the card's two meanings
+  function splitTwo(def){
+    var m = String(def || "").match(/^\s*1[.)]\s*([\s\S]*?)[;.,]?\s*2[.)]\s*([\s\S]+)$/);
+    if(!m) return null;
+    var a = m[1].trim(), b = m[2].trim();
+    return (a && b) ? [a, b] : null;
+  }
+  function withTwo(card){
+    var two = splitTwo(card.def);
+    if(two){ card.def = two[0]; card.def2 = two[1]; }
+    return card;
+  }
   function seps(){
     var v = sepSel.value;
     if(v === "tab") return ["\t"];
@@ -3549,10 +3616,19 @@ function pastePanel(d){
     return parts;
   }
   function parse(){
-    var kind = kindOf(d), out = [];
+    var kind = kindOf(d), out = [], auto = sepSel.value === "auto" && kind !== "conj";
     box.value.split("\n").forEach(function(line){
       if(!line.trim()) return;
-      var f = split(line);
+      var f = auto ? autoParts(unbullet(line)) : split(line);
+      if(auto){
+        var rest = f.slice(1).join(" ").trim(), card = {id:uid(), term:f[0] || "", def:rest};
+        if(kind === "vocab"){
+          var sp = splitPos(rest);
+          if(sp){ card.pos = sp.pos; card.def = sp.def; }
+        }
+        out.push(withTwo(card));
+        return;
+      }
       if(kind === "conj"){
         var card = {id:uid(), term:f[0] || "", def:f[1] || "", forms:{}};
         // forms may be their own columns, or one comma-separated column
@@ -3562,10 +3638,10 @@ function pastePanel(d){
         out.push(card);
       } else if(kind === "vocab"){
         var pos = (f[1] || "").toLowerCase();
-        if(POS.indexOf(pos) > -1) out.push({id:uid(), term:f[0] || "", pos:pos, def:f.slice(2).join(" ").trim()});
-        else out.push({id:uid(), term:f[0] || "", def:f.slice(1).join(" ").trim()});
+        if(POS.indexOf(pos) > -1) out.push(withTwo({id:uid(), term:f[0] || "", pos:pos, def:f.slice(2).join(" ").trim()}));
+        else out.push(withTwo({id:uid(), term:f[0] || "", def:f.slice(1).join(" ").trim()}));
       } else {
-        out.push({id:uid(), term:f[0] || "", def:f.slice(1).join(" ").trim()});
+        out.push(withTwo({id:uid(), term:f[0] || "", def:f.slice(1).join(" ").trim()}));
       }
     });
     return out;
@@ -3580,8 +3656,10 @@ function pastePanel(d){
     }
     var withDef = n.filter(function(c){ return defs(c).length; }).length;
     var withPos = n.filter(function(c){ return posRights(c).length; }).length;
+    var two = n.filter(function(c){ return (c.def2 || "").trim(); }).length;
     preview.textContent = n.length + " card" + (n.length===1?"":"s") + " · " + withDef + " with a definition" +
       (kind === "vocab" ? " · " + withPos + " with a part of speech" : "") +
+      (two ? " · " + two + " with two meanings" : "") +
       (withDef < n.length ? " · " + (n.length - withDef) + " line" + (n.length-withDef===1?"":"s") + " had no separator" : "");
   }
   var ph = kindOf(d) === "conj"
@@ -3604,6 +3682,7 @@ function pastePanel(d){
     file.value = "";
   });
   sepSel = el("select",{"aria-label":"Separator",onchange:function(){ custom.hidden = sepSel.value !== "custom"; refresh(); }},[
+    el("option",{value:"auto",text:"Work it out"}),
     el("option",{value:"tab",text:"Tab (paste from a spreadsheet)"}),
     el("option",{value:"dash",text:"A dash  -  between them"}),
     el("option",{value:"comma",text:"A comma"}),
@@ -3620,6 +3699,8 @@ function pastePanel(d){
       : kindOf(d) === "vocab"
       ? "One word per line: word, part of speech, definition. Leave the middle one out and the part of speech stays blank."
       : "One card per line, term first. Straight from a spreadsheet column pair, a Word table, or your outline."}),
+    el("p",{class:"saveflag",style:"margin:-8px 0 12px",
+      text:"Left on Work it out, it finds the divider itself — a tab, a dash, a colon — and ignores bullets and numbering. A definition written \u201c1. … 2. …\u201d becomes a card with two meanings."}),
     box,
     el("div",{class:"rowctl",style:"justify-content:flex-start;margin-top:12px"},[
       el("button",{class:"btn sm",onclick:function(){ file.click(); }},[icon(I.upload,14),"From a file"]), file,
@@ -3767,6 +3848,37 @@ function pushProgress(){
   }).catch(function(){ ids.forEach(function(id){ pendingDecks[id] = true; }); });
 }
 
+/* ---------------- "something's wrong with this card" ----------------
+   Spotted while studying, which is the only moment anyone ever notices. It goes to the
+   same inbox as submitted decks, so there is one place to look. Signing in is needed —
+   a report nobody can reply to is worth less than no report — so the button offers the
+   sign-in rather than disappearing. */
+function reportCard(d, c){
+  if(!S.user){ toast("Sign in first, so the editor can tell you it's fixed"); return go("who"); }
+  if(!sb) return toast("Can't reach the account service just now");
+  var what = prompt("What's wrong with \u201c" + ((c.term || "").trim() || "this card") + "\u201d?\n\n" +
+                    "A typo, the wrong definition, a missing accent \u2014 whatever you spotted:", "");
+  if(what === null) return;
+  if(!String(what).trim()) return toast("Say what's wrong and it'll go in");
+  sb.from("reports").insert({
+    user_id: S.user.id,
+    deck_name: d.name || "Untitled deck",
+    card_id: c.id || null,
+    term: (c.term || "").slice(0, 300),
+    def: defText(c).slice(0, 600),
+    note: String(what).slice(0, 1000)
+  }).then(function(r){
+    if(r && r.error) return toast("Didn't send: " + r.error.message);
+    toast("Sent \u2014 thanks. The editor sees it with the card.");
+  });
+}
+function reportBtn(d, c, cls){
+  return el("button",{class:cls || "rep", title:"Something's wrong with this card",
+    "aria-label":"Report a problem with " + ((c.term || "").trim() || "this card"),
+    onclick:function(ev){ ev.stopPropagation(); reportCard(d, c); }},[icon(I.flag, cls === "rep" ? 14 : 15)]);
+}
+function reportsOn(){ return !!(S.user || S.providers); }   // the client itself loads only on sign-in
+
 /* ---- submissions ---- */
 function submitDeck(d, note){
   if(!sb || !S.user) return Promise.reject(new Error("Sign in first"));
@@ -3800,6 +3912,39 @@ function loadSubs(){
       }).catch(function(){ return rows; });
     }).catch(function(){ return []; });
 }
+function loadReports(){
+  if(!sb || !S.user) return Promise.resolve([]);
+  return sb.from("reports").select("id,deck_name,card_id,term,def,note,status,created_at,user_id")
+    .order("created_at",{ascending:false}).then(function(r){
+      var rows = r.data || [];
+      if(!rows.length || !isEditor()) return rows;
+      var ids = rows.map(function(x){ return x.user_id; }).filter(function(v,i,a){ return a.indexOf(v) === i; });
+      return sb.from("profiles").select("id,name,avatar").in("id", ids).then(function(pr){
+        var by = {};
+        (pr.data || []).forEach(function(x){ by[x.id] = x; });
+        rows.forEach(function(x){ x.who = by[x.user_id] || null; });
+        return rows;
+      }).catch(function(){ return rows; });
+    }).catch(function(){ return []; });
+}
+function judgeReport(r, status){
+  if(!sb) return;
+  sb.from("reports").update({status:status, reviewed_at:new Date().toISOString()}).eq("id", r.id)
+    .then(function(){ toast(status === "fixed" ? "Marked fixed" : "Dismissed"); render(); });
+}
+// Opens the deck the report came from, with the card it is about in view.
+function openReported(r){
+  var d = null;
+  S.decks.forEach(function(x){ if(!d && x.name === r.deck_name) d = x; });
+  if(!d) return toast("That deck isn't here any more");
+  S.deckId = d.id; S.view = "edit"; render();
+  setTimeout(function(){
+    var k = cardsOf(d).map(function(c){ return c.id; }).indexOf(r.card_id);
+    var row = stage.querySelectorAll(".row")[k];
+    if(row){ row.scrollIntoView({block:"center"}); var ta = row.querySelector("textarea"); if(ta) ta.focus(); }
+  }, 60);
+}
+
 /* ---------------- home ----------------
    A welcome for anyone who has never been here, and from then on a dashboard: what is
    due, one way into review, and every deck. */
@@ -4135,17 +4280,42 @@ function renderPeople(){
 function renderSubs(){
   stage.appendChild(el("div",{class:"stage-head"},[
     el("div",{},[ el("h2",{text:"Submitted decks"}),
-      el("div",{class:"sub",text: isEditor() ? "Decks students sent in. Approving adds one to your decks, ready to publish." : "Decks you've sent in."}) ]),
+      el("div",{class:"sub",text: isEditor() ? "Decks students sent in, and problems they reported. Approving adds a deck to yours, ready to publish." : "Decks you've sent in, and problems you've reported."}) ]),
     el("button",{class:"btn ghost",onclick:function(){ go("home"); }},[icon(I.back,15),"Deck"])
   ]));
   var box = el("div",{id:"subbox"},[ el("div",{class:"empty"},[el("h3",{text:"Loading…"})]) ]);
   stage.appendChild(box);
+  var rbox = el("div",{id:"repbox"});
+  stage.appendChild(rbox);
+  loadReports().then(function(list){
+    rbox.textContent = "";
+    if(!list.length) return;
+    rbox.appendChild(el("h3",{style:"margin:26px 0 12px",text:"Reported problems"}));
+    var listEl = el("div",{class:"sublist"});
+    list.forEach(function(r){
+      listEl.appendChild(el("div",{class:"subrow reprow"},[
+        el("div",{},[
+          el("div",{class:"what",text:r.note || "(nothing said)"}),
+          el("div",{class:"card",text:"\u201c" + (r.term || "a card") + "\u201d in " + r.deck_name}),
+          el("div",{class:"m",text:String(r.created_at || "").slice(0,10)}),
+          r.who ? el("div",{class:"sender"},[ avatarEl(r.who.name, r.who.avatar, "md"), r.who.name || "Someone" ]) : null
+        ]),
+        el("div",{class:"rowctl"},[
+          el("span",{class:"stat-pill " + (r.status === "fixed" ? "approved" : r.status === "declined" ? "declined" : r.status),text:r.status}),
+          (isEditor() && S.canEdit && r.card_id) ? el("button",{class:"btn sm",onclick:function(){ openReported(r); }},["Open the card"]) : null,
+          (isEditor() && r.status === "pending") ? el("button",{class:"btn primary sm",onclick:function(){ judgeReport(r,"fixed"); }},["Fixed"]) : null,
+          (isEditor() && r.status === "pending") ? el("button",{class:"btn sm",onclick:function(){ judgeReport(r,"declined"); }},["Dismiss"]) : null
+        ])
+      ]));
+    });
+    rbox.appendChild(listEl);
+  });
   loadSubs().then(function(list){
     box.textContent = "";
     if(!list.length){
       box.appendChild(el("div",{class:"empty"},[
         el("h3",{text:"Nothing here yet"}),
-        el("p",{text: isEditor() ? "When a student sends a deck in, it lands here." : "Build a deck, then use Send to the editor from the deck editor."})
+        el("p",{text: isEditor() ? "When a student sends a deck in, or reports a problem with a card, it lands here." : "Build a deck, then use Send to the editor from the deck editor. The flag on a card reports a problem with it."})
       ]));
       return;
     }

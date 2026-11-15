@@ -270,3 +270,41 @@ begin
   delete from public.invites i where lower(i.email) = lower(coalesce(new.email, ''));
   return new;
 end; $$;
+
+-- ================================================================ card reports
+-- "Something's wrong with this card", sent while studying. It lands in the same inbox
+-- as submitted decks, so there is one place to look. The card's text is copied in, so
+-- the report still makes sense after the card has been edited or the deck renamed.
+create table if not exists public.reports (
+  id          uuid primary key default gen_random_uuid(),
+  user_id     uuid not null references auth.users on delete cascade,
+  deck_name   text not null,
+  card_id     text,
+  term        text,
+  def         text,
+  note        text,
+  status      text not null default 'pending' check (status in ('pending','fixed','declined')),
+  created_at  timestamptz not null default now(),
+  reviewed_at timestamptz
+);
+create index if not exists reports_status_idx on public.reports (status, created_at desc);
+
+alter table public.reports enable row level security;
+
+drop policy if exists "insert own report"    on public.reports;
+drop policy if exists "read own report"      on public.reports;
+drop policy if exists "editor reads reports" on public.reports;
+drop policy if exists "editor judges report" on public.reports;
+
+-- Send your own, see your own; the editor sees them all and is the only one who can
+-- mark one fixed. Same shape as submissions, for the same reason.
+create policy "insert own report"    on public.reports for insert to authenticated
+  with check (user_id = (select auth.uid()));
+create policy "read own report"      on public.reports for select to authenticated
+  using (user_id = (select auth.uid()));
+create policy "editor reads reports" on public.reports for select to authenticated
+  using (public.is_editor());
+create policy "editor judges report" on public.reports for update to authenticated
+  using (public.is_editor()) with check (public.is_editor());
+
+grant select, insert, update on public.reports to authenticated;
