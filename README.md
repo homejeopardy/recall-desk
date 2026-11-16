@@ -69,6 +69,35 @@ behind a stale cache. The Supabase and GitHub calls are never cached, so a faile
 stays a visible failure rather than a fake success. If it ever misbehaves, add `?nosw`
 to the address to tear it down.
 
+## On a phone
+
+Under 860px the sidebar stops being a column and becomes a drawer over the page, so the
+app opens on the deck you came to read rather than on a list of decks. **Decks**, bottom
+left, opens it; picking anything, tapping the dimmed page, or Escape shuts it again. The
+drawer always starts shut on a phone — the open/shut preference is saved for the big
+screen only, because a drawer gets opened a dozen times an evening and would otherwise
+keep overwriting it. Rotating a tablet across the breakpoint hands back whichever state
+that size wants.
+
+**Flashcards take a swipe**: left for the next card, right for the one before. A tap
+still flips. A drag that is short, or more down than across, is left alone so the page
+still scrolls past the card. The keyboard hints (`Space` flip, `←` `→` move) are replaced
+by the touch ones wherever there is no mouse — that's the `.kbhint` / `.tiphint` pair, a
+media query rather than a device sniff, so a laptop with a touchscreen keeps the keyboard
+wording and its small, dense controls.
+
+**Every field is at least 16px on a touch device.** Below that, iOS Safari zooms the page
+in when a field takes focus and never zooms back out, which is the single most
+maddening thing a web page can do to someone typing an answer. The typed-answer boxes
+were already above it; the editor's, the theme boxes and the selects weren't.
+
+The month calendar drops deck names under 560px — a seventh of a phone's width holds
+about five letters — and shows a tappable bar instead, with *Next up* underneath carrying
+the names. `apple-touch-icon.png` exists because iPhones ignore the manifest's icon and
+will otherwise put a screenshot of the page on the home screen. There is deliberately no
+`apple-mobile-web-app-capable`: in that mode iOS throws the Google sign-in out to Safari
+and the session never comes back.
+
 ## Who can do what
 
 Three levels, set under **People** (owners only):

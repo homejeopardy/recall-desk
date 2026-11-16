@@ -8,6 +8,9 @@
 <meta name="color-scheme" content="light dark">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#EFE9DE">
+<!-- iPhones ignore the manifest's icon and will otherwise put a screenshot of
+     the page on the home screen. They also will not take an SVG. -->
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="apple-touch-icon" href="icon.svg">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='3' y='6' width='26' height='21' fill='%23FBF8F1' stroke='%2314110D' stroke-width='2.5'/%3E%3Cpath d='M3 13h26' stroke='%23A8321F' stroke-width='2.5'/%3E%3Cpath d='M9 19h14M9 23h9' stroke='%2314110D' stroke-width='2'/%3E%3C/svg%3E">
 <style>[hidden]{display:none!important}</style>
@@ -137,8 +140,8 @@ kbd{font-family:var(--mono);font-size:11px;background:var(--surface-2);border:1p
 .eyebrow{font-family:var(--mono);font-size:10.5px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint)}
 
 /* ---- chrome ---- */
-.app{display:grid;grid-template-columns:var(--rail) 1fr;min-height:100vh;transition:grid-template-columns .2s ease}
-.rail{border-right:1px solid var(--rule);background:var(--surface);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow:hidden;min-width:0;transition:transform .2s ease,border-color .2s ease}
+.app{display:grid;grid-template-columns:var(--rail) 1fr;min-height:100vh;min-height:100dvh;transition:grid-template-columns .2s ease}
+.rail{border-right:1px solid var(--rule);background:var(--surface);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;height:100dvh;overflow:hidden;min-width:0;transition:transform .2s ease,border-color .2s ease}
 .brand{padding:20px 18px 15px;border-bottom:2px solid var(--ink);display:flex;align-items:baseline;gap:8px;width:100%;text-align:left;border-radius:0}
 .brand:hover h1{color:var(--bad)}
 .brand h1{transition:color .12s}
@@ -460,6 +463,7 @@ input.text:focus{border-color:var(--ink);outline:none}
 
 /* ---- sidebar controls ---- */
 .railbar{display:flex;align-items:center;gap:4px}
+#railctl{display:flex;align-items:center;gap:4px}
 .icbtn{width:26px;height:26px;display:grid;place-items:center;border-radius:var(--r);color:var(--ink-faint);flex:none}
 .icbtn:hover{background:var(--surface-2);color:var(--ink)}
 /* the rail leaves the grid entirely, so the stage must become the only column —
@@ -476,13 +480,18 @@ input.text:focus{border-color:var(--ink);outline:none}
   transform:translateX(-101%);opacity:0;pointer-events:none;transition:transform .2s ease,opacity .16s ease}
 .reopen:hover{background:var(--surface-2)}
 .app.shut + .reopen{transform:none;opacity:1;pointer-events:auto}
+/* Only ever drawn behind the drawer, which is a phone-sized idea. */
+.scrim{display:none}
 
 /* ---- what's coming up ---- */
 .soon{border-top:1px solid var(--rule);padding:11px 14px 12px}
-.soon .hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px}
+.soon .hd{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:7px}
+.soon .hd .eyebrow{white-space:nowrap}
 .soon ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:1px}
-.soon button{width:100%;display:flex;align-items:baseline;gap:8px;padding:5px 7px;border-radius:var(--r);text-align:left;color:var(--ink-soft)}
-.soon button:hover{background:var(--surface-2);color:var(--ink)}
+/* Named rather than "every button in here", which was also stretching the
+   little calendar icon beside the heading across the whole sidebar. */
+.soon li button{width:100%;display:flex;align-items:baseline;gap:8px;padding:5px 7px;border-radius:var(--r);text-align:left;color:var(--ink-soft)}
+.soon li button:hover{background:var(--surface-2);color:var(--ink)}
 .soon .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px}
 .soon .when{font-family:var(--mono);font-size:10.5px;letter-spacing:.03em;white-space:nowrap}
 .when.today{color:var(--bad);font-weight:600}
@@ -492,6 +501,7 @@ input.text:focus{border-color:var(--ink);outline:none}
 
 /* ---- calendar ---- */
 .calhead{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.calmonth{font-family:var(--read);font-size:22px;min-width:12ch}
 .calgrid{display:grid;grid-template-columns:repeat(7,1fr);border:1px solid var(--rule);border-radius:var(--r-lg);overflow:hidden;background:var(--rule-soft);gap:1px}
 .caldow{background:var(--surface-2);padding:8px 10px;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);text-align:center}
 .calday{background:var(--surface);min-height:96px;padding:7px 8px;display:flex;flex-direction:column;gap:4px}
@@ -653,19 +663,44 @@ input.text:focus{border-color:var(--ink);outline:none}
 .dcard .foot{display:flex;align-items:center;gap:8px;margin-top:auto}
 @media (max-width:860px){ .hero h1{font-size:33px} .startbar{flex-direction:column;gap:14px} }
 
-.railtoggle{display:none}
+/* Shown only where there is no mouse, in place of the keyboard hints. */
+.tiphint{display:none}
+@media (hover:none) and (pointer:coarse){ .kbhint{display:none} .tiphint{display:inline} }
+
 @media (max-width:860px){
-  .app{grid-template-columns:1fr}
-  .rail{position:static;height:auto;border-right:none;border-bottom:2px solid var(--ink)}
-  .rail[hidden]{display:none}
-  .decks{max-height:260px}
-  .railtoggle{display:inline-flex}
-  .stage{padding:22px 18px 50px}
+  /* The deck list stops being a column and becomes a drawer over the page, so
+     the app opens on the deck you came to read rather than on a list of them. */
+  .app,.app.shut{grid-template-columns:1fr}
+  .app.shut .stage{padding-left:18px}
+  .rail{position:fixed;top:0;left:0;bottom:0;height:auto;width:min(84vw,310px);z-index:60;
+    border-right:1px solid var(--rule);box-shadow:10px 0 28px rgba(0,0,0,.22);overscroll-behavior:contain;
+    transition:transform .2s ease,border-color .2s ease,visibility 0s}
+  /* Hidden rather than merely slid away, so the Tab key and a screen reader
+     don't wander off the side of the screen into a drawer nobody opened. */
+  .app.shut .rail{transform:translateX(-100%);border-right-color:var(--rule);
+    visibility:hidden;transition:transform .2s ease,visibility 0s linear .2s}
+  .decks{max-height:none}
+  /* Dimming behind the drawer. Always there so it can fade; untouchable when shut. */
+  .scrim{display:block;position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.45);transition:opacity .2s ease}
+  .app.shut ~ .scrim{opacity:0;pointer-events:none}
+  /* "Decks" goes where a thumb already is, and is there in every view. */
+  .reopen{top:auto;bottom:calc(16px + env(safe-area-inset-bottom));left:14px;z-index:45;
+    border:1px solid var(--ink);border-radius:999px;padding:11px 18px;font-size:14px;
+    transform:none;opacity:1;pointer-events:auto}
+  .app:not(.shut) + .reopen{transform:translateY(170%);opacity:0;pointer-events:none;visibility:hidden;transition:transform .2s ease,opacity .16s ease,visibility 0s linear .2s}
+  .stage{padding:22px 18px 94px}
+  .judge .btn{flex:1;min-width:0}
+  /* Clear of the Decks button, and above the drawer rather than under it. */
+  .toast{left:16px;right:16px;bottom:calc(76px + env(safe-area-inset-bottom));transform:none;text-align:center;z-index:70}
   .stage-head h2{font-size:25px}
   .facetext{font-size:23px}
   .face{padding:52px 24px 42px}
-  .row,.rowhead{grid-template-columns:24px 1fr 32px}
+  .row,.rowhead{grid-template-columns:24px 1fr 40px}
   .row .def-cell{grid-column:2/4}
+  /* Delete, or the report flag: beside the term, not stranded on a line of its
+     own below the definition, which is where plain grid flow was putting it. */
+  .row > *:last-child{grid-column:3;grid-row:1}
+  .row .n,.row textarea.term{grid-row:1}
   .rowhead .h-def{display:none}
   .missed li{grid-template-columns:1fr}
   .stat{min-width:50%;flex:none}
@@ -675,9 +710,9 @@ input.text:focus{border-color:var(--ink);outline:none}
   .learn{grid-template-columns:1fr}
   .missed.lround li{grid-template-columns:1fr}
   .st{text-align:left}
-  .rows.vocab .rowhead,.rows.vocab .row{grid-template-columns:24px 1fr 32px}
+  .rows.vocab .rowhead,.rows.vocab .row{grid-template-columns:24px 1fr 40px}
   .rows.vocab .row select.pos{grid-column:2/4;width:auto}
-  .conjcard .ch{grid-template-columns:24px 1fr 32px}
+  .conjcard .ch{grid-template-columns:24px 1fr 40px}
   .conjcard .ch input:nth-of-type(2){grid-column:2/4}
   .crow{grid-template-columns:104px 1fr}
   .crow .pl{padding:11px 10px}
@@ -686,6 +721,42 @@ input.text:focus{border-color:var(--ink);outline:none}
   .calday{min-height:62px;padding:4px 3px}
   .calpill{font-size:10px;padding:2px 4px;border-left-width:2px}
   .caldow{padding:6px 2px;font-size:9px}
+}
+
+@media (max-width:560px){
+  /* The month, two arrows and Today will not sit on one line of a small phone. */
+  .calhead{flex-wrap:wrap;gap:8px}
+  .calmonth{font-size:19px;min-width:0;white-space:nowrap}
+  /* A seventh of a phone's width holds about five letters, so the month shows a
+     bar you can tap and the list underneath carries the names. */
+  .calday{min-height:58px;padding:5px 4px;gap:3px}
+  .calday .dn{font-size:12px}
+  .calpill{font-size:0;line-height:0;padding:0;min-height:17px;flex:1;border-radius:3px;
+    background:var(--bad);border-left:0;opacity:.85}
+  .calpill.done{background:var(--ink-faint);opacity:.4}
+  .caldow{padding:6px 1px;font-size:9px}
+}
+
+/* ---- anything without a real mouse ----
+   Scoped to pointer:coarse rather than to a width, so a laptop with a
+   touchscreen keeps its small, dense controls and a phone held sideways
+   still gets the big ones. */
+@media (hover:none) and (pointer:coarse){
+  /* Under 16px iOS Safari zooms the page in when a field takes focus, and
+     never zooms back out again. Everything typed into gets dragged up to it. */
+  input,select,textarea,input.text,.row textarea,.row textarea.def,.cell input,
+  .persons input,.quizfield input,.fpick select,.prow select,.tbuild .code input{font-size:16px}
+  button,a{touch-action:manipulation}
+  .seg button{padding:10px 14px;font-size:14px}
+  .btn{padding:10px 15px}
+  .btn.sm{padding:9px 12px;font-size:13.5px}
+  .icbtn{width:38px;height:38px}
+  .fold-tog{width:40px}
+  .crumb{display:inline-block;padding:5px 0}
+  .linkbtn{padding:9px 3px}
+  .choice{padding:15px}
+  .face .star{padding:11px;top:4px;right:8px}
+  .calpill{min-height:19px}
 }
 </style>
 
@@ -707,6 +778,7 @@ if(c&&c.css)document.documentElement.style.cssText=c.css+"color-scheme:"+(c.dark
   <main class="stage" id="stage"></main>
 </div>
 <button class="reopen" id="reopen"><span aria-hidden="true">›</span> Decks</button>
+<div class="scrim" id="scrim" aria-hidden="true"></div>
 
 <script>
 (function(){
@@ -1567,11 +1639,22 @@ function collapseAll(shut){
   S.folders.forEach(function(f){ S.open[f.id] = !shut; });
   saveFolds(); renderRail();
 }
+// Below this the deck list is a drawer over the page rather than a column;
+// it matches the breakpoint the stylesheet uses.
+function phone(){ try{ return window.matchMedia("(max-width:860px)").matches; }catch(e){ return false; } }
 function setRail(shut){
   S.railShut = !!shut;
-  try{ localStorage.setItem(RAIL_KEY, shut ? "1" : "0"); }catch(e){}
+  // A drawer is opened and shut a dozen times an evening. Remembering that
+  // would keep overwriting the sidebar preference, which belongs to the big
+  // screen, so a phone is left out of the saving.
+  if(!phone()){ try{ localStorage.setItem(RAIL_KEY, shut ? "1" : "0"); }catch(e){} }
   document.querySelector(".app").className = "app" + (shut ? " shut" : "");
+  // With the drawer open, a finger dragged over the page should move the deck
+  // list, not the deck behind it.
+  document.body.style.overflow = (!shut && phone()) ? "hidden" : "";
 }
+// Picking something out of the drawer is the end of the drawer.
+function shutRail(){ if(phone() && !S.railShut) setRail(true); }
 // What's coming up, in the space above "Studying as…".
 function renderSoon(){
   var slot = $("soonslot"); if(!slot) return;
@@ -1641,6 +1724,7 @@ function routeHash(){
   return false;
 }
 function go(view){
+  shutRail();
   if((view === "home" || view === "folder") && !S.session && S.incoming) applyIncoming();
   if(view === "cal") setHash("cal");
   else if(view === "start") setHash("home");
@@ -1648,6 +1732,7 @@ function go(view){
   S.view = view; render(); window.scrollTo(0,0);
 }
 function openDeck(id){
+  shutRail();
   S.deckId = id; S.session = null; S.view = "home";
   markSeen(); S.firstVisit = false; rememberDeck(id);
   var dd = deck(); if(dd) setHash("deck=" + dd.id);
@@ -1660,6 +1745,7 @@ function openPath(folderId){
   if(changed) saveFolds();
 }
 function openFolder(id){
+  shutRail();
   S.folderId = id; S.session = null; S.view = "folder";
   setHash("folder=" + id);
   openPath(id);
@@ -1762,8 +1848,7 @@ function renderHome(){
                                                   function(){ prompt("Copy this link:", url); });
         } else prompt("Copy this link:", url);
       }},[icon(I.link,15),"Link"]),
-      el("button",{class:"btn ghost",title:"Print this deck",onclick:function(){ S.printFolder = null; go("print"); }},[icon(I.print,15),"Print"]),
-      el("button",{class:"btn ghost railtoggle",onclick:function(){ var r = $("rail"); r.hidden = !r.hidden; }},["Decks"])
+      el("button",{class:"btn ghost",title:"Print this deck",onclick:function(){ S.printFolder = null; go("print"); }},[icon(I.print,15),"Print"])
     ])
   ]);
   stage.appendChild(head);
@@ -2217,7 +2302,7 @@ function renderLearn(){
     });
     stage.appendChild(wrap);
   } else {
-    input = el("input",{class:"answer",type:"text",placeholder:"Type the " + (c.fixed ? "form" : typesTerm(c) ? "term" : ANS_LABEL().toLowerCase()) + "…","aria-label":"Your answer",autocomplete:"off",autocapitalize:"off",spellcheck:"false"});
+    input = el("input",{class:"answer",type:"text",placeholder:"Type the " + (c.fixed ? "form" : typesTerm(c) ? "term" : ANS_LABEL().toLowerCase()) + "…","aria-label":"Your answer",autocomplete:"off",autocapitalize:"off",autocorrect:"off",spellcheck:"false"});
     if(a){ input.value = a.given; input.disabled = true; }
     else {
       input.addEventListener("keydown", function(ev){ if(ev.key === "Enter"){ ev.preventDefault(); learnType(input.value); } });
@@ -2228,7 +2313,7 @@ function renderLearn(){
 
   if(!a){
     stage.appendChild(el("div",{class:"rowctl",style:"margin-top:12px;justify-content:space-between"},[
-      el("span",{style:"font-size:11.5px;color:var(--ink-faint)",
+      el("span",{class:"kbhint",style:"font-size:11.5px;color:var(--ink-faint)",
         html: !typed ? 'Press <kbd>1</kbd>–<kbd>' + s.choices.length + '</kbd>' : 'Press <kbd>Enter</kbd> to check'}),
       el("span",{class:"rowctl"},[
         el("button",{class:"linkbtn",onclick:learnDontKnow},["Don't know?"]),
@@ -2333,7 +2418,7 @@ function renderLearnRound(s){
       el("button",{class:"btn primary",onclick:learnContinueRound},["Continue to round " + (s.round + 1)]),
       el("button",{class:"btn ghost",onclick:function(){ S.session = null; go("home"); }},["Back to deck"])
     ]),
-    el("div",{style:"margin-top:12px;font-size:11.5px;color:var(--ink-faint)",html:'Press <kbd>Enter</kbd> to keep going'}),
+    el("div",{class:"kbhint",style:"margin-top:12px;font-size:11.5px;color:var(--ink-faint)",html:'Press <kbd>Enter</kbd> to keep going'}),
     el("div",{class:"eyebrow",style:"margin-top:26px;text-align:left",text:"This round"}),
     ul
   ]));
@@ -2486,7 +2571,7 @@ function renderTest(){
   ]));
 
   if(q.kind === "type"){
-    var inp = el("input",{class:"answer",type:"text",value:q.given || "",placeholder:"Type your answer…","aria-label":"Your answer",autocomplete:"off",autocapitalize:"off",spellcheck:"false"});
+    var inp = el("input",{class:"answer",type:"text",value:q.given || "",placeholder:"Type your answer…","aria-label":"Your answer",autocomplete:"off",autocapitalize:"off",autocorrect:"off",spellcheck:"false"});
     inp.addEventListener("input", function(ev){ q.given = ev.target.value; });
     inp.addEventListener("keydown", function(ev){ if(ev.key === "Enter"){ ev.preventDefault(); nextTestQ(1); } });
     stage.appendChild(inp);
@@ -2623,12 +2708,12 @@ function renderCal(){
     render();
   }
   stage.appendChild(el("div",{class:"stage-head"},[
-    el("div",{},[ el("h2",{text:"Calendar"}), el("div",{class:"sub",text:"Every deck with a quiz date. Click one to study it."}) ]),
+    el("div",{},[ el("h2",{text:"Calendar"}), el("div",{class:"sub",text:"Every deck with a quiz date — pick one to study it."}) ]),
     el("button",{class:"btn ghost",onclick:function(){ go("home"); }},[icon(I.back,15),"Deck"])
   ]));
   stage.appendChild(el("div",{class:"calhead"},[
     el("button",{class:"btn sm",onclick:function(){ shift(-1); },"aria-label":"Previous month"},["\u2039"]),
-    el("h3",{style:"font-family:var(--read);font-size:22px;min-width:12ch",text:MONTHS[m] + " " + y}),
+    el("h3",{class:"calmonth",text:MONTHS[m] + " " + y}),
     el("button",{class:"btn sm",onclick:function(){ shift(1); },"aria-label":"Next month"},["\u203a"]),
     el("button",{class:"btn ghost sm",onclick:function(){ S.calMonth = null; render(); }},["Today"])
   ]));
@@ -2707,7 +2792,7 @@ function renderPos(){
       el("button",{class:"btn sm",onclick:nextPos},[ s.i + 1 >= s.cards.length ? "See score" : "Next", icon(I.chev,14)])
     ]));
   } else {
-    stage.appendChild(el("div",{style:"margin-top:12px;font-size:11.5px;color:var(--ink-faint);text-align:center",html:'Press <kbd>1</kbd>–<kbd>' + s.choices.length + '</kbd> to answer'}));
+    stage.appendChild(el("div",{class:"kbhint",style:"margin-top:12px;font-size:11.5px;color:var(--ink-faint);text-align:center",html:'Press <kbd>1</kbd>–<kbd>' + s.choices.length + '</kbd> to answer'}));
   }
 }
 function pickPos(idx){
@@ -2758,7 +2843,7 @@ function renderTable(){
         ])
       ]);
     } else {
-      var inp = el("input",{type:"text",value:got,placeholder:"—","aria-label":pp.label + " form",autocomplete:"off",autocapitalize:"off",spellcheck:"false"});
+      var inp = el("input",{type:"text",value:got,placeholder:"—","aria-label":pp.label + " form",autocomplete:"off",autocapitalize:"off",autocorrect:"off",spellcheck:"false"});
       inp.addEventListener("input", function(ev){ s.given[pp.id] = ev.target.value; });
       inp.addEventListener("keydown", function(ev){
         if(ev.key !== "Enter") return;
@@ -2774,7 +2859,7 @@ function renderTable(){
 
   if(!s.checked){
     stage.appendChild(el("div",{class:"rowctl",style:"justify-content:space-between"},[
-      el("span",{style:"font-size:11.5px;color:var(--ink-faint)",html:'<kbd>Enter</kbd> moves down the table'}),
+      el("span",{class:"kbhint",style:"font-size:11.5px;color:var(--ink-faint)",html:'<kbd>Enter</kbd> moves down the table'}),
       el("span",{class:"rowctl"},[
         el("button",{class:"linkbtn",onclick:function(){ s.given = {}; checkTable(); }},["Don't know?"]),
         el("button",{class:"btn primary",onclick:checkTable},["Check the table"])
@@ -2787,7 +2872,7 @@ function renderTable(){
       el("span",{text: gotRight + " of " + persons.length + " right."}),
       el("button",{class:"btn sm",onclick:nextTable},[ s.i + 1 >= s.cards.length ? "See score" : "Next verb", icon(I.chev,14)])
     ]));
-    stage.appendChild(el("div",{style:"margin-top:12px;font-size:11.5px;color:var(--ink-faint);text-align:center",html:'Press <kbd>Enter</kbd> to continue'}));
+    stage.appendChild(el("div",{class:"kbhint",style:"margin-top:12px;font-size:11.5px;color:var(--ink-faint);text-align:center",html:'Press <kbd>Enter</kbd> to continue'}));
   }
 }
 function checkTable(){
@@ -2836,7 +2921,10 @@ function renderFlash(){
   stage.appendChild(modeHead("Flashcards"));
   stage.appendChild(el("div",{class:"deskrow"},[
     el("span",{class:"counter",text:(s.i+1) + " / " + s.cards.length}),
-    el("span",{style:"font-size:11.5px;color:var(--ink-faint)",html:'<kbd>Space</kbd> flip · <kbd>←</kbd><kbd>→</kbd> move · <kbd>S</kbd> star'})
+    el("span",{style:"font-size:11.5px;color:var(--ink-faint)"},[
+      el("span",{class:"kbhint",html:'<kbd>Space</kbd> flip · <kbd>←</kbd><kbd>→</kbd> move · <kbd>S</kbd> star'}),
+      el("span",{class:"tiphint",text:"Tap to flip · swipe to move"})
+    ])
   ]));
   var tr = el("div",{class:"track"}); tr.appendChild(el("i",{style:"width:" + ((s.i)/s.cards.length*100) + "%"})); stage.appendChild(tr);
 
@@ -2847,7 +2935,10 @@ function renderFlash(){
     el("div",{class:"face"},[
       el("span",{class:"role",text:ASK_LABEL()}), starBtn,
       el("div",{class:"facetext",text:ask(c) || "—"}),
-      el("div",{class:"hintline",text:"Click or press Space to reveal"})
+      el("div",{class:"hintline"},[
+        el("span",{class:"kbhint",text:"Click or press Space to reveal"}),
+        el("span",{class:"tiphint",text:"Tap to reveal"})
+      ])
     ]),
     el("div",{class:"face back"},[
       el("span",{class:"role",text:ANS_LABEL()}), starBtn2,
@@ -2856,7 +2947,9 @@ function renderFlash(){
       el("div",{class:"hintline",text:"How did that go?"})
     ])
   ]);
-  stage.appendChild(el("div",{class:"cardwrap"},[card]));
+  var wrap = el("div",{class:"cardwrap"},[card]);
+  swipable(wrap, function(){ advanceFlash(1); }, function(){ advanceFlash(-1); });
+  stage.appendChild(wrap);
 
   if(s.flipped){
     stage.appendChild(el("div",{class:"judge"},[
@@ -2869,6 +2962,25 @@ function renderFlash(){
       el("button",{class:"btn",onclick:function(){ s.flipped = true; render(); }},["Reveal"])
     ]));
   }
+}
+// Drag left for the next card, right for the one before — the way every other
+// stack of cards on a phone behaves. A tap still flips.
+function swipable(node, onLeft, onRight){
+  var x0 = 0, y0 = 0, live = false;
+  node.addEventListener("touchstart", function(ev){
+    live = ev.touches.length === 1;
+    if(live){ x0 = ev.touches[0].clientX; y0 = ev.touches[0].clientY; }
+  }, {passive:true});
+  node.addEventListener("touchend", function(ev){
+    if(!live) return;
+    live = false;
+    var t = ev.changedTouches[0], dx = t.clientX - x0, dy = t.clientY - y0;
+    // Far enough across to mean it, and more across than down so that scrolling
+    // the page past the card doesn't count as one.
+    if(Math.abs(dx) < 48 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+    ev.preventDefault();          // and so the tap-to-flip never fires
+    (dx < 0 ? onLeft : onRight)();
+  }, {passive:false});
 }
 function advanceFlash(step){
   var s = S.session;
@@ -2945,7 +3057,7 @@ function renderQuiz(){
       el("button",{class:"btn sm",onclick:nextQuiz},[ s.i + 1 >= s.cards.length ? "See score" : "Next", icon("M9 6l6 6-6 6",14)])
     ]));
   } else {
-    stage.appendChild(el("div",{style:"margin-top:12px;font-size:11.5px;color:var(--ink-faint);text-align:center",html:'Press <kbd>1</kbd>–<kbd>4</kbd> to answer'}));
+    stage.appendChild(el("div",{class:"kbhint",style:"margin-top:12px;font-size:11.5px;color:var(--ink-faint);text-align:center",html:'Press <kbd>1</kbd>–<kbd>4</kbd> to answer'}));
   }
 }
 function pickChoice(idx, ok, c){
@@ -2974,7 +3086,7 @@ function renderWrite(){
     el("div",{class:"q",text:ask(c) || "—"})
   ]));
 
-  var input = el("input",{class:"answer",type:"text",placeholder:"Type the " + ANS_LABEL().toLowerCase() + "…","aria-label":"Your answer",autocomplete:"off",autocapitalize:"off",spellcheck:"false"});
+  var input = el("input",{class:"answer",type:"text",placeholder:"Type the " + ANS_LABEL().toLowerCase() + "…","aria-label":"Your answer",autocomplete:"off",autocapitalize:"off",autocorrect:"off",spellcheck:"false"});
   if(s.state){ input.value = s.state.given; input.disabled = true; }
   stage.appendChild(input);
 
@@ -2996,7 +3108,7 @@ function renderWrite(){
       ])
     ]);
     stage.appendChild(v);
-    stage.appendChild(el("div",{style:"margin-top:12px;font-size:11.5px;color:var(--ink-faint);text-align:center",html:'Press <kbd>Enter</kbd> to continue'}));
+    stage.appendChild(el("div",{class:"kbhint",style:"margin-top:12px;font-size:11.5px;color:var(--ink-faint);text-align:center",html:'Press <kbd>Enter</kbd> to continue'}));
   }
 }
 function submitWrite(c, given){
@@ -3481,8 +3593,7 @@ function renderFolder(){
     el("div",{class:"rowctl"},[
       ro || !canNest ? null : el("button",{class:"btn",onclick:function(){ newFolder(f.id); }},[icon(I.folder,15),"New subfolder"]),
       ro ? null : el("button",{class:"btn",onclick:function(){ newDeck(f.id); }},[icon(I.plus,15),"New deck here"]),
-      el("button",{class:"btn ghost",title:"Print everything in this folder",onclick:function(){ S.printFolder = f.id; go("print"); }},[icon(I.print,15),"Print"]),
-      el("button",{class:"btn ghost railtoggle",onclick:function(){ var r = $("rail"); r.hidden = !r.hidden; }},["Decks"])
+      el("button",{class:"btn ghost",title:"Print everything in this folder",onclick:function(){ S.printFolder = f.id; go("print"); }},[icon(I.print,15),"Print"])
     ])
   ]));
 
@@ -4071,6 +4182,7 @@ function weakEverywhere(limit){
   return out.slice(0, limit || 20);
 }
 function startReview(){
+  shutRail();
   var items = weakEverywhere(20);
   if(!items.length) return toast("Nothing needs reviewing — go and enjoy yourself");
   S.session = {mode:"review", items: shuffled(items), i:0, answer:null, correct:0};
@@ -4117,7 +4229,7 @@ function renderReview(){
     });
     stage.appendChild(wrap);
   } else {
-    var inp = el("input",{class:"answer",type:"text",placeholder:"Type the answer…","aria-label":"Your answer",autocomplete:"off",autocapitalize:"off",spellcheck:"false"});
+    var inp = el("input",{class:"answer",type:"text",placeholder:"Type the answer…","aria-label":"Your answer",autocomplete:"off",autocapitalize:"off",autocorrect:"off",spellcheck:"false"});
     if(a){ inp.value = a.given || ""; inp.disabled = true; }
     else {
       inp.addEventListener("keydown", function(ev){
@@ -4394,7 +4506,7 @@ function renderWho(){
       el("h2",{text: S.user ? "Signed in as " + whoName(S.user) : "Sign in"}),
       el("div",{class:"sub",text: S.user ? "Your scores are saved to your account." : "Without an account your scores still work — they just stay in this browser."})
     ]),
-    S.decks.length ? el("button",{class:"btn ghost",onclick:function(){ go("home"); }},[icon(I.back,15),"Decks"]) : null
+    S.decks.length ? el("button",{class:"btn ghost",onclick:function(){ go("home"); }},[icon(I.back,15),"Back"]) : null
   ]));
 
   var wrap = el("div",{class:"signin"});
@@ -4626,6 +4738,7 @@ function renderConnect(){
 
 /* ============================ keyboard ============================ */
 document.addEventListener("keydown", function(ev){
+  if(ev.key === "Escape" && phone() && !S.railShut){ ev.preventDefault(); return setRail(true); }
   var tag = (ev.target.tagName || "").toLowerCase();
   if(tag === "input" || tag === "textarea" || tag === "select") return;
   if(ev.metaKey || ev.ctrlKey || ev.altKey) return;
@@ -4710,6 +4823,8 @@ S.open = ls(FOLD_KEY, {});
 S.firstVisit = !hasSeen();
 markSeen();
 try{ S.railShut = localStorage.getItem(RAIL_KEY) === "1"; }catch(e){ S.railShut = false; }
+// A phone always starts on the content. The saved preference is the laptop's.
+if(phone()) S.railShut = true;
 try{ S.conjMode = localStorage.getItem(CONJ_KEY) === "meaning" ? "meaning" : "forms"; }catch(e){}
 try{ S.theme = localStorage.getItem(THEME_KEY) || ""; }catch(e){ S.theme = ""; }
 try{ S.custom = JSON.parse(localStorage.getItem(CUSTOM_KEY) || "null"); }catch(e){ S.custom = null; }
@@ -4718,6 +4833,21 @@ if(S.theme === "custom" && !S.custom) S.theme = "";
 paintTheme();
 setRail(S.railShut);
 $("reopen").addEventListener("click", function(){ setRail(false); });
+$("scrim").addEventListener("click", function(){ setRail(true); });
+// Rotating a phone, or dragging a window across the breakpoint, swaps which of
+// the two the sidebar is — so hand it back the state that kind of screen wants.
+(function(){
+  var was = phone();
+  window.addEventListener("resize", function(){
+    var now = phone();
+    if(now === was) return;
+    was = now;
+    if(now) return setRail(true);
+    var pref = false;
+    try{ pref = localStorage.getItem(RAIL_KEY) === "1"; }catch(e){}
+    setRail(pref);
+  });
+})();
 loadLocal();
 $("whobtn").addEventListener("click", function(){ go("who"); });
 $("homebtn").addEventListener("click", function(){ go("start"); });
