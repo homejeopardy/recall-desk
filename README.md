@@ -212,6 +212,16 @@ Marking is the same as Type the answer, near misses and all, including "I was ri
 and "I was wrong". The mode only appears on decks that have at least one example, and
 says so if an example has been written that the blanker can't find the word in.
 
+## Printing
+
+Printing forces a paper palette, whatever theme is on screen. It has to: browsers
+don't print background colours, so a dark theme printed as near-white text on nothing
+— blank pages. Colouring the sheet wasn't enough, because the parts carrying most of
+the words set their own colour from `--ink-soft` and `--ink-faint`, so the variables
+themselves are redefined for print and everything drawing from them follows. The
+overrides are `!important` because a custom theme is written straight onto the `<html>`
+element, and an inline style otherwise wins.
+
 ## Cards you are having another go at
 
 A flashcard you have got wrong and not got right since is outlined in the accent red
