@@ -135,6 +135,34 @@ all of it off with one rule rather than a list — but note that the JS helpers 
 too, via `still()`, because a transition the stylesheet has zeroed still needs the end
 value set.
 
+## The dashboard
+
+With editing unlocked, a **Dashboard** button sits in the top right of every page
+(`#dashboard` too). It is fixed to the corner rather than put in a header, because
+there isn't one — each view draws its own heading row — so every one of those rows is
+given a matching gutter. Without it the button lands on top of a view's own buttons at
+around 980px wide, which is exactly what it did to the home page's sign-in corner until
+`.startbar` and `.testbar` were given the gutter as well. On a phone the label drops and
+only the mark is left.
+
+It holds three things:
+
+- **Whether anything is unpublished**, with Publish and Discard right there, and a word
+  if this browser has no publishing key.
+- **Worth a look** — the standing answer to "have I left anything half-done", which is
+  otherwise only visible by opening every deck in turn. Half-written cards, decks with
+  no cards at all, decks whose quiz has been and gone and aren't filed away, decks with
+  no quiz date, and decks students have sent in. Each row says how many and takes you
+  to it; the archive row does the filing itself. Nothing wrong, and it says so.
+- **Everything else** — new deck, new folder, announce, calendar, print, submitted,
+  people, the publishing key, and the account page.
+
+Submissions are the one count that has to be asked for over the network, so the page is
+drawn without it and that row appears only if there turn out to be any.
+
+A student has none of this: the button is hidden, the gutters aren't applied, and
+`#dashboard` bounces them home.
+
 ## Announcements
 
 **Announce**, in a deck's header when editing is unlocked (or `#notices`), writes a card

@@ -551,6 +551,52 @@ input.text:focus{border-color:var(--ink);outline:none}
 .crow .right{font-family:var(--read);font-size:16px;color:var(--bad)}
 .crow .given{font-family:var(--read);font-size:17px;padding:7px 0}
 
+/* ---- the way in to the editor's own page ----
+   Fixed to the corner rather than put in a header, because there isn't one: every
+   view draws its own heading row. The heading row is given a gutter to match, or
+   the button lands on top of that view's own buttons on a middling screen. */
+.deskbtn{position:fixed;top:14px;right:16px;z-index:46;display:inline-flex;align-items:center;gap:7px;
+  padding:9px 14px;border:1px solid var(--ink);border-radius:999px;background:var(--surface);
+  font-weight:500;font-size:13.5px;box-shadow:var(--lift);
+  transition:background var(--t-tap),transform var(--t-tap) var(--ease)}
+.deskbtn:hover{background:var(--surface-2)}
+.deskbtn:active{transform:scale(.97)}
+/* Every bar that runs along the top of a view and puts something in its right-hand
+   corner, not just .stage-head — the home page has its own, and the sign-in corner in
+   it was landing underneath the button at around 980px wide. */
+body.editing .stage-head,body.editing .startbar,body.editing .testbar{padding-right:152px}
+@media (max-width:700px){
+  /* Just the mark on a phone; the gutter shrinks with it. */
+  .deskbtn .dlabel{display:none}
+  .deskbtn{padding:10px;gap:0}
+  body.editing .stage-head,body.editing .startbar,body.editing .testbar{padding-right:54px}
+}
+
+/* ---- the editor's page ---- */
+.deskwarn{display:flex;flex-direction:column;gap:0;border:1px solid var(--rule);
+  border-radius:var(--r-lg);background:var(--surface);overflow:hidden;margin-bottom:22px}
+.deskwarn button{display:flex;align-items:center;gap:13px;padding:13px 16px;text-align:left;
+  border-bottom:1px solid var(--rule-soft);width:100%;transition:background var(--t-tap)}
+.deskwarn button:last-child{border-bottom:0}
+.deskwarn button:hover{background:var(--surface-2)}
+.deskwarn .n{font-family:var(--mono);font-size:19px;font-variant-numeric:tabular-nums;
+  min-width:2.2ch;text-align:right;flex:none}
+.deskwarn .w{flex:1;min-width:0;font-size:14px;line-height:1.4}
+.deskwarn .w b{font-weight:600}
+.deskwarn .go{color:var(--ink-faint);flex:none}
+.deskwarn .bad .n{color:var(--bad)}
+.deskwarn .warn .n{color:var(--brass)}
+.deskwarn .ok .n{color:var(--good)}
+.actgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(186px,1fr));gap:10px}
+.actgrid button{border:1px solid var(--rule);border-radius:var(--r-lg);background:var(--surface);
+  padding:14px 15px;text-align:left;display:flex;flex-direction:column;gap:4px;
+  transition:border-color var(--t-quick),background var(--t-quick),transform var(--t-tap) var(--ease)}
+.actgrid button:hover{border-color:var(--ink);background:var(--surface-2)}
+.actgrid button:active{transform:scale(.985)}
+.actgrid .t{font-weight:600;font-size:14.5px;display:flex;align-items:center;gap:8px}
+.actgrid .t svg{color:var(--bad)}
+.actgrid .d{font-size:12.5px;color:var(--ink-soft);line-height:1.45}
+
 /* ---- announcements ----
    A card over the page, once, with the page itself dimmed behind it. Deliberately
    not a banner: the point of these is the things that get missed. */
@@ -655,7 +701,7 @@ input.text:focus{border-color:var(--ink);outline:none}
 .plist .d{font-family:var(--read);font-size:15px;color:var(--ink-soft);white-space:pre-line}
 .plist .pos{font-family:var(--mono);font-size:10px;text-transform:uppercase;color:var(--ink-faint)}
 @media print{
-  .rail,.reopen,.stage-head .rowctl,.opts,.toast,.pubbar,.editbar{display:none!important}
+  .rail,.reopen,.deskbtn,.stage-head .rowctl,.opts,.toast,.pubbar,.editbar{display:none!important}
   .app{display:block}
   .stage{padding:0;max-width:none}
   .sheet{border:0;padding:0;border-radius:0;background:#fff;color:#000}
@@ -903,6 +949,7 @@ if(c&&c.css)document.documentElement.style.cssText=c.css+"color-scheme:"+(c.dark
 </div>
 <button class="reopen" id="reopen"><span aria-hidden="true">›</span> Decks</button>
 <div class="scrim" id="scrim" aria-hidden="true"></div>
+<button class="deskbtn" id="deskbtn" hidden title="Everything for running this, in one place"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v14H4zM4 10h16M10 10v9"/></svg><span class="dlabel">Dashboard</span></button>
 
 <script>
 (function(){
@@ -1309,7 +1356,18 @@ function whoLine(){
   if(S.canEdit) return "Editing as ADMIN" + (S.token ? " · can publish" : " · publishing not set up");
   return S.who ? "Studying as " + S.who + " · this browser only" : "Not signed in · scores stay on this device";
 }
+// Shown only once editing is unlocked, and the matching gutter on the heading row
+// goes with it, so a student's layout is untouched.
+function syncDeskBtn(){
+  var b = $("deskbtn"); if(!b) return;
+  // Not on its own page: a button that goes where you already are is just clutter,
+  // and the gutter it reserves goes with it.
+  var show = !!S.canEdit && S.view !== "desk";
+  b.hidden = !show;
+  document.body.classList.toggle("editing", show);
+}
 function refreshFoot(){
+  syncDeskBtn();
   setSync(S.canEdit ? "edit" : !!S.who, whoLine());
   var dot = $("syncdot"), isPic = dot.classList.contains("avatar");
   if(S.user){
@@ -1690,6 +1748,149 @@ function showNotice(n, preview){
   setTimeout(function(){ try{ ok.focus(); }catch(e){} }, 0);
 }
 
+/* ============================ the editor's page ============================
+   Everything for running this in one place, and more to the point a standing
+   answer to "is there anything I've left half-done" — which is otherwise only
+   visible by opening every deck in turn. */
+function deckTrouble(){
+  var live = S.decks.filter(function(d){ return !(folderById(d.folder) || {}).archive; });
+  var blank = 0, blankIn = null;
+  live.forEach(function(d){
+    if(kindOf(d) === "conj") return;                 // a verb deck is a different shape
+    cardsOf(d).forEach(function(c){
+      if(!(c.term || "").trim() || !defText(c).trim()){ blank++; if(!blankIn) blankIn = d; }
+    });
+  });
+  var empty = live.filter(function(d){ return !cardsOf(d).length; });
+  var undated = live.filter(function(d){ return !d.quiz; });
+  var passed = live.filter(function(d){ var n = daysUntil(d.quiz); return n !== null && n < 0; });
+  return {live:live, blank:blank, blankIn:blankIn, empty:empty, undated:undated, passed:passed};
+}
+function deskWarnRow(kind, count, text, go2){
+  return el("button",{class:kind,onclick:go2},[
+    el("span",{class:"n",text:String(count)}),
+    el("span",{class:"w",html:text}),
+    el("span",{class:"go"},[icon(I.chev,15)])
+  ]);
+}
+function renderDesk(){
+  if(!S.canEdit) return go("home");
+  var t = deckTrouble();
+  var cards = 0;
+  t.live.forEach(function(d){ cards += cardsOf(d).length; });
+  var showing = S.notices.filter(noticeLive).length;
+
+  stage.appendChild(el("div",{class:"stage-head"},[
+    el("div",{},[
+      el("h2",{text:"Dashboard"}),
+      el("div",{class:"sub",text:"Everything for running Quizletish, and anything left half-done."})
+    ]),
+    el("button",{class:"btn ghost",onclick:function(){ go("home"); }},[icon(I.back,15),"Back"])
+  ]));
+
+  // ---- publishing ----
+  var pub = el("div",{class:"panel"},[
+    el("h3",{text: S.draft ? "Unpublished changes" : "Everything is published"}),
+    el("p",{text: S.draft
+      ? (S.remoteMoved
+          ? "Someone else published while you were editing. Publishing keeps both sets of changes."
+          : "Students are still seeing the last published decks. Nothing you've changed has reached them yet.")
+      : "What's on this device matches what students see."})
+  ]);
+  if(S.draft){
+    pub.appendChild(el("div",{class:"rowctl",style:"justify-content:flex-start"},[
+      el("button",{class:"btn primary",disabled: S.busy ? "disabled" : null,onclick:publish},
+        [icon(I.upload,15), S.busy ? "Publishing\u2026" : (S.token ? "Publish to everyone" : "Set up publishing")]),
+      el("button",{class:"btn ghost",onclick:discardDraft},["Discard the draft"])
+    ]));
+  }
+  if(!S.token){
+    pub.appendChild(el("p",{class:"saveflag",style:"margin:12px 0 0",
+      text:"This browser has no publishing key, so it can't write to GitHub yet."}));
+  }
+  stage.appendChild(pub);
+
+  // ---- anything left half-done ----
+  stage.appendChild(el("div",{class:"eyebrow",style:"margin-bottom:9px",text:"Worth a look"}));
+  var warn = el("div",{class:"deskwarn"});
+  var n = 0;
+  if(t.blank){
+    n++; warn.appendChild(deskWarnRow("bad", t.blank,
+      "<b>half-written cards</b> \u2014 a term or a definition left blank",
+      function(){ if(t.blankIn){ S.deckId = t.blankIn.id; renderRail(); } go("edit"); }));
+  }
+  if(t.empty.length){
+    n++; warn.appendChild(deskWarnRow("bad", t.empty.length,
+      "<b>decks with no cards in them</b> at all",
+      function(){ S.deckId = t.empty[0].id; renderRail(); go("edit"); }));
+  }
+  if(t.passed.length){
+    n++; warn.appendChild(deskWarnRow("warn", t.passed.length,
+      "<b>decks whose quiz has been and gone</b> and aren't filed away yet",
+      function(){ autoArchive(); renderRail(); render(); toast("Filed the ones whose quiz has passed"); }));
+  }
+  if(t.undated.length){
+    n++; warn.appendChild(deskWarnRow("warn", t.undated.length,
+      "<b>decks with no quiz date</b>, so they sort last and never file themselves away",
+      function(){ go("cal"); }));
+  }
+  var subsRow = null;
+  if(isEditor()){
+    subsRow = deskWarnRow("ok", 0, "<b>decks sent in</b> by students", function(){ go("subs"); });
+    subsRow.hidden = true;                      // until the count is actually back
+    warn.appendChild(subsRow);
+  }
+  var nothing = el("button",{class:"ok",onclick:function(){ go("home"); }},[
+    el("span",{class:"n",text:"\u2713"}),
+    el("span",{class:"w",html:"<b>Nothing needs you.</b> Every deck has cards, a date, and both sides filled in."}),
+    el("span",{class:"go"})
+  ]);
+  if(!n) warn.appendChild(nothing);
+  stage.appendChild(warn);
+
+  // Submissions are the one thing here that has to be asked for over the network, so
+  // the page is drawn without it and the row appears if there turn out to be any.
+  if(isEditor()){
+    loadSubs().then(function(rows){
+      var waiting = (rows || []).filter(function(r){ return r.status === "pending" || !r.status; });
+      if(!waiting.length || !subsRow || !subsRow.parentNode) return;
+      subsRow.className = "warn";
+      subsRow.hidden = false;
+      subsRow.querySelector(".n").textContent = String(waiting.length);
+      if(nothing.parentNode) nothing.remove();
+    }).catch(function(){});
+  }
+
+  // ---- numbers ----
+  stage.appendChild(el("div",{class:"summary"},[
+    el("div",{class:"stat"},[el("span",{class:"v mono",text:String(t.live.length)}), el("span",{class:"l",text:"Decks"})]),
+    el("div",{class:"stat"},[el("span",{class:"v mono",text:String(cards)}), el("span",{class:"l",text:"Cards"})]),
+    el("div",{class:"stat"},[el("span",{class:"v mono",text:String(S.folders.length)}), el("span",{class:"l",text:"Folders"})]),
+    el("div",{class:"stat"},[el("span",{class:"v mono" + (showing ? " brass" : ""),text:String(showing)}), el("span",{class:"l",text:"Notices up"})])
+  ]));
+
+  // ---- the rest of the levers ----
+  stage.appendChild(el("div",{class:"eyebrow",style:"margin:24px 0 9px",text:"Everything else"}));
+  var acts = el("div",{class:"actgrid"});
+  function act(ic, title, desc, fn){
+    acts.appendChild(el("button",{onclick:fn},[
+      el("span",{class:"t"},[icon(ic,16), title]),
+      el("span",{class:"d",text:desc})
+    ]));
+  }
+  act(I.plus,   "New deck",    "A blank deck, filed wherever you like.", function(){ newDeck(""); });
+  act(I.folder, "New folder",  "Folders can hold folders.", function(){ newFolder(""); });
+  act(I.flag,   "Announce",    "A notice over the page, once each, for everyone.", function(){ go("news"); });
+  act(I.cal,    "Calendar",    "Every quiz date in one month view.", function(){ go("cal"); });
+  act(I.print,  "Print",       "A deck or a whole folder as a plain list.", function(){ S.printFolder = null; go("print"); });
+  if(isEditor()) act(I.cards, "Submitted", "Decks students have sent in for you to check.", function(){ go("subs"); });
+  if(isOwner())  act(I.user,  "People",    "Who can edit, and who can hand that out.", function(){ go("people"); });
+  act(I.link,   "Publishing key", S.token ? "Connected. Check or replace the GitHub token." : "Not set up. This browser can't publish yet.",
+      function(){ go("connect"); });
+  act(I.user,   "Account & look", "Sign in, themes, and locking editing again.", function(){ go("who"); });
+  stage.appendChild(acts);
+}
+
 function publishNotices(){
   if(!S.token) return go("connect");
   if(S.busy) return;
@@ -2067,6 +2268,7 @@ function routeHash(){
   if(h === "home"){ go("start"); return true; }
   if(h === "cal"){ go("cal"); return true; }
   if(h === "notices"){ go("news"); return true; }
+  if(h === "dashboard"){ go("desk"); return true; }
   if(h === "review"){ startReview(); return true; }
   return false;
 }
@@ -2109,6 +2311,7 @@ function render(){
   var sig = [S.view, S.deckId, S.folderId, S.session ? S.session.mode : ""].join("|");
   FRESH = sig !== lastView; lastView = sig;
   FLASH = null;
+  syncDeskBtn();
   stage.textContent = "";
   // Flipping a card or picking an answer rebuilds the stage too, and animating
   // those as a page turn would make the whole thing flicker under every tap.
@@ -2121,6 +2324,7 @@ function render(){
   if(S.view === "subs") return renderSubs();
   if(S.view === "people") return renderPeople();
   if(S.view === "news") return renderNotices();
+  if(S.view === "desk") return renderDesk();
   if(S.view === "review" && S.ready && !S.loadError) return renderReview();
   if(S.view === "start" && S.ready && !S.loadError) return renderStart();
   if(S.loadError){
@@ -2145,6 +2349,7 @@ function render(){
   if(v === "subs") return renderSubs();
   if(v === "people") return renderPeople();
   if(v === "news") return renderNotices();
+  if(v === "desk") return renderDesk();
   if(v === "review") return renderReview();
   if(v === "start") return renderStart();
   if(v === "table") return renderTable();
@@ -5473,6 +5678,8 @@ paintTheme();
 setRail(S.railShut);
 $("reopen").addEventListener("click", function(){ setRail(false); });
 $("scrim").addEventListener("click", function(){ setRail(true); });
+$("deskbtn").addEventListener("click", function(){ go("desk"); });
+syncDeskBtn();        // hidden for a student, and the heading gutter with it
 // Rotating a phone, or dragging a window across the breakpoint, swaps which of
 // the two the sidebar is — so hand it back the state that kind of screen wants.
 (function(){
