@@ -173,6 +173,12 @@ alternately lands back where it started. In Learn, taking a mark back also gives
 the rung the card was granted and puts it in the queue again, which is the whole point:
 a card you only half-knew should come round once more.
 
+All three typed surfaces behave the same way. Review used to be the odd one out: it
+graded in the same three bands but only ever said "Correct.", so the one call worth
+arguing with was the one it never mentioned — and it moved on by itself after 900ms,
+which took the chance to argue with it too. It now names a near miss and holds still
+for it. A clean hit still carries you along.
+
 ## The dashboard
 
 With editing unlocked, a **Dashboard** button sits in the top right of every page

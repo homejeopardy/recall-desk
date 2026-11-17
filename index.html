@@ -4969,7 +4969,11 @@ function renderReview(){
     if(a){ inp.value = a.given || ""; inp.disabled = true; }
     else {
       inp.addEventListener("keydown", function(ev){
-        if(ev.key === "Enter"){ ev.preventDefault(); answerReview({given: inp.value, ok: grade(inp.value, right) !== "no"}); }
+        if(ev.key === "Enter"){
+          ev.preventDefault();
+          var r = grade(inp.value, right);
+          answerReview({given: inp.value, result: r, ok: r !== "no"});
+        }
       });
       setTimeout(function(){ inp.focus(); }, 0);
     }
@@ -4984,10 +4988,43 @@ function renderReview(){
     ]));
     return;
   }
-  stage.appendChild(el("div",{class:"verdict " + (a.ok ? "ok" : "no")},[
-    el("span",{}, a.ok ? ["Correct."] : [a.skipped ? "The answer is " : "Not quite — the answer is ", el("b",{text:right})]),
-    el("button",{class:"btn sm",onclick:nextReview},[ s.i + 1 >= s.items.length ? "Finish" : "Next", icon(I.chev,14)])
+  /* A near miss is counted as right, and Review used to just say "Correct." and move
+     on — so the one call worth arguing with was the one it didn't mention. It now
+     reads the same as the other two typed modes, and can be refused or claimed. */
+  var near = a.result === "near";
+  var cls = a.ok ? (near ? "near" : "ok") : "no";
+  stage.appendChild(el("div",{class:"verdict " + cls},[
+    el("span",{}, near ? ["Close enough — the exact wording is ", el("b",{text:right}), "."]
+               : a.ok  ? [a.overridden ? "Counted as correct." : "Correct."]
+               :         [a.undone ? "Counted as wrong — the answer is "
+                        : a.skipped ? "The answer is " : "Not quite — the answer is ", el("b",{text:right})]),
+    el("span",{class:"rowctl"},[
+      (!a.ok && !a.skipped && a.given) ? el("button",{class:"btn sm",onclick:reviewRight},["I was right"]) : null,
+      (near || a.overridden) ? el("button",{class:"btn sm",onclick:reviewWrong},["I was wrong"]) : null,
+      el("button",{class:"btn sm",onclick:nextReview},[ s.i + 1 >= s.items.length ? "Finish" : "Next", icon(I.chev,14)])
+    ])
   ]));
+}
+// The same pair as everywhere else, and each undoes the other, so the score can't drift.
+function reviewRight(){
+  var s = S.session, a = s && s.answer;
+  if(!a || a.ok) return;
+  var it = s.items[s.i];
+  a.ok = true; a.result = "exact"; a.overridden = true; a.undone = false;
+  s.correct++;
+  recordIn(it.deck.id, it.unit.id, true);
+  clearTimeout(learnTimer);
+  render();
+}
+function reviewWrong(){
+  var s = S.session, a = s && s.answer;
+  if(!a || !a.ok) return;
+  var it = s.items[s.i];
+  a.ok = false; a.result = "no"; a.overridden = false; a.undone = true;
+  s.correct = Math.max(0, s.correct - 1);
+  recordIn(it.deck.id, it.unit.id, false);
+  clearTimeout(learnTimer);          // a near miss was about to carry them off
+  render();
 }
 function answerReview(a){
   var s = S.session; if(!s || s.answer) return;
@@ -4996,7 +5033,12 @@ function answerReview(a){
   if(a.ok) s.correct++;
   recordIn(it.deck.id, it.unit.id, a.ok);
   render();
-  if(a.ok){ clearTimeout(learnTimer); learnTimer = setTimeout(function(){ if(S.session === s && s.answer === a) nextReview(); }, 900); }
+  // Only a clean hit moves on by itself. A near miss is exactly the one worth
+  // reading, and carrying them off it would take the "I was wrong" with it.
+  if(a.ok && a.result !== "near"){
+    clearTimeout(learnTimer);
+    learnTimer = setTimeout(function(){ if(S.session === s && s.answer === a) nextReview(); }, 900);
+  }
 }
 function nextReview(){
   clearTimeout(learnTimer);
