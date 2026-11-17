@@ -4151,7 +4151,7 @@ function renderEdit(){
   var rows = el("div",{class:"rows" + (tagged(d) ? " vocab" : "")});
   rows.appendChild(el("div",{class:"rowhead"},[
     el("span",{text:"#"}), el("span",{text:"Term"}),
-    kind === "vocab" ? el("span",{text:"Part of speech"}) : null,
+    tagged(d) ? el("span",{text: kind === "vocab" ? "Part of speech" : tagName(d)}) : null,
     el("span",{class:"h-def",text:"Definition"}), el("span",{})
   ]));
   var list = d.cards && d.cards.length ? d.cards : (d.cards = [{id:uid(),term:"",def:""}]);
