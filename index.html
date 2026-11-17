@@ -1094,7 +1094,7 @@ var S = {
   canEdit:false, ready:false, who:null, published:null, base:null, remoteMoved:false, draft:false, token:null, busy:false, incoming:null,
   decks:[], deckId:null, view:"home",
   folders:[], folderId:null, open:{}, learn:{}, railShut:false, calMonth:null, user:null, profile:null, providers:null,
-  notices:[], noticeShown:false, noticeDirty:false, mailSent:null,
+  notices:[], noticeShown:false, noticeDirty:false, mailMode:"in", mailDraft:null, mailCheck:null,
   conjMode:"forms", theme:"", custom:null,
   dir:"t2d",        // t2d = term -> definition, d2t = definition -> term
   filter:"all",     // all | starred | missed
@@ -2072,6 +2072,9 @@ function routeHash(){
 }
 function go(view){
   shutRail();
+  // Walking away from the sign-in page puts its form back to a blank one. Otherwise
+  // you return to "check your email" from last time with no obvious way past it.
+  if(view !== "who" && view !== "connect"){ S.mailCheck = null; S.mailDraft = null; S.authError = null; }
   if((view === "home" || view === "folder") && !S.session && S.incoming) applyIncoming();
   if(view === "cal") setHash("cal");
   else if(view === "start") setHash("home");
@@ -5057,64 +5060,125 @@ function renderWho(){
       acct.appendChild(el("p",{class:"saveflag",text:"Google sign-in isn't switched on for this project yet."}));
     }
 
-    /* A link in an email, for anyone without a Google account. No password to
-       invent and forget, and because this project uses the implicit flow rather
-       than PKCE the link carries the whole session — so it can be opened on a
-       different device from the one that asked for it, which is what a student
-       who requested it on a chromebook and opened their mail on a phone will do. */
+    /* Email and a password, for anyone without a Google account.
+
+       Worth knowing why this is the shape it is: with "Confirm email" switched
+       off in Supabase, signing up returns a session there and then, so the whole
+       thing needs no email sent at all — which matters, because the built-in
+       sender does about two messages an hour. With it switched on, signing up
+       sends a confirmation first and nobody gets in until that arrives. Both are
+       handled below, because which one is in force is a dashboard setting and not
+       something this page can see. */
     if(S.providers.email){
       if(S.providers.google) acct.appendChild(el("div",{class:"hr",text:"or"}));
-      if(S.mailSent){
+
+      if(S.mailCheck){
         acct.appendChild(el("p",{style:"margin:0 0 10px"},[
-          "Sent. Open the link in the email at ", el("b",{text:S.mailSent}), " and it signs you in \u2014 on whichever device you open it."
+          "Account made. There's a confirmation link in the email at ",
+          el("b",{text:S.mailCheck}), " \u2014 open it and you're in."
         ]));
         acct.appendChild(el("p",{class:"saveflag",style:"margin:0 0 13px",
-          text:"Nothing there? Give it a minute, then look in spam."}));
+          text:"Nothing there after a minute? Look in spam, then tell your teacher."}));
         acct.appendChild(el("button",{class:"btn ghost sm",onclick:function(){
-          S.mailSent = null; S.authError = null; render();
-        }},["Use a different address"]));
+          S.mailCheck = null; S.authError = null; render();
+        }},["Back"]));
       } else {
-        var mailIn = el("input",{class:"text",type:"email",placeholder:"you@example.com",
-          autocomplete:"email",inputmode:"email","aria-label":"Your email address",
-          autocapitalize:"off",autocorrect:"off",spellcheck:"false",style:"width:100%"});
-        var mailBtn = el("button",{class:"btn",onclick:function(){ sendLink(); }},[icon(I.user,15),"Email me a link"]);
-        function sendLink(){
-          var addr = mailIn.value.trim();
+        var making = S.mailMode === "up";
+        var emIn = el("input",{class:"text",type:"email",placeholder:"you@example.com",
+          autocomplete:"email",inputmode:"email","aria-label":"Email address",
+          autocapitalize:"off",autocorrect:"off",spellcheck:"false",style:"width:100%",
+          value: S.mailDraft || ""});
+        var pwIn = el("input",{class:"text",type:"password",placeholder:"\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022",
+          autocomplete: making ? "new-password" : "current-password",
+          "aria-label":"Password",style:"width:100%"});
+        // A mistyped password on the way in is a nuisance; a mistyped one on the way
+        // up locks you out of an account you can't reset without email. So you can
+        // look at what you typed.
+        var peek = el("button",{class:"linkbtn",type:"button",onclick:function(){
+          var hid = pwIn.type === "password";
+          pwIn.type = hid ? "text" : "password";
+          peek.textContent = hid ? "Hide" : "Show";
+          pwIn.focus();
+        }},["Show"]);
+        var goBtn = el("button",{class:"btn primary",onclick:function(){ submit(); }},
+          [making ? "Create account" : "Sign in"]);
+
+        function submit(){
+          var addr = (emIn.value || "").trim(), pw = pwIn.value || "";
           if(!/.+@.+\..+/.test(addr)){
-            S.authError = "That doesn't look like an email address.";
+            S.mailDraft = addr; S.authError = "That doesn't look like an email address.";
             return render();
           }
-          if(mailBtn.disabled) return;
-          mailBtn.disabled = true;
-          mailBtn.textContent = "Sending\u2026";
+          if(making && pw.length < 6){
+            S.mailDraft = addr; S.authError = "Pick a password of at least 6 characters.";
+            return render();
+          }
+          if(!pw){
+            S.mailDraft = addr; S.authError = "Put your password in too.";
+            return render();
+          }
+          if(goBtn.disabled) return;
+          goBtn.disabled = true;
+          goBtn.textContent = making ? "Creating\u2026" : "Signing in\u2026";
           rememberWhere();
           sbLoad()
             .then(function(c){
-              return c.auth.signInWithOtp({email: addr,
-                options:{emailRedirectTo: location.origin + location.pathname}});
+              return making
+                ? c.auth.signUp({email:addr, password:pw,
+                    options:{emailRedirectTo: location.origin + location.pathname}})
+                : c.auth.signInWithPassword({email:addr, password:pw});
             })
             .then(function(res){
-              // Same as the Google button: a refusal arrives in the result, not thrown.
+              // A refusal arrives in the result rather than thrown, the same as the
+              // Google button, and used to be the thing that made a button do nothing.
               if(res && res.error) throw res.error;
-              S.authError = null; S.mailSent = addr; render();
+              S.authError = null; S.mailDraft = null;
+              // Signed up with confirmation on: there is a user but no session yet.
+              if(making && res && res.data && !res.data.session){
+                S.mailCheck = addr; return render();
+              }
+              // Otherwise onAuthStateChange has it from here.
             })
             .catch(function(err){
-              S.authError = String((err && err.message) || "Couldn't send the email. Try again in a moment.");
-              render();
+              var m = String((err && err.message) || "That didn't work. Try again.");
+              // Supabase's wording for a wrong password is accurate and unhelpful.
+              if(/invalid login credentials/i.test(m)){
+                m = "That email and password don't match an account. Check the password, or make an account if you haven't yet.";
+              } else if(/user already registered/i.test(m)){
+                m = "There's already an account on that address \u2014 sign in instead.";
+              }
+              S.mailDraft = addr; S.authError = m; render();
             });
         }
-        mailIn.addEventListener("keydown", function(ev){
-          if(ev.key === "Enter"){ ev.preventDefault(); sendLink(); }
+        [emIn, pwIn].forEach(function(f){
+          f.addEventListener("keydown", function(ev){
+            if(ev.key === "Enter"){ ev.preventDefault(); submit(); }
+          });
         });
+
         acct.appendChild(el("div",{class:"field"},[
-          el("label",{text:"Sign in by email"}), mailIn
+          el("label",{text: making ? "Make an account" : "Sign in with an email"}), emIn
         ]));
-        acct.appendChild(mailBtn);
+        acct.appendChild(el("div",{class:"field"},[
+          el("label",{style:"display:flex;align-items:center;justify-content:space-between"},
+            ["Password", peek]),
+          pwIn
+        ]));
+        if(making){
+          acct.appendChild(el("p",{class:"saveflag",style:"margin:-4px 0 12px",
+            text:"At least 6 characters. There's no way to reset it from here, so pick one you'll remember."}));
+        }
+        acct.appendChild(el("div",{class:"rowctl",style:"justify-content:space-between"},[
+          goBtn,
+          el("button",{class:"linkbtn",onclick:function(){
+            S.mailMode = making ? "in" : "up";
+            S.authError = null; S.mailDraft = (emIn.value || "").trim(); render();
+          }},[ making ? "I already have an account" : "Make an account" ])
+        ]));
       }
     }
 
-    wrap.appendChild(acct);
-    wrap.appendChild(el("div",{class:"hr",text:"or"}));
+    wrap.appendChild(acct);    wrap.appendChild(el("div",{class:"hr",text:"or"}));
   }
 
   userIn = el("input",{class:"text",type:"text",placeholder:"Username",autocomplete:"username"});

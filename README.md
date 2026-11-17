@@ -179,7 +179,7 @@ every system of this kind has.
 
 ## Accounts
 
-Sign-in is **Continue with Google** or **a link sent to an email address**, and it's
+Sign-in is **Continue with Google** or **an email and password**, and it's
 optional — without it the app behaves as it always has, keeping scores in the browser.
 With it:
 
@@ -190,21 +190,37 @@ With it:
   the editor** in its editor. It lands under **Submitted**, where the editor approves
   it into their own decks — ready to publish like anything else — or declines it.
 
-### Signing in by email
+### Signing in with an email and password
 
-Under the Google button, an address and **Email me a link**. No password to invent and
-forget, and because this project uses the implicit flow rather than PKCE the link carries
-the whole session — so it can be opened on a different device from the one that asked for
-it, which is exactly what a student who asked on a chromebook and reads their mail on a
-phone will do. A new address creates an account, so this covers anyone without Google.
+Under the Google button: an address, a password, **Sign in**, and **Make an account**
+to switch the same two boxes into signing up. A new password has to be six characters,
+and **Show** reveals what was typed — a typo on the way in is a nuisance, but a typo on
+the way *up* locks you out of an account that can't be reset without email.
 
-> **This needs custom SMTP in Supabase before students can use it.** Supabase's built-in
-> email sender is for development: a couple of messages an hour, and on current projects
-> it will only deliver to members of the Supabase organisation. A class hitting it gets
-> `Email rate limit exceeded`, which the page now shows them verbatim. Set up an SMTP
-> provider under **Authentication → Emails → SMTP Settings** (Resend, SendGrid, Postmark,
-> or the school's own Google Workspace SMTP) and the limit becomes that provider's.
-> Until then, treat the email option as untested with real students.
+Supabase's own wording for a wrong password, "Invalid login credentials", is accurate
+and no help to a thirteen-year-old, so that one is replaced with a sentence that says
+what to do. Everything else it returns is shown as it came.
+
+> **Turn "Confirm email" off in Supabase before a class uses this.**
+> Under **Authentication → Providers → Email**. With it *on* — which is how the project
+> stands right now — making an account sends a confirmation message first and nobody
+> gets in until it arrives, which runs straight into the built-in email sender: a couple
+> of messages an hour, and on current projects it only delivers to members of the
+> Supabase organisation. With it *off*, signing up returns a session there and then and
+> the whole flow sends no email at all. The page handles both, because which one is in
+> force is a dashboard setting it can't see.
+>
+> The trade is that nobody proves they own the address they sign up with. For a study
+> app whose rows are scoped per student by row level security, and which holds nothing
+> but quiz scores, that is a fair price for not depending on email at all. Decide it
+> deliberately rather than by accident.
+
+> **There is no "forgot password".** It would need email, which is the thing being
+> avoided. Until SMTP is configured under **Authentication → Emails → SMTP Settings**
+> (Resend, SendGrid, Postmark, or the school's own Google Workspace SMTP), a student who
+> forgets theirs either makes a second account or has it reset by hand in the Supabase
+> table editor. Their scores still work signed out, so this is an annoyance and not a
+> catastrophe — but it is the reason the sign-up box says to pick one they'll remember.
 
 The backend is Supabase (free tier). Its URL and **publishable** key are in `index.html`
 and are meant to be public; the secret key is not used anywhere and must never be. What
