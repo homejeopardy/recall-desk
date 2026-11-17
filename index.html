@@ -417,6 +417,11 @@ kbd{font-family:var(--mono);font-size:11px;background:var(--surface-2);border:1p
 .altdel:hover{color:var(--bad)}
 .row textarea:hover{border-color:var(--rule)}
 .row textarea:focus{border-color:var(--ink);outline:none;background:var(--surface-2)}
+.rows.ord .rowhead,.rows.ord .row{grid-template-columns:32px 1fr 1.5fr 56px 32px}
+.rowmv{display:flex;align-items:center;gap:1px;padding-top:4px}
+.rowmv .mv{color:var(--ink-faint);padding:5px;border-radius:var(--r);line-height:0}
+.rowmv .mv:hover:not(:disabled){color:var(--ink);background:var(--surface-2)}
+.rowmv .mv:disabled{opacity:.28}
 .row .del{color:var(--ink-faint);padding:8px;border-radius:var(--r);line-height:0}
 .row .del:hover{color:var(--bad);background:var(--bad-wash)}
 .row .rep{color:var(--ink-faint);padding:8px;border-radius:var(--r);line-height:0;opacity:.45;transition:opacity .12s}
@@ -574,6 +579,21 @@ input.text:focus{border-color:var(--ink);outline:none}
 .crow.no .mark{color:var(--bad)}
 .crow .right{font-family:var(--read);font-size:16px;color:var(--bad)}
 .crow .given{font-family:var(--read);font-size:17px;padding:7px 0}
+/* The ordering board is the conjugation table with the row labels turned into
+   positions, so the two read as the same piece of furniture. */
+.ordboard .crow{grid-template-columns:54px 1fr}
+.ordboard .pl{justify-content:center;font-size:12px}
+.ordboard .slot{display:block;width:100%;text-align:left;padding:9px 10px;border-radius:var(--r);font-family:var(--read);font-size:16px;line-height:1.35}
+.ordboard button.slot:hover{background:var(--surface-2)}
+/* Its own class, not .empty — that one is the big "nothing here" panel, and a slot
+   that borrowed it borrowed fifty pixels of padding with it. The dashed outline is
+   worth keeping on purpose: it reads as a place something goes. */
+.ordboard .slot.blank{color:var(--ink-faint);border:1px dashed var(--rule);border-radius:var(--r)}
+.pool{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 16px}
+.pool .chip{padding:10px 14px;border:1px solid var(--ink);border-radius:var(--r-lg);background:var(--surface);
+  box-shadow:var(--lift);font-family:var(--read);font-size:15.5px;line-height:1.3;text-align:left;max-width:100%}
+.pool .chip:hover{background:var(--surface-2)}
+.pool .chip:active{transform:translateY(1px)}
 
 /* ---- the way in to the editor's own page ----
    Fixed to the corner rather than put in a header, because there isn't one: every
@@ -912,7 +932,9 @@ body.editing .stage-head,body.editing .startbar,body.editing .testbar{padding-ri
   .learn{grid-template-columns:1fr}
   .missed.lround li{grid-template-columns:1fr}
   .st{text-align:left}
-  .rows.vocab .rowhead,.rows.vocab .row{grid-template-columns:24px 1fr 40px}
+  .rows.vocab .rowhead,.rows.vocab .row,
+  .rows.ord .rowhead,.rows.ord .row{grid-template-columns:24px 1fr 40px}
+  .rows.ord .rowmv{grid-column:2;justify-self:end;padding-top:0}
   .rows.vocab .row select.pos{grid-column:2/4;width:auto}
   .conjcard .ch{grid-template-columns:24px 1fr 40px}
   .conjcard .ch input:nth-of-type(2){grid-column:2/4}
@@ -1148,7 +1170,25 @@ var DEFAULT_PERSONS = [
   {id:"yo", label:"yo"}, {id:"tu", label:"tú"}, {id:"el", label:"él / ella / usted"},
   {id:"nos", label:"nosotros"}, {id:"vos", label:"vosotros"}, {id:"ellos", label:"ellos / ellas / ustedes"}
 ];
-function kindOf(d){ return d && (d.kind === "vocab" || d.kind === "conj" || d.kind === "cat") ? d.kind : "cards"; }
+function kindOf(d){ return d && (d.kind === "vocab" || d.kind === "conj" || d.kind === "cat" || d.kind === "order") ? d.kind : "cards"; }
+/* ---- a deck that is a sequence ----
+   The order of the cards in the editor is the answer, so an order deck needs no field
+   of its own — which also means an existing deck can be turned into one and back
+   without anything to convert. What it does need is a way to move a row, since until
+   now the only thing you could do to one was delete it.
+
+   Asked all at once a twenty-event timeline is a memory test rather than an ordering
+   one, so it is asked in sets of about six, each one a run of the real sequence. */
+function orderSets(cards){
+  var n = cards.length;
+  if(n < 2) return [];
+  var k = Math.max(1, Math.ceil(n / 6));
+  var size = Math.ceil(n / k), out = [], i;
+  for(i = 0; i < n; i += size) out.push(cards.slice(i, i + size));
+  // A set of one has nothing to put in order, so it joins the one before it.
+  if(out.length > 1 && out[out.length - 1].length < 2) out[out.length - 2] = out[out.length - 2].concat(out.pop());
+  return out;
+}
 /* ---- decks whose cards carry a label ----
    A vocabulary deck labels every word with a part of speech, out of a fixed list of
    nine. A categories deck does the same thing with a list you write yourself: Mitosis
@@ -2436,6 +2476,7 @@ function render(){
   if(v === "quiz") return renderQuiz();
   if(v === "write") return renderWrite();
   if(v === "cloze") return renderCloze();
+  if(v === "order") return renderOrder();
   if(v === "match") return renderMatch();
   if(v === "edit") return renderEdit();
   if(v === "who") return renderWho();
@@ -2534,6 +2575,9 @@ function renderHome(){
   var verbs = kind === "conj" ? cardsOf(d).filter(hasForms).length : 0;
   var tiles = [["test-setup","Simulated test", I.test,
     "A timed run-through that mixes the question types, over this deck or the whole folder.", np >= 2, np < 2 ? "Needs 2+ cards" : null]];
+  if(kind === "order") tiles.push(["order","Put them in order", I.table,
+    "The cards are a sequence. They come back shuffled, in sets of about six, and you put them back.",
+    np >= 2, np < 2 ? "Needs 2+ cards" : null]);
   if(kind === "conj") tiles.push(["table","Fill the table", I.table,
     "The whole table for one verb at a time. Type every form, then see it marked row by row.", verbs >= 1, verbs ? null : "No verb has any forms yet"]);
   if(tagged(d)) tiles.push(["pos", kind === "vocab" ? "Parts of speech" : tagName(d), I.tag,
@@ -2805,6 +2849,10 @@ function startMode(mode){
   if(mode === "pos"){
     var pc = cardsOf(deck()).filter(function(c){ return posRights(c).length; });
     S.session = {mode:"pos", cards: S.shuffle ? shuffled(pc) : pc, i:0, picked:null, correct:0, missed:[]};
+  }
+  if(mode === "order"){
+    var sets = orderSets(cardsOf(deck()));
+    S.session = {mode:"order", sets:sets, i:0, placed:[], checked:false, right:0, total:0, misses:[]};
   }
   if(mode === "cloze"){
     var cz = clozable(deck());
@@ -3842,6 +3890,128 @@ function renderWrite(){
     stage.appendChild(el("div",{class:"kbhint",style:"margin-top:12px;font-size:11.5px;color:var(--ink-faint);text-align:center",html:'Press <kbd>Enter</kbd> to continue'}));
   }
 }
+/* ---------------- put them in order ----------------
+   Tap to place, tap again to take back. A drag would be the obvious gesture and the
+   wrong one: it is fiddly on a phone, impossible from a keyboard, and this is a
+   two-tap job either way. Each card is recorded against the same id the other modes
+   use, so one that keeps landing in the wrong place turns up under Missed. */
+function renderOrder(){
+  var s = S.session; if(!s || s.mode !== "order") return go("home");
+  if(!s.sets.length) return go("home");
+  if(s.i >= s.sets.length) return renderOrderDone(s);
+  var set = s.sets[s.i];
+  if(!s.bag || s.bagFor !== s.i){ s.bag = shuffled(set.slice()); s.bagFor = s.i; }
+  var byId = {}; set.forEach(function(c){ byId[c.id] = c; });
+
+  stage.appendChild(modeHead("Put them in order"));
+  stage.appendChild(el("div",{class:"deskrow"},[
+    el("span",{class:"counter",text:"Set " + (s.i+1) + " / " + s.sets.length}),
+    el("span",{class:"counter",text: s.checked ? (s.right + " / " + s.total + " in place") : (s.placed.length + " of " + set.length + " placed")})
+  ]));
+  stage.appendChild(track(s.i/s.sets.length*100));
+
+  var board = el("div",{class:"ctable ordboard"},[
+    el("div",{class:"cth"},[
+      el("h3",{text: s.checked ? "How that went" : "Put these in order"}),
+      el("div",{class:"m",text: s.checked ? "The right order is the one shown here."
+                                          : "Tap one to place it, tap it again to take it back."})
+    ])
+  ]);
+  set.forEach(function(right, idx){
+    var gotId = s.placed[idx], got = gotId ? byId[gotId] : null;
+    if(s.checked){
+      var ok = gotId === right.id;
+      board.appendChild(el("div",{class:"crow " + (ok ? "ok" : "no")},[
+        el("span",{class:"pl",text:String(idx+1)}),
+        el("span",{class:"pv"},[
+          el("span",{class:"given",text: got ? (got.term || "—") : "—"}),
+          el("span",{style:"flex:1"}),
+          ok ? null : el("span",{class:"right",text: right.term || "—"}),
+          el("span",{class:"mark",text: ok ? "right" : "should be"})
+        ])
+      ]));
+      return;
+    }
+    board.appendChild(el("div",{class:"crow"},[
+      el("span",{class:"pl",text:String(idx+1)}),
+      el("span",{class:"pv"},[
+        got ? el("button",{class:"slot","aria-label":"Take " + (got.term || "this") + " back out of position " + (idx+1),
+                onclick:function(){ s.placed.splice(idx, 1); render(); }},[got.term || "—"])
+            : el("span",{class:"slot blank",text:"—"})
+      ])
+    ]));
+  });
+  stage.appendChild(board);
+
+  if(!s.checked){
+    var left = s.bag.filter(function(c){ return s.placed.indexOf(c.id) === -1; });
+    if(left.length){
+      var pool = el("div",{class:"pool"});
+      left.forEach(function(c){
+        pool.appendChild(el("button",{class:"chip","aria-label":"Place " + (c.term || "this") + " next",
+          onclick:function(){ s.placed.push(c.id); render(); }},[c.term || "—"]));
+      });
+      stage.appendChild(pool);
+    }
+    stage.appendChild(el("div",{class:"rowctl",style:"justify-content:space-between"},[
+      el("span",{class:"kbhint",style:"font-size:11.5px;color:var(--ink-faint)",
+        text: left.length ? left.length + " still to place" : "All placed"}),
+      el("span",{class:"rowctl"},[
+        s.placed.length ? el("button",{class:"linkbtn",onclick:function(){ s.placed = []; render(); }},["Start this set again"]) : null,
+        el("button",{class:"btn primary",disabled: left.length ? "disabled" : null, onclick:checkOrder},["Check the order"])
+      ])
+    ]));
+    return;
+  }
+  var gotRight = set.filter(function(c, idx){ return s.placed[idx] === c.id; }).length;
+  stage.appendChild(el("div",{class:"verdict " + (gotRight === set.length ? "ok" : gotRight ? "near" : "no")},[
+    el("span",{text: gotRight + " of " + set.length + " in the right place."}),
+    el("button",{class:"btn sm",onclick:nextOrder},[ s.i + 1 >= s.sets.length ? "See score" : "Next set", icon(I.chev,14)])
+  ]));
+  stage.appendChild(el("div",{class:"kbhint",style:"margin-top:12px;font-size:11.5px;color:var(--ink-faint);text-align:center",html:'Press <kbd>Enter</kbd> to continue'}));
+}
+function checkOrder(){
+  var s = S.session; if(!s || s.checked) return;
+  var set = s.sets[s.i];
+  if(s.placed.length < set.length) return;
+  set.forEach(function(c, idx){
+    var ok = s.placed[idx] === c.id;
+    s.total++; if(ok) s.right++; else s.misses.push({want:c, pos:idx+1, set:s.i+1});
+    record(c.id, ok);
+  });
+  s.checked = true; render();
+}
+function nextOrder(){
+  var s = S.session; if(!s || !s.checked) return;
+  s.i++; s.placed = []; s.checked = false; s.bag = null; render();
+}
+function renderOrderDone(s){
+  var pct = s.total ? Math.round(s.right / s.total * 100) : 0;
+  stage.appendChild(modeHead("Put them in order"));
+  var body = el("div",{class:"result"},[
+    el("div",{class:"eyebrow",text:"Session score"}),
+    el("div",{class:"score",text:pct + "%"}),
+    el("p",{style:"margin:2px 0 20px;color:var(--ink-soft);font-size:14px",
+      text: s.right + " of " + s.total + " in the right place, across " + s.sets.length + (s.sets.length === 1 ? " set" : " sets")}),
+    el("div",{class:"rowctl"},[
+      el("button",{class:"btn primary",onclick:function(){ startMode("order"); }},["Start over"]),
+      el("button",{class:"btn ghost",onclick:function(){ S.session=null; go("home"); }},["Back to deck"])
+    ])
+  ]);
+  if(s.misses.length){
+    var ul = el("ul",{class:"missed"});
+    s.misses.forEach(function(m){
+      ul.appendChild(el("li",{},[
+        el("span",{class:"t",text:(m.want.term || "—")}),
+        el("span",{class:"d",text:"belongs at " + m.pos + (s.sets.length > 1 ? " in set " + m.set : "")})
+      ]));
+    });
+    body.appendChild(el("div",{class:"eyebrow",style:"margin-top:24px;text-align:left",text:"Landed in the wrong place"}));
+    body.appendChild(ul);
+  }
+  stage.appendChild(body);
+}
+
 /* ---------------- fill the blank ----------------
    Type the answer with the sentence instead of the definition. The marking, the two
    second-thoughts buttons and the score screen are the same ones — only the question
@@ -4148,11 +4318,13 @@ function renderEdit(){
     ]));
   }
 
-  var rows = el("div",{class:"rows" + (tagged(d) ? " vocab" : "")});
+  var rows = el("div",{class:"rows" + (tagged(d) ? " vocab" : "") + (kind === "order" && !ro ? " ord" : "")});
   rows.appendChild(el("div",{class:"rowhead"},[
-    el("span",{text:"#"}), el("span",{text:"Term"}),
+    el("span",{text:"#"}), el("span",{text: kind === "order" ? "Step" : "Term"}),
     tagged(d) ? el("span",{text: kind === "vocab" ? "Part of speech" : tagName(d)}) : null,
-    el("span",{class:"h-def",text:"Definition"}), el("span",{})
+    el("span",{class:"h-def",text: kind === "order" ? "Detail" : "Definition"}),
+    kind === "order" && !ro ? el("span",{text:"Move"}) : null,
+    el("span",{})
   ]));
   var list = d.cards && d.cards.length ? d.cards : (d.cards = [{id:uid(),term:"",def:""}]);
   list.forEach(function(c, i){
@@ -4208,6 +4380,13 @@ function renderEdit(){
       mkta("term","term"),
       tagged(d) ? posSelect(d, c, i, ro, function(){ queueSave(d); }) : null,
       defCell,
+      // The sequence is the answer, so on an order deck a row has to be movable.
+      kind === "order" && !ro ? el("span",{class:"rowmv"},[
+        el("button",{class:"mv","aria-label":"Move " + (i+1) + " up", disabled: i === 0 ? "disabled" : null,
+          onclick:function(){ moveCard(d, i, -1); }},[icon("M6 15l6-6 6 6",13)]),
+        el("button",{class:"mv","aria-label":"Move " + (i+1) + " down", disabled: i === list.length - 1 ? "disabled" : null,
+          onclick:function(){ moveCard(d, i, 1); }},[icon("M6 9l6 6 6-6",13)])
+      ]) : null,
       ro ? (reportsOn() ? reportBtn(d, c) : el("span",{})) : el("button",{class:"del","aria-label":"Delete card " + (i+1),onclick:function(){ d.cards.splice(i,1); if(!d.cards.length) d.cards.push({id:uid(),term:"",def:""}); queueSave(d); render(); }},[icon(I.trash,15)])
     ]));
   });
@@ -4275,7 +4454,7 @@ function quizField(d){
 }
 function kindPicker(d){
   var sel = el("select",{"aria-label":"Deck type"});
-  [["cards","Cards"],["vocab","Vocabulary"],["cat","Categories"],["conj","Conjugation"]].forEach(function(o){
+  [["cards","Cards"],["vocab","Vocabulary"],["cat","Categories"],["order","Order"],["conj","Conjugation"]].forEach(function(o){
     sel.appendChild(el("option",{value:o[0],text:o[1]}));
   });
   sel.value = kindOf(d);
@@ -4288,9 +4467,24 @@ function kindPicker(d){
     toast(sel.value === "conj" ? "Conjugation deck — one table per verb"
        : sel.value === "vocab" ? "Vocabulary deck — each word gets a part of speech"
        : sel.value === "cat" ? "Categories deck — name the buckets, then file each card"
+       : sel.value === "order" ? "Order deck — the cards are a sequence, top to bottom"
        : "Plain two-sided cards");
   });
   return el("label",{class:"fpick"},[icon(I.cards,15), "Type", sel]);
+}
+function moveCard(d, i, by){
+  var to = i + by;
+  if(!d.cards || to < 0 || to >= d.cards.length) return;
+  var c = d.cards[i];
+  d.cards.splice(i, 1);
+  d.cards.splice(to, 0, c);
+  queueSave(d); render();
+  // Keeping the keyboard on the button that was pressed, so a card can be walked up
+  // the list without reaching for the mouse between each step.
+  setTimeout(function(){
+    var b = document.querySelector('[aria-label="Move ' + (to + 1) + (by < 0 ? ' up' : ' down') + '"]');
+    if(b && !b.disabled) b.focus();
+  }, 0);
 }
 function posSelect(d, c, i, ro, onset, field){
   field = field || "pos";
@@ -5940,6 +6134,9 @@ document.addEventListener("keydown", function(ev){
       if(s.choices && pi < s.choices.length){ ev.preventDefault(); pickPos(pi); }
     } else if((k === "Enter" || k === " ") && s.picked !== null){ ev.preventDefault(); nextPos(); }
     if(k === "Escape"){ S.session = null; go("home"); }
+  } else if(S.view === "order" && s && s.mode === "order"){
+    if(s.checked && (k === "Enter" || k === " ")){ ev.preventDefault(); nextOrder(); }
+    if(k === "Escape"){ S.session = null; go("home"); }
   } else if(S.view === "table" && s && s.mode === "table"){
     if(s.checked && (k === "Enter" || k === " ")){ ev.preventDefault(); nextTable(); }
     if(k === "Escape"){ S.session = null; go("home"); }
@@ -6071,7 +6268,7 @@ function normalizeStore(raw){
       subject: v.subject || "",
       folder: ids[v.folder] ? v.folder : "",
       quiz: parseDate(v.quiz) ? String(v.quiz) : "",
-      kind: (v.kind === "vocab" || v.kind === "conj" || v.kind === "cat") ? v.kind : undefined,
+      kind: (v.kind === "vocab" || v.kind === "conj" || v.kind === "cat" || v.kind === "order") ? v.kind : undefined,
       cats: Array.isArray(v.cats) ? v.cats.map(function(x){ return String(x == null ? "" : x); }) : undefined,
       catName: v.catName ? String(v.catName) : undefined,
       tense: v.tense ? String(v.tense) : "",

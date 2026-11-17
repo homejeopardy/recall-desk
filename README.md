@@ -183,6 +183,16 @@ deck move between Vocabulary and Categories without losing what was typed.
 across the top. The rows are free text, so it serves any table of forms, not only a
 Spanish verb.
 
+**Order** is a sequence: the order the cards sit in the editor is the answer. It needs
+no field of its own, which is why a deck can be turned into one and back with nothing
+to convert — but it does need a way to move a row, so an order deck's rows get up and
+down arrows, and the focus follows the card so it can be walked up the list without
+reaching for the mouse. **Put them in order** gives them back shuffled and asks you to
+rebuild it. A twenty-event timeline asked all at once is a memory test rather than an
+ordering one, so it comes in sets of about six, each a run of the real sequence. Tap to
+place, tap again to take back — a drag would be the obvious gesture and the wrong one:
+fiddly on a phone and impossible from a keyboard.
+
 ## The word in a sentence
 
 Any card can carry a third side: the word doing its job. **+ example** in the editor
