@@ -98,6 +98,43 @@ will otherwise put a screenshot of the page on the home screen. There is deliber
 `apple-mobile-web-app-capable`: in that mode iOS throws the Google sign-in out to Safari
 and the session never comes back.
 
+## Motion
+
+The durations and curves all come from six variables at the top of the stylesheet
+(`--ease`, `--t-tap`, `--t-move`, `--t-turn` and friends), so the whole page moves in one
+vocabulary: things arriving decelerate, a press answers in 100ms, and the only thing slow
+enough to actually watch is a card turning over.
+
+Three facts about this app shape every bit of it, and getting them wrong is how the
+animations quietly stopped working before:
+
+- **The stage is rebuilt constantly** — `render()` wipes it for a flipped card and a
+  picked answer as much as for a new view. So the page-turn entrance is gated on `FRESH`,
+  a signature of view + deck + folder + session mode. Animating every render instead
+  makes the page flicker under every tap.
+- **A node built already wearing a class has nothing to transition from.** This is why
+  the card flip never actually played: flipping re-rendered the stage, and the new card
+  arrived already at `rotateX(180deg)`. The card is now kept and only reclassed, with the
+  judge buttons underneath as the one part that redraws. The matching grid is kept for
+  the same reason — a tile rebuilt wearing `.done` just appeared dim instead of fading
+  and shrinking. Where a node genuinely is new each time, like a right or wrong answer
+  washing in, it's an `animation`, not a `transition`.
+- **A bar rebuilt with the stage has no width to move from**, so `track()` gives it the
+  width it had a moment ago and walks it to the new one on the next frame. It only does
+  that if it is going to animate; starting at the old value and then not moving would
+  leave the bar reading a card behind for the whole session, which is exactly what
+  happens on a reduced-motion machine if you forget.
+
+Flashcards arrive from the side you sent the last one out towards, which is what a swipe
+has already promised. Grids built only on a view change (the mode tiles, the deck grid,
+a folder's list) come in one item at a time; anything a tap inside the view rebuilds must
+not, or it flickers on every answer.
+
+Nothing here carries meaning in the movement, so `prefers-reduced-motion: reduce` turns
+all of it off with one rule rather than a list — but note that the JS helpers check it
+too, via `still()`, because a transition the stylesheet has zeroed still needs the end
+value set.
+
 ## Who can do what
 
 Three levels, set under **People** (owners only):
