@@ -135,6 +135,29 @@ all of it off with one rule rather than a list — but note that the JS helpers 
 too, via `still()`, because a transition the stylesheet has zeroed still needs the end
 value set.
 
+## Announcements
+
+**Announce**, in a deck's header when editing is unlocked (or `#notices`), writes a card
+that goes up over the page the next time anyone opens the site. Each person sees a given
+notice once; dismissing it — the button, Escape, or clicking the dimmed page — remembers
+it on that device and it never comes back. Deliberately a pop-up rather than a banner,
+because the whole point of these is the things that otherwise get missed.
+
+Give one a **From** date and it waits for the morning it matters. Give it an **Until**
+and it takes itself down. **Hidden** parks one without deleting it. The status line under
+each says which of those it is doing right now, and **Preview** shows it exactly as a
+student gets it without marking anything as read.
+
+They live in their own **`notices.json`**, not in `decks.json`. Decks go through a
+careful three-way merge whenever two people publish at once, and a notice has no business
+anywhere near that: this way posting one cannot touch a single card, and it doesn't have
+to wait for a deck edit to go out. Publishing sends the sha the editor read, so if someone
+else wrote in between GitHub refuses it rather than quietly burying their notice. No file
+at all is a normal state — it means nobody has written one.
+
+Editing a notice does **not** bring it back for anyone who already dismissed it; they are
+remembered by id. To say something again, write a new one.
+
 ## Who can do what
 
 Three levels, set under **People** (owners only):

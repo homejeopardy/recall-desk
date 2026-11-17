@@ -551,6 +551,33 @@ input.text:focus{border-color:var(--ink);outline:none}
 .crow .right{font-family:var(--read);font-size:16px;color:var(--bad)}
 .crow .given{font-family:var(--read);font-size:17px;padding:7px 0}
 
+/* ---- announcements ----
+   A card over the page, once, with the page itself dimmed behind it. Deliberately
+   not a banner: the point of these is the things that get missed. */
+.notewrap{position:fixed;inset:0;z-index:80;display:flex;align-items:center;justify-content:center;
+  padding:24px;background:rgba(0,0,0,.5);animation:fade var(--t-move) ease}
+.notewrap.out{opacity:0;transition:opacity var(--t-quick) ease}
+.notecard{background:var(--surface);border:1px solid var(--ink);border-radius:var(--r-lg);
+  box-shadow:var(--lift);padding:26px 28px;max-width:470px;width:100%;max-height:80vh;overflow:auto;
+  animation:pop var(--t-move) var(--ease)}
+.notecard h3{font-family:var(--read);font-size:23px;font-weight:600;letter-spacing:-.015em;margin:6px 0 0}
+.notebody{font-family:var(--read);font-size:16px;line-height:1.6;color:var(--ink-soft);
+  margin-top:11px;white-space:pre-line}
+@media (max-width:560px){ .notewrap{padding:16px} .notecard{padding:22px 20px} }
+
+/* the editor's side of them */
+.noterow{border:1px solid var(--rule);border-radius:var(--r-lg);background:var(--surface);
+  padding:15px 16px;margin-bottom:12px;display:flex;flex-direction:column;gap:9px}
+.noterow.off{opacity:.55}
+.noterow .when{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.noterow .when label{font-family:var(--mono);font-size:10px;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--ink-faint);display:flex;align-items:center;gap:6px}
+.noterow textarea{width:100%;min-height:76px;border:1px solid var(--rule);border-radius:var(--r);
+  padding:9px 11px;background:var(--surface-2);font-family:var(--read);font-size:15px;
+  line-height:1.55;resize:vertical}
+.noterow textarea:focus,.noterow input:focus{border-color:var(--ink);outline:none}
+.notefoot{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+
 /* ---- sidebar controls ---- */
 #railctl{display:flex;align-items:center;gap:4px;margin-left:auto}
 /* An editor gets two more buttons up here, and a label plus four controls will not
@@ -1067,6 +1094,7 @@ var S = {
   canEdit:false, ready:false, who:null, published:null, base:null, remoteMoved:false, draft:false, token:null, busy:false, incoming:null,
   decks:[], deckId:null, view:"home",
   folders:[], folderId:null, open:{}, learn:{}, railShut:false, calMonth:null, user:null, profile:null, providers:null,
+  notices:[], noticeShown:false, noticeDirty:false,
   conjMode:"forms", theme:"", custom:null,
   dir:"t2d",        // t2d = term -> definition, d2t = definition -> term
   filter:"all",     // all | starred | missed
@@ -1582,6 +1610,192 @@ function unb64utf8(s64){
   return new TextDecoder().decode(bytes);
 }
 
+/* ============================ announcements ============================
+   Their own file rather than a corner of decks.json. Decks go through a careful
+   three-way merge when two people publish at once, and a notice has no business
+   anywhere near that — this way posting one can't touch a single card, and it
+   doesn't wait on a deck edit to go out. */
+var GH_NOTE_FILE = "notices.json";
+var GH_NOTE_API = "https://api.github.com/repos/" + GH_OWNER + "/" + GH_REPO + "/contents/" + GH_NOTE_FILE;
+var NOTE_READ_KEY = "recalldesk.notices-read.v1";
+
+function normalizeNotices(raw){
+  var list = raw && Array.isArray(raw.notices) ? raw.notices : (Array.isArray(raw) ? raw : []);
+  return list.map(function(n){
+    return {
+      id: String(n.id || uid("n")),
+      title: String(n.title || ""),
+      body: String(n.body || ""),
+      starts: parseDate(n.starts) ? String(n.starts) : "",
+      ends: parseDate(n.ends) ? String(n.ends) : "",
+      off: !!n.off
+    };
+  });
+}
+// Showing is decided by the date, so a notice can be written now and appear on the
+// morning it matters, and stop on its own rather than being taken down by hand.
+function noticeLive(n){
+  if(n.off || !(n.title || n.body)) return false;
+  var t = today(), a = parseDate(n.starts), b = parseDate(n.ends);
+  if(a && a > t) return false;
+  if(b && b < t) return false;
+  return true;
+}
+function noticesRead(){ return ls(NOTE_READ_KEY, {}) || {}; }
+function markNoticeRead(id){
+  var m = noticesRead(); m[id] = 1;
+  try{ localStorage.setItem(NOTE_READ_KEY, JSON.stringify(m)); }catch(e){}
+}
+function pendingNotice(){
+  var read = noticesRead();
+  for(var i = 0; i < S.notices.length; i++){
+    if(noticeLive(S.notices[i]) && !read[S.notices[i].id]) return S.notices[i];
+  }
+  return null;
+}
+// Held until the decks are in, so it lands on the page the reader came for rather
+// than on top of "Loading decks…".
+function maybeShowNotice(){
+  if(S.noticeShown || !S.ready || S.loadError) return;
+  var n = pendingNotice();
+  if(n){ S.noticeShown = true; showNotice(n); }
+}
+function showNotice(n, preview){
+  var was = document.activeElement;
+  var ok = el("button",{class:"btn primary",onclick:function(){ close(); }},["Got it"]);
+  var card = el("div",{class:"notecard",role:"dialog","aria-modal":"true","aria-labelledby":"notetitle"},[
+    el("div",{class:"eyebrow",text: preview ? "Preview" : "Notice"}),
+    el("h3",{id:"notetitle",text: n.title || "A note from your teacher"}),
+    n.body ? el("div",{class:"notebody",text:n.body}) : null,
+    el("div",{class:"rowctl",style:"justify-content:flex-end;margin-top:18px"},[ok])
+  ]);
+  var back = el("div",{class:"notewrap"},[card]);
+  function close(){
+    if(!preview) markNoticeRead(n.id);
+    document.removeEventListener("keydown", onKey, true);
+    back.classList.add("out");
+    setTimeout(function(){ if(back.parentNode) back.remove(); }, 220);
+    if(was && was.focus) try{ was.focus(); }catch(e){}
+  }
+  // Captured and stopped, so Space doesn't flip the card behind the dialog and the
+  // only thing Tab can reach is the one button in it.
+  function onKey(ev){
+    ev.stopPropagation();
+    if(ev.key === "Escape"){ ev.preventDefault(); close(); }
+    else if(ev.key === "Tab"){ ev.preventDefault(); ok.focus(); }
+  }
+  document.addEventListener("keydown", onKey, true);
+  back.addEventListener("click", function(ev){ if(ev.target === back) close(); });
+  document.body.appendChild(back);
+  setTimeout(function(){ try{ ok.focus(); }catch(e){} }, 0);
+}
+
+function publishNotices(){
+  if(!S.token) return go("connect");
+  if(S.busy) return;
+  S.busy = true; render();
+  var payload = {
+    version: 1,
+    updated: new Date().toISOString().slice(0,10),
+    notices: S.notices.filter(function(n){ return n.title || n.body; })
+  };
+  ghFetch(GH_NOTE_API + "?ref=" + GH_BRANCH)
+    .then(function(res){
+      if(res.status === 404) return null;                 // first one; the file isn't there yet
+      if(!res.ok) throw new Error(ghError(res));
+      return res.json();
+    })
+    .then(function(existing){
+      var body = {
+        message: "Update notices (" + payload.notices.length + ")",
+        content: b64utf8(JSON.stringify(payload, null, 2) + "\n"),
+        branch: GH_BRANCH
+      };
+      // Sent with the sha it read, so if someone else wrote in between GitHub
+      // refuses it rather than quietly burying their notice.
+      if(existing && existing.sha) body.sha = existing.sha;
+      return ghFetch(GH_NOTE_API, {method:"PUT", body: JSON.stringify(body)});
+    })
+    .then(function(res){
+      if(!res.ok) throw new Error(ghError(res));
+      S.busy = false; S.noticeDirty = false; render();
+      toast("Notices published \u2014 students see them in about a minute");
+    })
+    .catch(function(err){
+      S.busy = false; render();
+      toast("Didn't publish: " + String(err && err.message || err));
+    });
+}
+
+function renderNotices(){
+  // Writing one is no use without a key to publish it, and a half-filled list that
+  // goes nowhere is worse than no page at all.
+  if(!S.canEdit) return go("home");
+  stage.appendChild(el("div",{class:"stage-head"},[
+    el("div",{},[
+      el("h2",{text:"Announcements"}),
+      el("div",{class:"sub",text:"Shown once, over the page, to everyone who opens Quizletish. Each person sees a given notice one time and it then leaves them alone."})
+    ]),
+    el("button",{class:"btn ghost",onclick:function(){ go("home"); }},[icon(I.back,15),"Back"])
+  ]));
+
+  if(!S.notices.length){
+    stage.appendChild(el("div",{class:"empty"},[
+      el("h3",{text:"No announcements"}),
+      el("p",{text:"Write one and it goes up over the page the next time anyone opens the site. Give it an end date and it takes itself down."}),
+      el("button",{class:"btn primary",onclick:addNotice},[icon(I.plus,15),"Write one"])
+    ]));
+    return;
+  }
+
+  S.notices.forEach(function(n, i){
+    var row = el("div",{class:"noterow" + (n.off ? " off" : "")});
+    row.appendChild(el("input",{class:"text",value:n.title || "",placeholder:"Title \u2014 e.g. No quiz on Friday","aria-label":"Title",
+      style:"font-family:var(--read);font-size:17px;font-weight:600",
+      oninput:function(ev){ n.title = ev.target.value; S.noticeDirty = true; }}));
+    row.appendChild(el("textarea",{placeholder:"What you want them to know.","aria-label":"Message",
+      oninput:function(ev){ n.body = ev.target.value; S.noticeDirty = true; }}, [n.body || ""]));
+    row.appendChild(el("div",{class:"when"},[
+      el("label",{},["From", el("input",{type:"date",class:"text",value:n.starts || "","aria-label":"Show from",
+        oninput:function(ev){ n.starts = ev.target.value; S.noticeDirty = true; }})]),
+      el("label",{},["Until", el("input",{type:"date",class:"text",value:n.ends || "","aria-label":"Show until",
+        oninput:function(ev){ n.ends = ev.target.value; S.noticeDirty = true; }})]),
+      el("label",{},[el("input",{type:"checkbox",checked: n.off ? "checked" : null,"aria-label":"Hidden",
+        onchange:function(ev){ n.off = !!ev.target.checked; S.noticeDirty = true; render(); }}), "Hidden"])
+    ]));
+    row.appendChild(el("div",{class:"notefoot"},[
+      el("span",{class:"saveflag",text: n.off ? "Hidden — nobody sees this one"
+        : noticeLive(n) ? "Showing now"
+        : (parseDate(n.ends) && parseDate(n.ends) < today()) ? "Finished — its end date has passed"
+        : "Waiting — starts on " + (n.starts || "a date you haven't set")}),
+      el("span",{class:"rowctl"},[
+        el("button",{class:"btn ghost sm",onclick:function(){ showNotice(n, true); }},["Preview"]),
+        el("button",{class:"btn danger sm",onclick:function(){
+          if(!confirm("Delete this announcement?")) return;
+          S.notices.splice(i, 1); S.noticeDirty = true; render();
+        }},[icon(I.trash,14),"Delete"])
+      ])
+    ]));
+    stage.appendChild(row);
+  });
+
+  stage.appendChild(el("div",{class:"rowctl",style:"justify-content:space-between;margin-top:18px"},[
+    el("button",{class:"btn",onclick:addNotice},[icon(I.plus,15),"Another"]),
+    el("span",{class:"rowctl"},[
+      el("span",{class:"saveflag",text: S.noticeDirty ? "Not published yet" : "Matches what's published"}),
+      el("button",{class:"btn primary",disabled: S.busy ? "disabled" : null,onclick:publishNotices},
+        [icon(I.upload,15), S.busy ? "Publishing\u2026" : "Publish"])
+    ])
+  ]));
+  stage.appendChild(el("p",{class:"saveflag",style:"margin-top:14px",
+    text:"Everyone who has already dismissed a notice keeps it dismissed. Editing one doesn't bring it back for them — give it a new title by writing a new one instead."}));
+}
+function addNotice(){
+  S.notices.push({id:uid("n"), title:"", body:"", starts:"", ends:"", off:false});
+  S.noticeDirty = true;
+  render();
+}
+
 function publish(){
   if(!S.token){ return go("connect"); }
   if(S.busy) return;
@@ -1852,6 +2066,7 @@ function routeHash(){
   if(m){ var f = findFolder(m[1]); if(f){ openFolder(f.id); return true; } return false; }
   if(h === "home"){ go("start"); return true; }
   if(h === "cal"){ go("cal"); return true; }
+  if(h === "notices"){ go("news"); return true; }
   if(h === "review"){ startReview(); return true; }
   return false;
 }
@@ -1902,6 +2117,7 @@ function render(){
   if(S.view === "print" && S.ready && !S.loadError) return renderPrint();
   if(S.view === "subs") return renderSubs();
   if(S.view === "people") return renderPeople();
+  if(S.view === "news") return renderNotices();
   if(S.view === "review" && S.ready && !S.loadError) return renderReview();
   if(S.view === "start" && S.ready && !S.loadError) return renderStart();
   if(S.loadError){
@@ -1925,6 +2141,7 @@ function render(){
   if(v === "test") return renderTest();
   if(v === "subs") return renderSubs();
   if(v === "people") return renderPeople();
+  if(v === "news") return renderNotices();
   if(v === "review") return renderReview();
   if(v === "start") return renderStart();
   if(v === "table") return renderTable();
@@ -1982,6 +2199,7 @@ function renderHome(){
     el("div",{class:"rowctl"},[
       S.canEdit ? el("button",{class:"btn",onclick:function(){ go("edit"); }},[icon(I.edit,15),"Edit cards"]) : el("button",{class:"btn",onclick:function(){ go("edit"); }},[icon(I.cards,15),"Browse all cards"]),
       isEditor() ? el("button",{class:"btn ghost",title:"Decks students sent in",onclick:function(){ go("subs"); }},[icon(I.cards,15),"Submitted"]) : null,
+      S.canEdit ? el("button",{class:"btn ghost",title:"Write a notice everyone sees once",onclick:function(){ go("news"); }},[icon(I.flag,15),"Announce"]) : null,
       el("button",{class:"btn ghost",title:"Copy a link straight to this deck",onclick:function(){
         var url = deckLink(d);
         if(navigator.clipboard && navigator.clipboard.writeText){
@@ -5206,6 +5424,13 @@ function normalizeStore(raw){
   return {folders:folders, decks:decks};
 }
 
+/* Best-effort and quite separate from the decks: no file yet simply means nobody
+   has written one, and a notice that can't be fetched must never hold up a deck. */
+fetch("notices.json", {cache:"no-store"})
+  .then(function(r){ return r.ok ? r.json() : null; })
+  .then(function(raw){ S.notices = normalizeNotices(raw); maybeShowNotice(); })
+  .catch(function(){});
+
 fetch("decks.json", {cache:"no-store"})
   .then(function(r){ if(!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
   .then(function(raw){
@@ -5232,6 +5457,7 @@ fetch("decks.json", {cache:"no-store"})
       if(back) openDeck(back.id);
       else { S.view = "start"; setHash("home"); render(); }
     }
+    maybeShowNotice();                   // whichever of the two files lands last
   })
   .catch(function(err){
     S.ready = true; S.loadError = err;
