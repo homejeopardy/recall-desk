@@ -1094,7 +1094,7 @@ var S = {
   canEdit:false, ready:false, who:null, published:null, base:null, remoteMoved:false, draft:false, token:null, busy:false, incoming:null,
   decks:[], deckId:null, view:"home",
   folders:[], folderId:null, open:{}, learn:{}, railShut:false, calMonth:null, user:null, profile:null, providers:null,
-  notices:[], noticeShown:false, noticeDirty:false,
+  notices:[], noticeShown:false, noticeDirty:false, mailSent:null,
   conjMode:"forms", theme:"", custom:null,
   dir:"t2d",        // t2d = term -> definition, d2t = definition -> term
   filter:"all",     // all | starred | missed
@@ -5056,6 +5056,63 @@ function renderWho(){
     if(!S.providers.google){
       acct.appendChild(el("p",{class:"saveflag",text:"Google sign-in isn't switched on for this project yet."}));
     }
+
+    /* A link in an email, for anyone without a Google account. No password to
+       invent and forget, and because this project uses the implicit flow rather
+       than PKCE the link carries the whole session — so it can be opened on a
+       different device from the one that asked for it, which is what a student
+       who requested it on a chromebook and opened their mail on a phone will do. */
+    if(S.providers.email){
+      if(S.providers.google) acct.appendChild(el("div",{class:"hr",text:"or"}));
+      if(S.mailSent){
+        acct.appendChild(el("p",{style:"margin:0 0 10px"},[
+          "Sent. Open the link in the email at ", el("b",{text:S.mailSent}), " and it signs you in \u2014 on whichever device you open it."
+        ]));
+        acct.appendChild(el("p",{class:"saveflag",style:"margin:0 0 13px",
+          text:"Nothing there? Give it a minute, then look in spam."}));
+        acct.appendChild(el("button",{class:"btn ghost sm",onclick:function(){
+          S.mailSent = null; S.authError = null; render();
+        }},["Use a different address"]));
+      } else {
+        var mailIn = el("input",{class:"text",type:"email",placeholder:"you@example.com",
+          autocomplete:"email",inputmode:"email","aria-label":"Your email address",
+          autocapitalize:"off",autocorrect:"off",spellcheck:"false",style:"width:100%"});
+        var mailBtn = el("button",{class:"btn",onclick:function(){ sendLink(); }},[icon(I.user,15),"Email me a link"]);
+        function sendLink(){
+          var addr = mailIn.value.trim();
+          if(!/.+@.+\..+/.test(addr)){
+            S.authError = "That doesn't look like an email address.";
+            return render();
+          }
+          if(mailBtn.disabled) return;
+          mailBtn.disabled = true;
+          mailBtn.textContent = "Sending\u2026";
+          rememberWhere();
+          sbLoad()
+            .then(function(c){
+              return c.auth.signInWithOtp({email: addr,
+                options:{emailRedirectTo: location.origin + location.pathname}});
+            })
+            .then(function(res){
+              // Same as the Google button: a refusal arrives in the result, not thrown.
+              if(res && res.error) throw res.error;
+              S.authError = null; S.mailSent = addr; render();
+            })
+            .catch(function(err){
+              S.authError = String((err && err.message) || "Couldn't send the email. Try again in a moment.");
+              render();
+            });
+        }
+        mailIn.addEventListener("keydown", function(ev){
+          if(ev.key === "Enter"){ ev.preventDefault(); sendLink(); }
+        });
+        acct.appendChild(el("div",{class:"field"},[
+          el("label",{text:"Sign in by email"}), mailIn
+        ]));
+        acct.appendChild(mailBtn);
+      }
+    }
+
     wrap.appendChild(acct);
     wrap.appendChild(el("div",{class:"hr",text:"or"}));
   }

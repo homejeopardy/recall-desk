@@ -179,8 +179,9 @@ every system of this kind has.
 
 ## Accounts
 
-Sign-in is **Continue with Google**, and it's optional — without it the app behaves as
-it always has, keeping scores in the browser. With it:
+Sign-in is **Continue with Google** or **a link sent to an email address**, and it's
+optional — without it the app behaves as it always has, keeping scores in the browser.
+With it:
 
 - **Scores follow the student**, not the browser. Progress is merged field by field
   (the larger of each count, the higher Learn rung), so studying on a phone and then a
@@ -188,6 +189,22 @@ it always has, keeping scores in the browser. With it:
 - **Students can send decks in.** A signed-in student builds a deck and uses **Send to
   the editor** in its editor. It lands under **Submitted**, where the editor approves
   it into their own decks — ready to publish like anything else — or declines it.
+
+### Signing in by email
+
+Under the Google button, an address and **Email me a link**. No password to invent and
+forget, and because this project uses the implicit flow rather than PKCE the link carries
+the whole session — so it can be opened on a different device from the one that asked for
+it, which is exactly what a student who asked on a chromebook and reads their mail on a
+phone will do. A new address creates an account, so this covers anyone without Google.
+
+> **This needs custom SMTP in Supabase before students can use it.** Supabase's built-in
+> email sender is for development: a couple of messages an hour, and on current projects
+> it will only deliver to members of the Supabase organisation. A class hitting it gets
+> `Email rate limit exceeded`, which the page now shows them verbatim. Set up an SMTP
+> provider under **Authentication → Emails → SMTP Settings** (Resend, SendGrid, Postmark,
+> or the school's own Google Workspace SMTP) and the limit becomes that provider's.
+> Until then, treat the email option as untested with real students.
 
 The backend is Supabase (free tier). Its URL and **publishable** key are in `index.html`
 and are meant to be public; the secret key is not used anywhere and must never be. What
