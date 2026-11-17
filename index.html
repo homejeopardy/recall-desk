@@ -287,6 +287,11 @@ kbd{font-family:var(--mono);font-size:11px;background:var(--surface-2);border:1p
    go at, so it says so on the card itself rather than only in the Missed filter.
    Both faces, because it is the card that is being retried, not the question. */
 .card.redo .face{border-color:var(--bad)}
+/* The same mark in Learn. A card you get wrong drops back to the first rung, so
+   next time round it is usually a pick-one and there is no answer box to outline
+   — the term's own panel is the part that is always there. */
+.prompt.redo{border-color:var(--bad)}
+.answer.redo,.answer.redo:focus{border-color:var(--bad)}
 .face .role{position:absolute;top:12px;left:22px;font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint)}
 .face .star{position:absolute;top:9px;right:16px;padding:6px;border-radius:var(--r);color:var(--ink-faint);line-height:0}
 .face .star[aria-pressed="true"]{color:var(--brass)}
@@ -2857,6 +2862,8 @@ function renderLearn(){
     s.kindFor = s.i;
   }
   var a = s.answer, typed = s.kind === "type", right = lans(c, s.kind);
+  // Same test as the flashcards and the Missed filter: got wrong, not got right since.
+  var pc = prog(d.id, c.id), redo = pc.wrong > 0 && pc.last !== "right";
 
   stage.appendChild(modeHead("Learn"));
   stage.appendChild(learnMeter(d, s.all));
@@ -2865,7 +2872,7 @@ function renderLearn(){
     el("span",{class:"kind",text: s.kind === "pos" ? "Part of speech" : !typed ? "Pick one" : c.fixed ? "Type the form" : typesTerm(c) ? "Type the term" : "Type it"})
   ]));
   stage.appendChild(track(s.i/s.queue.length*100));
-  stage.appendChild(el("div",{class:"prompt"},[
+  stage.appendChild(el("div",{class:"prompt" + (redo ? " redo":"")},[
     el("div",{class:"role",text: s.kind === "pos" ? "What part of speech?" : c.fixed ? "Which form?" : typed && typesTerm(c) ? "Definition" : ASK_LABEL()}),
     el("div",{class:"q",text:lask(c, s.kind) || "—"})
   ]));
@@ -2888,7 +2895,7 @@ function renderLearn(){
     });
     stage.appendChild(wrap);
   } else {
-    input = el("input",{class:"answer",type:"text",placeholder:"Type the " + (c.fixed ? "form" : typesTerm(c) ? "term" : ANS_LABEL().toLowerCase()) + "…","aria-label":"Your answer",autocomplete:"off",autocapitalize:"off",autocorrect:"off",spellcheck:"false"});
+    input = el("input",{class:"answer" + (redo ? " redo":""),type:"text",placeholder:"Type the " + (c.fixed ? "form" : typesTerm(c) ? "term" : ANS_LABEL().toLowerCase()) + "…","aria-label":"Your answer",autocomplete:"off",autocapitalize:"off",autocorrect:"off",spellcheck:"false"});
     if(a){ input.value = a.given; input.disabled = true; }
     else {
       input.addEventListener("keydown", function(ev){ if(ev.key === "Enter"){ ev.preventDefault(); learnType(input.value); } });

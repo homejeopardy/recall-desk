@@ -168,6 +168,11 @@ instead of the usual ink, on both faces. It's the same test the **Missed** filte
 than only being findable by changing the filter. Marking it **Study again** turns it
 red; getting it right turns it back.
 
+**Learn** marks it the same way, on the panel the question is written in. It has to be
+the panel rather than the answer box: getting a card wrong in Learn drops it back to
+the first rung, so the next time it comes round it is usually a pick-one and there is
+no box to outline. When it *is* a typed question, the box is outlined too.
+
 ## "I was right" and "I was wrong"
 
 Typing an answer is graded in three bands: exact, near, and no. A near miss is
