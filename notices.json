@@ -1,5 +1,14 @@
 {
   "version": 1,
-  "updated": "2026-11-16",
-  "notices": []
+  "updated": "2026-11-17",
+  "notices": [
+    {
+      "id": "n3w7lfg2y0",
+      "title": "Hey everyone!",
+      "body": "Remember I've added accounts, so you can login with Google, it only takes a second, and it will save your progress forever!",
+      "starts": "2026-11-16",
+      "ends": "2026-11-20",
+      "off": false
+    }
+  ]
 }
