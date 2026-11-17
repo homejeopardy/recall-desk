@@ -47,6 +47,12 @@ self.addEventListener('fetch', function (e) {
   var sameSite = url.origin === self.location.origin;
   var isFont = url.hostname.indexOf('fonts.googleapis.com') > -1 || url.hostname.indexOf('fonts.gstatic.com') > -1;
 
+  /* The return leg of a sign-in. The code in the address bar is good for exactly one
+     exchange, so this must not be answered from the cache and the reply must not be
+     kept — a second read of a spent code fails, and the reader lands back on the
+     home page still signed out with nothing to explain it. */
+  if (sameSite && /[?&](code|access_token|error)=/.test(url.search)) return;
+
   if (isFont) {
     e.respondWith(caches.match(req).then(function (hit) {
       return hit || fetch(req).then(function (res) {

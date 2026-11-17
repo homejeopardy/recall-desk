@@ -189,7 +189,11 @@ kbd{font-family:var(--mono);font-size:11px;background:var(--surface-2);border:1p
 .brand h1{font-family:var(--read);font-size:24px;font-weight:600;letter-spacing:-.02em;line-height:1}
 .brand h1 em{font-style:italic;color:var(--bad)}
 .brand .tag{font-family:var(--mono);font-size:10px;color:var(--ink-faint);letter-spacing:.04em}
-.rail-head{display:flex;align-items:center;justify-content:space-between;padding:15px 18px 7px}
+/* DECKS, then (for an editor) New folder and New deck, then collapse-all and hide.
+   All of that in a 262px column only just fits, and it used to not: the last icon
+   was cut in half by the edge of the sidebar. Tighter spacing buys the room, and
+   wrapping is the safety net so a longer word can never clip a control again. */
+.rail-head{display:flex;align-items:center;justify-content:space-between;padding:15px 14px 7px;flex-wrap:wrap;gap:6px}
 .decks{list-style:none;margin:0;padding:0 10px 10px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:1px}
 .deck-btn{width:100%;text-align:left;padding:9px 10px;border-radius:var(--r);display:flex;align-items:baseline;gap:8px;color:var(--ink-soft);border-left:3px solid transparent;transition:background var(--t-tap),color var(--t-tap),border-left-color var(--t-quick) var(--ease)}
 .deck-btn:hover{background:var(--surface-2);color:var(--ink)}
@@ -276,11 +280,36 @@ kbd{font-family:var(--mono);font-size:11px;background:var(--surface-2);border:1p
 .facetext{font-family:var(--read);font-size:29px;line-height:1.36;max-width:33ch;letter-spacing:-.015em;white-space:pre-line}
 .face.back .facetext{font-size:21px;max-width:46ch;line-height:1.55}
 .hintline{position:absolute;bottom:15px;left:0;right:0;text-align:center;font-family:var(--mono);font-size:10.5px;letter-spacing:.05em;color:var(--ink-faint)}
-/* Nothing here carries meaning in the movement, so when the machine is set to
-   prefer less of it, all of it goes rather than a list of it. */
+/* "Reduce motion" asks for less movement, not for a dead page — the thing it is
+   actually about is travel across the screen, which is what makes some people ill.
+   So everything that moves comes out (the slides, the stagger, the shake, the flip,
+   anything that scales) and what is left is the same change as a plain cross-fade,
+   which still says something happened. Switched on, this is the whole page's
+   behaviour, so it is worth it being pleasant rather than merely inoffensive. */
 @media (prefers-reduced-motion:reduce){
-  *,*::before,*::after{animation-duration:.01ms!important;animation-delay:0s!important;
-    animation-iteration-count:1!important;transition-duration:.01ms!important}
+  *,*::before,*::after{
+    animation-duration:.2s!important;animation-delay:0s!important;
+    animation-iteration-count:1!important;
+    transition-property:opacity,background-color,border-color,color,box-shadow!important;
+    transition-duration:.18s!important;
+  }
+  /* Same timing, same meaning, no travel. */
+  #stage.enter,.stagger > *,.cardwrap.in-next,.cardwrap.in-prev,
+  .verdict,.result,.result .score,.toast{animation-name:fade!important}
+  .tile.miss,.empty.load h3{animation:none!important}
+  .btn:active:not(:disabled),.mode:active:not(:disabled),.choice:active:not(:disabled),
+  .dcard:active,.tile:active:not(:disabled):not(.done),.tile.done{transform:none}
+  /* The flip becomes a swap. Both faces are stacked and hidden from each other by
+     facing backwards; with the rotation gone they would both face front, so which
+     one shows has to be said outright. */
+  .card{transform:none!important}
+  .face{backface-visibility:visible;-webkit-backface-visibility:visible;transition:none!important}
+  .face.back{transform:none}
+  /* Swapped outright, not faded: someone who has asked for less movement is not
+     asking for a half-second dissolve on every card either. Saying which face shows
+     is not optional here — with the rotation gone, both of them face front, and
+     without this the card shows its two sides on top of each other. */
+  .card:not(.flipped) .face.back,.card.flipped .face:not(.back){opacity:0;pointer-events:none}
 }
 
 .judge.turn > *{animation:fade var(--t-quick) ease}
@@ -523,8 +552,14 @@ input.text:focus{border-color:var(--ink);outline:none}
 .crow .given{font-family:var(--read);font-size:17px;padding:7px 0}
 
 /* ---- sidebar controls ---- */
-.railbar{display:flex;align-items:center;gap:4px}
-#railctl{display:flex;align-items:center;gap:4px}
+#railctl{display:flex;align-items:center;gap:4px;margin-left:auto}
+/* An editor gets two more buttons up here, and a label plus four controls will not
+   fit across 262px — crushing them on to one row is what sliced the last icon in
+   half at the edge of the sidebar. They take the next line instead, whole, lined
+   up with the deck list beneath them. A student has none of this and sees one row. */
+#newdeckslot{flex-basis:100%}
+#newdeckslot:empty{display:none}
+#newdeckslot .btn.sm{padding:5px 8px;gap:5px}
 .icbtn{width:26px;height:26px;display:grid;place-items:center;border-radius:var(--r);color:var(--ink-faint);flex:none;transition:background var(--t-tap),color var(--t-tap)}
 .icbtn:hover{background:var(--surface-2);color:var(--ink)}
 /* the rail leaves the grid entirely, so the stage must become the only column —
@@ -832,7 +867,7 @@ if(c&&c.css)document.documentElement.style.cssText=c.css+"color-scheme:"+(c.dark
 <div class="app">
   <aside class="rail" id="rail">
     <button class="brand" id="homebtn" title="Home"><h1>Quizlet<em>ish</em></h1><span class="tag">v2</span></button>
-    <div class="rail-head"><span class="eyebrow">Decks</span><span class="railbar"><span id="newdeckslot"></span><span id="railctl"></span></span></div>
+    <div class="rail-head"><span class="eyebrow">Decks</span><span id="railctl"></span><span id="newdeckslot"></span></div>
     <ul class="decks" id="decks"></ul>
     <div id="soonslot"></div>
     <button class="rail-foot" id="whobtn"><span class="dot off" id="syncdot"></span><span id="syncmsg">Loading…</span></button>
@@ -4030,6 +4065,50 @@ function sbLoad(){
     document.head.appendChild(tag);
   });
 }
+/* ---- coming back from Google ----
+   The round trip ends at this page with a one-time code in the address bar, which
+   has to be exchanged for a session before it is any use. Everything here exists
+   because that exchange used to be able to not happen, and when it doesn't the
+   only visible result is landing back on the home page still signed out — which
+   is indistinguishable from the page having simply reloaded. */
+var BACK_KEY = "recalldesk.after-signin";
+function authReturning(){
+  // ?code= is the current flow, #access_token= the older one, error= either refusing.
+  return /[?&]code=|access_token=|[?&]error=/.test(location.search + location.hash);
+}
+function storedSession(){
+  try{
+    return Object.keys(localStorage).some(function(k){
+      return k.indexOf("sb-") === 0 && k.indexOf("-auth-token") > -1;
+    });
+  }catch(e){ return false; }
+}
+// The code is good for one exchange, so it must not be left in the address bar to
+// be re-read on a refresh. The deck the reader came in on is kept.
+function cleanAuthUrl(){
+  if(!authReturning()) return;
+  var h = /access_token=|[?&]error=/.test(location.hash) ? "" : location.hash;
+  try{ history.replaceState(null, "", location.pathname + h); }catch(e){}
+}
+// Where they were when they left, so signing in doesn't dump them on the front page.
+function rememberWhere(){
+  try{ sessionStorage.setItem(BACK_KEY, location.hash || ""); }catch(e){}
+}
+function goBackAfterSignIn(){
+  var h = null;
+  try{ h = sessionStorage.getItem(BACK_KEY); sessionStorage.removeItem(BACK_KEY); }catch(e){}
+  if(!h) return false;
+  try{ location.hash = h.replace(/^#/, ""); }catch(e){ return false; }
+  return routeHash();
+}
+function signInFailed(msg){
+  var m = /[?&]error_description=([^&]*)/.exec(location.search + location.hash);
+  S.authError = msg || (m ? decodeURIComponent(m[1].replace(/\+/g, " "))
+    : "Google sent you back without finishing the sign-in. Try once more.");
+  cleanAuthUrl();
+  S.view = "who";
+  render();
+}
 function whoName(u){
   if(!u) return "";
   var m = u.user_metadata || {};
@@ -4708,10 +4787,36 @@ function renderWho(){
       el("h3",{text:"Sign in"}),
       el("p",{text:"Sign in and your scores follow you to any device instead of living in one browser — and you can send decks you've made to the editor."})
     ]);
+    if(S.authError){
+      acct.appendChild(el("p",{class:"err",style:"margin:0 0 13px",text:S.authError}));
+    }
     if(S.providers.google){
-      acct.appendChild(el("button",{class:"gbtn",onclick:function(){
-        sbLoad().then(function(c){ c.auth.signInWithOAuth({provider:"google", options:{redirectTo: location.origin + location.pathname}}); })
-          .catch(function(){ toast("Couldn't reach the sign-in service"); });
+      // Fetched up front rather than on the click. Loading it on the click meant the
+      // button sat there doing nothing on a slow connection, with nothing to say so.
+      sbLoad().catch(function(){});
+      var gbtn = el("button",{class:"gbtn",onclick:function(){
+        if(gbtn.disabled) return;
+        gbtn.disabled = true;
+        var lbl = gbtn.querySelector(".glabel");
+        if(lbl) lbl.textContent = "Opening Google\u2026";
+        rememberWhere();
+        sbLoad()
+          .then(function(c){
+            return c.auth.signInWithOAuth({provider:"google",
+              options:{redirectTo: location.origin + location.pathname}});
+          })
+          .then(function(res){
+            // A refusal comes back in the result rather than thrown, and this used to
+            // be dropped, which is the other way the button could silently do nothing.
+            if(res && res.error) throw res.error;
+          })
+          .catch(function(err){
+            gbtn.disabled = false;
+            if(lbl) lbl.textContent = "Continue with Google";
+            S.authError = String((err && err.message) ||
+              "Couldn't reach Google. Check the connection and try again.");
+            render();
+          });
       }},[
         (function(){
           var g = document.createElementNS("http://www.w3.org/2000/svg","svg");
@@ -4726,8 +4831,9 @@ function renderWho(){
             });
           return g;
         })(),
-        "Continue with Google"
-      ]));
+        el("span",{class:"glabel",text:"Continue with Google"})
+      ]);
+      acct.appendChild(gbtn);
     }
     if(!S.providers.google){
       acct.appendChild(el("p",{class:"saveflag",text:"Google sign-in isn't switched on for this project yet."}));
@@ -4968,29 +5074,51 @@ try{ S.who = localStorage.getItem(WHO_KEY) || null; }catch(e){ S.who = null; }
 try{ S.token = localStorage.getItem(TOKEN_KEY) || null; }catch(e){ S.token = null; }
 if(S.token) keepStorage();
 
-/* Which sign-in methods the project has switched on, so no dead buttons are shown.
-   Everything below is best-effort: the app works unchanged if it all fails. */
+/* Two jobs, kept apart, because tying them together is what made signing in
+   unreliable. Asking the project which methods are switched on only decides which
+   buttons to draw, and the app is fine without the answer. Finishing a sign-in
+   that is already half done is not optional — and it used to sit behind that first
+   request, so one flaky reply and the code in the address bar was never exchanged.
+   The reader went to Google, came straight back, and was still signed out. */
+
+// 1. Which buttons to draw. Best-effort; a failure costs nothing but the buttons.
 fetch(SB_URL + "/auth/v1/settings", {headers:{apikey: SB_KEY}})
   .then(function(r){ return r.ok ? r.json() : null; })
   .then(function(cfg){
     if(!cfg) return;
-    S.providers = {google: !!(cfg.external && cfg.external.google), email: !!(cfg.external && cfg.external.email)};
-    var hasSession = /access_token=|[?&]code=/.test(location.hash + location.search);
-    var stored = false;
-    try{ stored = Object.keys(localStorage).some(function(k){ return k.indexOf("sb-") === 0 && k.indexOf("-auth-token") > -1; }); }catch(e){}
-    if(!hasSession && !stored) return render();
-    return sbLoad().then(function(c){
-      return c.auth.getSession().then(function(r){
-        if(r.data && r.data.session) setUser(r.data.session.user); else render();
-        c.auth.onAuthStateChange(function(ev, sess){
-          if(ev === "SIGNED_IN" && sess && (!S.user || S.user.id !== sess.user.id)) setUser(sess.user);
-          if(ev === "SIGNED_OUT") setUser(null);
-        });
-        if(location.hash.indexOf("access_token") > -1) history.replaceState(null, "", location.pathname);
-      });
-    });
+    var x = cfg.external || {};
+    S.providers = {google: !!x.google, email: !!x.email};
+    if(S.view === "who") render();         // the panel was drawn before the answer came
   })
   .catch(function(){});
+
+// 2. Pick up the session — arriving back from Google now, or saved here earlier.
+//    Starts immediately and waits for nothing.
+(function(){
+  var back = authReturning();
+  if(!back && !storedSession()) return;
+  sbLoad().then(function(c){
+    return c.auth.getSession().then(function(r){
+      c.auth.onAuthStateChange(function(ev, sess){
+        if(ev === "SIGNED_IN" && sess && (!S.user || S.user.id !== sess.user.id)) setUser(sess.user);
+        if(ev === "SIGNED_OUT") setUser(null);
+      });
+      if(r.data && r.data.session){
+        S.authError = null;
+        cleanAuthUrl();
+        setUser(r.data.session.user);
+        // Back to the deck they were reading when they left.
+        if(back) goBackAfterSignIn();
+      }
+      // Came back from Google with nothing to show for it: say so, rather than
+      // landing quietly on the home page.
+      else if(back) signInFailed();
+      else render();
+    });
+  }).catch(function(err){
+    if(back) signInFailed("Couldn't reach the sign-in service to finish signing you in. Check the connection and try again.");
+  });
+})();
 S.open = ls(FOLD_KEY, {});
 S.firstVisit = !hasSeen();
 markSeen();
@@ -5096,7 +5224,10 @@ fetch("decks.json", {cache:"no-store"})
     S.ready = true;
     if(!S.deckId && S.decks.length) S.deckId = S.decks[0].id;
     refreshFoot(); renderRail();
-    if(!routeHash()){
+    // Unless a sign-in is mid-flight: the two arrive in either order, and the decks
+    // landing second must not quietly replace the page explaining what went wrong.
+    if(S.view === "who"){ render(); }
+    else if(!routeHash()){
       var back = recentDeck();
       if(back) openDeck(back.id);
       else { S.view = "start"; setHash("home"); render(); }
