@@ -160,6 +160,14 @@ Where it appears:
 - `icon-dark.svg` is the kit's dark lockup, kept as an asset for anywhere that needs one
   on a dark ground. Nothing in the page references it.
 
+## Cards you are having another go at
+
+A flashcard you have got wrong and not got right since is outlined in the accent red
+instead of the usual ink, on both faces. It's the same test the **Missed** filter uses
+— `wrong > 0` and the last answer wasn't right — so the card says it on itself rather
+than only being findable by changing the filter. Marking it **Study again** turns it
+red; getting it right turns it back.
+
 ## "I was right" and "I was wrong"
 
 Typing an answer is graded in three bands: exact, near, and no. A near miss is

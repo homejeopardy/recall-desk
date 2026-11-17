@@ -283,6 +283,10 @@ kbd{font-family:var(--mono);font-size:11px;background:var(--surface-2);border:1p
   background-position:0 40px}
 .face::before{content:"";position:absolute;left:0;right:0;top:38px;height:1px;background:var(--bad);opacity:.5}
 .face.back{transform:rotateX(180deg)}
+/* A card you have got wrong and not got right since is one you are having another
+   go at, so it says so on the card itself rather than only in the Missed filter.
+   Both faces, because it is the card that is being retried, not the question. */
+.card.redo .face{border-color:var(--bad)}
 .face .role{position:absolute;top:12px;left:22px;font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint)}
 .face .star{position:absolute;top:9px;right:16px;padding:6px;border-radius:var(--r);color:var(--ink-faint);line-height:0}
 .face .star[aria-pressed="true"]{color:var(--brass)}
@@ -3548,7 +3552,9 @@ function renderFlash(){
     });
   }
 
-  var card = el("div",{class:"card" + (s.flipped ? " flipped":""), onclick:function(){ flip(!s.flipped); }},[
+  // Same test the Missed filter uses: got wrong, not yet got right.
+  var redo = p.wrong > 0 && p.last !== "right";
+  var card = el("div",{class:"card" + (s.flipped ? " flipped":"") + (redo ? " redo":""), onclick:function(){ flip(!s.flipped); }},[
     el("div",{class:"face"},[
       el("span",{class:"role",text:ASK_LABEL()}), starBtn(),
       el("div",{class:"facetext",text:ask(c) || "—"}),
