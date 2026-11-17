@@ -292,6 +292,14 @@ kbd{font-family:var(--mono);font-size:11px;background:var(--surface-2);border:1p
    — the term's own panel is the part that is always there. */
 .prompt.redo{border-color:var(--bad)}
 .answer.redo,.answer.redo:focus{border-color:var(--bad)}
+/* Once a question has been answered the panel echoes the verdict underneath it, so the
+   colour says the same thing twice in two places rather than two different things in
+   one. Green for a hit, the amber of "close enough" for a near miss, and the red it
+   already had for a miss. */
+.prompt.got{border-color:var(--good)}
+.prompt.near{border-color:var(--brass)}
+.answer.got,.answer.got:focus{border-color:var(--good)}
+.answer.near,.answer.near:focus{border-color:var(--brass)}
 .face .role{position:absolute;top:12px;left:22px;font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint)}
 .face .star{position:absolute;top:9px;right:16px;padding:6px;border-radius:var(--r);color:var(--ink-faint);line-height:0}
 .face .star[aria-pressed="true"]{color:var(--brass)}
@@ -753,6 +761,24 @@ body.editing .stage-head,body.editing .startbar,body.editing .testbar{padding-ri
 .plist .d{font-family:var(--read);font-size:15px;color:var(--ink-soft);white-space:pre-line}
 .plist .pos{font-family:var(--mono);font-size:10px;text-transform:uppercase;color:var(--ink-faint)}
 @media print{
+  /* Paper is white and browsers don't print background colours, so a dark theme used
+     to come out as near-white text on nothing — blank pages. Setting a colour on the
+     sheet wasn't enough, because the parts that carry most of the words set their own
+     from --ink-soft and --ink-faint. The palette itself is redefined instead, so
+     everything drawing from it comes out legible, including anything added later.
+     !important because a custom theme is written straight onto the <html> element and
+     an inline style otherwise wins. */
+  :root{
+    --paper:#fff!important; --surface:#fff!important; --surface-2:#fff!important;
+    --ink:#000!important; --ink-soft:#333!important; --ink-faint:#555!important;
+    --rule:#bbb!important; --rule-soft:#ddd!important;
+    --accent:#000!important; --accent-ink:#fff!important; --accent-wash:#eee!important;
+    --brass:#6B5200!important; --brass-wash:#fff!important;
+    --good:#2C5C22!important; --good-wash:#fff!important;
+    --bad:#8A2A19!important; --bad-wash:#fff!important;
+    --lift:none!important;
+    color-scheme:light!important;
+  }
   .rail,.reopen,.deskbtn,.stage-head .rowctl,.opts,.toast,.pubbar,.editbar{display:none!important}
   .app{display:block}
   .stage{padding:0;max-width:none}
@@ -2990,6 +3016,10 @@ function renderLearn(){
   var a = s.answer, typed = s.kind === "type", right = lans(c, s.kind);
   // Same test as the flashcards and the Missed filter: got wrong, not got right since.
   var pc = prog(d.id, c.id), redo = pc.wrong > 0 && pc.last !== "right";
+  /* Before it is answered the border is about the card's history — red if this is one
+     you are having another go at. Once it is answered it is about the answer, and both
+     second-thoughts buttons re-render, so claiming or refusing one changes it back. */
+  var mark = a ? (a.result === "no" ? "redo" : a.result === "near" ? "near" : "got") : (redo ? "redo" : "");
 
   stage.appendChild(modeHead("Learn"));
   stage.appendChild(learnMeter(d, s.all));
@@ -2998,7 +3028,7 @@ function renderLearn(){
     el("span",{class:"kind",text: s.kind === "pos" ? tagName(d) : !typed ? "Pick one" : c.fixed ? "Type the form" : typesTerm(c) ? "Type the term" : "Type it"})
   ]));
   stage.appendChild(track(s.i/s.queue.length*100));
-  stage.appendChild(el("div",{class:"prompt" + (redo ? " redo":"")},[
+  stage.appendChild(el("div",{class:"prompt" + (mark ? " " + mark : "")},[
     el("div",{class:"role",text: s.kind === "pos" ? tagAsk(d) : c.fixed ? "Which form?" : typed && typesTerm(c) ? "Definition" : ASK_LABEL()}),
     el("div",{class:"q",text:lask(c, s.kind) || "—"})
   ]));
@@ -3021,7 +3051,7 @@ function renderLearn(){
     });
     stage.appendChild(wrap);
   } else {
-    input = el("input",{class:"answer" + (redo ? " redo":""),type:"text",placeholder:"Type the " + (c.fixed ? "form" : typesTerm(c) ? "term" : ANS_LABEL().toLowerCase()) + "…","aria-label":"Your answer",autocomplete:"off",autocapitalize:"off",autocorrect:"off",spellcheck:"false"});
+    input = el("input",{class:"answer" + (mark ? " " + mark : ""),type:"text",placeholder:"Type the " + (c.fixed ? "form" : typesTerm(c) ? "term" : ANS_LABEL().toLowerCase()) + "…","aria-label":"Your answer",autocomplete:"off",autocapitalize:"off",autocorrect:"off",spellcheck:"false"});
     if(a){ input.value = a.given; input.disabled = true; }
     else {
       input.addEventListener("keydown", function(ev){ if(ev.key === "Enter"){ ev.preventDefault(); learnType(input.value); } });

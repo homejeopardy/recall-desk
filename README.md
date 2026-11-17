@@ -220,6 +220,12 @@ instead of the usual ink, on both faces. It's the same test the **Missed** filte
 than only being findable by changing the filter. Marking it **Study again** turns it
 red; getting it right turns it back.
 
+Once a question in Learn has been answered, that same border stops being about the
+card's history and starts being about the answer, echoing the verdict underneath it:
+green for a hit, the amber of "close enough" for a near miss, red for a miss. Both
+"I was right" and "I was wrong" re-render, so claiming or refusing a near miss changes
+the border with it.
+
 **Learn** marks it the same way, on the panel the question is written in. It has to be
 the panel rather than the answer box: getting a card wrong in Learn drops it back to
 the first rung, so the next time it comes round it is usually a pick-one and there is
