@@ -135,6 +135,31 @@ all of it off with one rule rather than a list — but note that the JS helpers 
 too, via `still()`, because a transition the stylesheet has zeroed still needs the end
 value set.
 
+## The mark
+
+The brand kit's index-card mark: a tab behind, the card in front of it, three ruled
+lines, the tab in the accent red. The geometry in `icon.svg` was measured straight off
+the kit's 192px app icon rather than eyeballed, so it matches to within a pixel.
+
+The palette needed no changes at all — sampling the kit returns `#EFE9DE`, `#FBF8F1`,
+`#14110D`, `#151310`, `#1E1A15`, `#EDE6D8`, `#C6BCA8`, `#A8321F` and `#DC7159`, which
+are already this stylesheet's `--paper`, `--surface`, `--ink`, `--rule` and `--bad` in
+their light and dark forms. The kit was built from the site, not the other way round.
+
+Where it appears:
+
+- **The sidebar**, beside the wordmark, with the byline under it — the kit's horizontal
+  lockup. **The welcome page**, above the wordmark at 54px — the stacked one.
+- Both are drawn from `var(--ink)`, `var(--surface)` and `var(--bad)` rather than being
+  flat images, so the mark follows whichever of the eight themes is on, and a custom
+  one too. Checked against each: Blueprint gives it a navy outline and a brick tab,
+  Rose its own red, Midnight a cream outline and salmon.
+- `icon.svg` for the manifest, `apple-touch-icon.png` (180px, square — iOS rounds it
+  itself) and a 32px favicon inline in the head, which drops to two rules because three
+  close into a smudge by the time a browser draws it at 16.
+- `icon-dark.svg` is the kit's dark lockup, kept as an asset for anywhere that needs one
+  on a dark ground. Nothing in the page references it.
+
 ## "I was right" and "I was wrong"
 
 Typing an answer is graded in three bands: exact, near, and no. A near miss is

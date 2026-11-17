@@ -7,12 +7,16 @@
 <meta name="description" content="Term drills for a law course — flashcards, multiple choice, typed recall, and timed matching.">
 <meta name="color-scheme" content="light dark">
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#EFE9DE">
+<!-- The browser's own chrome, in the brand's two backgrounds. -->
+<meta name="theme-color" content="#EFE9DE" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#151310" media="(prefers-color-scheme: dark)">
 <!-- iPhones ignore the manifest's icon and will otherwise put a screenshot of
      the page on the home screen. They also will not take an SVG. -->
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="apple-touch-icon" href="icon.svg">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='3' y='6' width='26' height='21' fill='%23FBF8F1' stroke='%2314110D' stroke-width='2.5'/%3E%3Cpath d='M3 13h26' stroke='%23A8321F' stroke-width='2.5'/%3E%3Cpath d='M9 19h14M9 23h9' stroke='%2314110D' stroke-width='2'/%3E%3C/svg%3E">
+<!-- The mark again at 32px, down to two rules: three of them close up into a smudge
+     by the time a browser has drawn the tab at 16 across. -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23EFE9DE'/%3E%3Crect x='5.7' y='5.3' width='9.8' height='6' rx='1.2' fill='%23A8321F' stroke='%2314110D' stroke-width='1.9'/%3E%3Crect x='4.3' y='9.3' width='23.2' height='16.5' rx='1.6' fill='%23FBF8F1' stroke='%2314110D' stroke-width='1.9'/%3E%3Cpath d='M8.7 16h14.5M8.7 21h9' stroke='%2314110D' stroke-width='1.9' stroke-linecap='round' fill='none'/%3E%3C/svg%3E">
 <style>[hidden]{display:none!important}</style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -186,6 +190,11 @@ kbd{font-family:var(--mono);font-size:11px;background:var(--surface-2);border:1p
 .brand{padding:20px 18px 15px;border-bottom:2px solid var(--ink);display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;width:100%;text-align:left;border-radius:0}
 /* Its own line under the name, which is what flex-basis:100% buys in a wrapping row. */
 .brand .byline{flex-basis:100%;font-family:var(--mono);font-size:10px;letter-spacing:.05em;color:var(--ink-faint);margin-top:3px}
+/* Drawn from the theme's own variables, so the mark follows whichever of the eight
+   is on rather than being a flat image that only suits the default one. */
+.brand .mark{align-self:center;line-height:0;flex:none}
+.brand .mark svg{display:block}
+.hero .mark{display:block;line-height:0;margin-bottom:14px}
 .brand:hover h1{color:var(--bad)}
 .brand h1{transition:color .12s}
 .brand h1{font-family:var(--read);font-size:24px;font-weight:600;letter-spacing:-.02em;line-height:1}
@@ -941,7 +950,7 @@ if(c&&c.css)document.documentElement.style.cssText=c.css+"color-scheme:"+(c.dark
 
 <div class="app">
   <aside class="rail" id="rail">
-    <button class="brand" id="homebtn" title="Home"><h1>Quizlet<em>ish</em></h1><span class="tag">v2</span><span class="byline">by Nathan Bennett-Crump</span></button>
+    <button class="brand" id="homebtn" title="Home"><span class="mark" aria-hidden="true"><svg viewBox="0 0 192 192" width="25" height="25"><rect x="34" y="32" width="59" height="36" rx="7" fill="var(--bad)" stroke="var(--ink)" stroke-width="8"/><rect x="26" y="56" width="139" height="99" rx="9" fill="var(--surface)" stroke="var(--ink)" stroke-width="8"/><path d="M52 92h87M52 116h87M52 140h51" stroke="var(--ink)" stroke-width="8" stroke-linecap="round" fill="none"/></svg></span><h1>Quizlet<em>ish</em></h1><span class="tag">v2</span><span class="byline">by Nathan Bennett-Crump</span></button>
     <div class="rail-head"><span class="eyebrow">Decks</span><span id="railctl"></span><span id="newdeckslot"></span></div>
     <ul class="decks" id="decks"></ul>
     <div id="soonslot"></div>
@@ -4567,6 +4576,23 @@ function signInFailed(msg){
   S.view = "who";
   render();
 }
+/* The mark, built rather than pasted, so the hero and anywhere else can have it at
+   whatever size and it still answers to the current theme. */
+function brandMark(size){
+  var s = document.createElementNS("http://www.w3.org/2000/svg","svg");
+  s.setAttribute("viewBox","0 0 192 192");
+  s.setAttribute("width", size); s.setAttribute("height", size);
+  s.setAttribute("aria-hidden","true");
+  function add(tag, attrs){
+    var n = document.createElementNS("http://www.w3.org/2000/svg", tag);
+    for(var k in attrs) n.setAttribute(k, attrs[k]);
+    s.appendChild(n);
+  }
+  add("rect",{x:34,y:32,width:59,height:36,rx:7,fill:"var(--bad)",stroke:"var(--ink)","stroke-width":8});
+  add("rect",{x:26,y:56,width:139,height:99,rx:9,fill:"var(--surface)",stroke:"var(--ink)","stroke-width":8});
+  add("path",{d:"M52 92h87M52 116h87M52 140h51",stroke:"var(--ink)","stroke-width":8,"stroke-linecap":"round",fill:"none"});
+  return s;
+}
 function whoName(u){
   if(!u) return "";
   var m = u.user_metadata || {};
@@ -4796,6 +4822,7 @@ function renderStart(){
 
   if(welcome){
     stage.appendChild(el("div",{class:"hero"},[
+      el("span",{class:"mark"},[brandMark(54)]),
       el("h1",{},["Quizlet",el("em",{text:"ish"})]),
       el("p",{class:"lede",text:"Flashcards for the things you actually get quizzed on, with the quiz dates built in."}),
       el("p",{text:"Every deck here is made by someone in your class. Pick one and study it however suits you — flip through it, get quizzed on it, type the answers, or race the clock. It remembers what you keep missing and asks you that more often."}),

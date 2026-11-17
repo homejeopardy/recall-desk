@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192">
+  <!-- The dark lockup from the kit: cream outline, salmon tab, on near-black. -->
+  <rect width="192" height="192" rx="34" fill="#151310"/>
+  <rect x="34" y="32" width="59" height="36" rx="7" fill="#DC7159" stroke="#EDE6D8" stroke-width="8"/>
+  <rect x="26" y="56" width="139" height="99" rx="9" fill="#151310" stroke="#EDE6D8" stroke-width="8"/>
+  <path d="M52 92h87M52 116h87M52 140h51" stroke="#EDE6D8" stroke-width="8" stroke-linecap="round" fill="none"/>
+</svg>
