@@ -318,31 +318,58 @@ kbd{font-family:var(--mono);font-size:11px;background:var(--surface-2);border:1p
    anything that scales) and what is left is the same change as a plain cross-fade,
    which still says something happened. Switched on, this is the whole page's
    behaviour, so it is worth it being pleasant rather than merely inoffensive. */
-@media (prefers-reduced-motion:reduce){
-  *,*::before,*::after{
-    animation-duration:.2s!important;animation-delay:0s!important;
-    animation-iteration-count:1!important;
-    transition-property:opacity,background-color,border-color,color,box-shadow!important;
-    transition-duration:.18s!important;
-  }
-  /* Same timing, same meaning, no travel. */
-  #stage.enter,.stagger > *,.cardwrap.in-next,.cardwrap.in-prev,
-  .verdict,.result,.result .score,.toast{animation-name:fade!important}
-  .tile.miss,.empty.load h3{animation:none!important}
-  .btn:active:not(:disabled),.mode:active:not(:disabled),.choice:active:not(:disabled),
-  .dcard:active,.tile:active:not(:disabled):not(.done),.tile.done{transform:none}
-  /* The flip becomes a swap. Both faces are stacked and hidden from each other by
-     facing backwards; with the rotation gone they would both face front, so which
-     one shows has to be said outright. */
-  .card{transform:none!important}
-  .face{backface-visibility:visible;-webkit-backface-visibility:visible;transition:none!important}
-  .face.back{transform:none}
-  /* Swapped outright, not faded: someone who has asked for less movement is not
-     asking for a half-second dissolve on every card either. Saying which face shows
-     is not optional here — with the rotation gone, both of them face front, and
-     without this the card shows its two sides on top of each other. */
-  .card:not(.flipped) .face.back,.card.flipped .face:not(.back){opacity:0;pointer-events:none}
+/* ---- motion ----
+   These used to sit behind @media (prefers-reduced-motion:reduce), which made the
+   computer's setting the only way to get them. It is now the default for a choice
+   instead: the setting picks full, less or none, and "Auto" asks the computer. The
+   class is put on <html> at boot, so the declarations below are the same ones that
+   were in the media query, only addressed differently. */
+.motion-low *,.motion-low *::before,.motion-low *::after{
+  animation-duration:.2s!important;animation-delay:0s!important;
+  animation-iteration-count:1!important;
+  transition-property:opacity,background-color,border-color,color,box-shadow!important;
+  transition-duration:.18s!important;
 }
+/* Same timing, same meaning, no travel. */
+.motion-low #stage.enter,.motion-low .stagger > *,.motion-low .cardwrap.in-next,.motion-low .cardwrap.in-prev,
+.motion-low .verdict,.motion-low .result,.motion-low .result .score,.motion-low .toast{animation-name:fade!important}
+.motion-low .tile.miss,.motion-low .empty.load h3{animation:none!important}
+.motion-low .btn:active:not(:disabled),.motion-low .mode:active:not(:disabled),.motion-low .choice:active:not(:disabled),
+.motion-low .dcard:active,.motion-low .tile:active:not(:disabled):not(.done),.motion-low .tile.done{transform:none}
+/* The flip becomes a swap. Both faces are stacked and hidden from each other by
+   facing backwards; with the rotation gone they would both face front, so which
+   one shows has to be said outright. */
+.motion-low .card,.motion-off .card{transform:none!important}
+.motion-low .face,.motion-off .face{backface-visibility:visible;-webkit-backface-visibility:visible;transition:none!important}
+.motion-low .face.back,.motion-off .face.back{transform:none}
+/* Swapped outright, not faded: someone who has asked for less movement is not
+   asking for a half-second dissolve on every card either. Saying which face shows
+   is not optional here — with the rotation gone, both of them face front, and
+   without this the card shows its two sides on top of each other. */
+.motion-low .card:not(.flipped) .face.back,.motion-low .card.flipped .face:not(.back),
+.motion-off .card:not(.flipped) .face.back,.motion-off .card.flipped .face:not(.back){opacity:0;pointer-events:none}
+/* Off is off: nothing moves, nothing fades, nothing is timed. */
+.motion-off *,.motion-off *::before,.motion-off *::after{
+  animation:none!important;transition:none!important;
+}
+.motion-off .btn:active:not(:disabled),.motion-off .mode:active:not(:disabled),.motion-off .choice:active:not(:disabled),
+.motion-off .dcard:active,.motion-off .tile:active:not(:disabled):not(.done),.motion-off .tile.done{transform:none}
+.motion-off .app{transition:none!important}
+
+/* ---- the rest of what the settings page sets ----
+   All of it hangs off a class or a variable on <html>, so nothing has to be
+   re-rendered for a setting to take effect. */
+.plain-brand .brand .mark,.plain-brand .brand .byline,.plain-brand .hero .mark{display:none}
+.flat-verdict .prompt.got,.flat-verdict .prompt.near,.flat-verdict .prompt.redo{border-color:var(--ink)}
+.flat-verdict .answer.got,.flat-verdict .answer.near,.flat-verdict .answer.redo{border-color:var(--rule)}
+.flat-verdict .answer.got:focus,.flat-verdict .answer.near:focus,.flat-verdict .answer.redo:focus{border-color:var(--ink)}
+.no-hints .kbhint{display:none}
+.sans-read{--read:var(--ui)}
+/* Zoom rather than a font-size scale, because the app's sizes are in pixels and the
+   point is for the whole study surface to grow together. The sidebar and the two
+   fixed buttons sit outside .stage, so they keep their own size. */
+.zoom-m .stage{zoom:1.12}
+.zoom-l .stage{zoom:1.25}
 
 .judge.turn > *{animation:fade var(--t-quick) ease}
 .rowctl{display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap}
@@ -834,6 +861,19 @@ body.editing .stage-head,body.editing .startbar,body.editing .testbar{padding-ri
 .stat-pill.declined{border-color:var(--bad);color:var(--bad)}
 
 /* ---- theme picker ---- */
+.setrow{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;
+  padding:12px 0;border-bottom:1px solid var(--rule-soft)}
+.setrow:last-child{border-bottom:0}
+.setlab{min-width:0;flex:1 1 230px}
+.setlab b{display:block;font-weight:600;font-size:14px}
+.setlab span{display:block;font-size:12.5px;color:var(--ink-faint);margin-top:2px;max-width:52ch}
+.seg{display:inline-flex;border:1px solid var(--rule);border-radius:var(--r);overflow:hidden;flex:none}
+.seg button{padding:7px 12px;font-size:12.5px;background:var(--surface);color:var(--ink-soft);
+  border-right:1px solid var(--rule);white-space:nowrap}
+.seg button:last-child{border-right:0}
+.seg button:hover{background:var(--surface-2)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+@media (max-width:560px){ .setrow{gap:8px} .seg{width:100%} .seg button{flex:1;text-align:center} }
 .themes{display:flex;gap:9px;flex-wrap:wrap}
 .swatch{display:flex;flex-direction:column;align-items:stretch;gap:5px;width:78px;padding:0;background:none}
 .swatch .chip{height:40px;border:1px solid var(--rule);border-radius:var(--r);overflow:hidden;display:flex}
@@ -1097,9 +1137,8 @@ function starIcon(on){
    wearing a class has nothing to transition from, so it needs an animation
    instead. And the stage is rebuilt for every tap, so anything that should
    animate across taps has to be the same node, not a new one. */
-function still(){
-  try{ return matchMedia("(prefers-reduced-motion: reduce)").matches; }catch(e){ return false; }
-}
+// Asked by the handful of places that animate from JavaScript rather than CSS.
+function still(){ return motionNow() !== "full"; }
 function replay(node, cls){
   node.classList.remove(cls);
   void node.offsetWidth;                 // make the removal stick before it returns
@@ -1268,6 +1307,11 @@ var S = {
 };
 
 /* -------- per-viewer progress: browser-local, never sent anywhere -------- */
+var PREF_KEY = "recalldesk.prefs.v1";
+// The two tab icons the brand setting chooses between: the index-card mark, and the
+// plain card this had before the brand kit.
+var FAV_MARK = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23EFE9DE'/%3E%3Crect x='5.7' y='5.3' width='9.8' height='6' rx='1.2' fill='%23A8321F' stroke='%2314110D' stroke-width='1.9'/%3E%3Crect x='4.3' y='9.3' width='23.2' height='16.5' rx='1.6' fill='%23FBF8F1' stroke='%2314110D' stroke-width='1.9'/%3E%3Cpath d='M8.7 16h14.5M8.7 21h9' stroke='%2314110D' stroke-width='1.9' stroke-linecap='round' fill='none'/%3E%3C/svg%3E";
+var FAV_PLAIN = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='3' y='6' width='26' height='21' fill='%23FBF8F1' stroke='%2314110D' stroke-width='2.5'/%3E%3Cpath d='M3 13h26' stroke='%23A8321F' stroke-width='2.5'/%3E%3Cpath d='M9 19h14M9 23h9' stroke='%2314110D' stroke-width='2'/%3E%3C/svg%3E";
 var WHO_KEY = "recalldesk.who.v1", DRAFT_KEY = "recalldesk.draft.v1", TOKEN_KEY = "recalldesk.gh.v1", FOLD_KEY = "recalldesk.folders-open.v1", TOKEN_AT = "recalldesk.gh.at.v1", RAIL_KEY = "recalldesk.rail.v1", CONJ_KEY = "recalldesk.conjmode.v1", THEME_KEY = "recalldesk.theme.v1", CUSTOM_KEY = "recalldesk.theme-custom.v1", BASE_KEY = "recalldesk.base.v1";
 // Scores are filed under whichever name is signed in, so a shared classroom machine
 // keeps them apart. Still browser-local: nothing about a score leaves the device.
@@ -1275,6 +1319,60 @@ function slug(n){ return String(n||"").toLowerCase().replace(/[^a-z0-9]+/g,"-").
 function PKEY(){ return "recalldesk.progress.v1." + slug(S.who); }
 function BKEY(){ return "recalldesk.bests.v1." + slug(S.who); }
 function LKEY(){ return "recalldesk.learn.v1." + slug(S.who); }
+/* ---- settings ----
+   One saved object rather than a key each, because they are read together at boot and
+   written together whenever one changes. Anything missing falls back to the default,
+   so a setting added later doesn't have to migrate what is already saved. */
+var PREF_DEFAULTS = {
+  motion:"auto",        // auto | full | low | off
+  brand:"mark",         // mark | plain
+  zoom:"1",             // 1 | 1.12 | 1.25
+  read:"serif",         // serif | sans
+  verdict:"colour",     // colour | flat
+  hints:"show",         // show | hide
+  advance:"on",         // on | off   — move on by itself after a clean right answer
+  strict:"off",         // off | on   — on means a near miss counts as wrong
+  shuffle:"on",         // on | off   — how a deck starts
+  dir:"t2d"             // t2d | d2t  — how a deck starts
+};
+var PREFS = {};
+function pref(k){ var v = PREFS[k]; return (v === undefined || v === null || v === "") ? PREF_DEFAULTS[k] : v; }
+function loadPrefs(){
+  var raw = {};
+  try{ raw = JSON.parse(localStorage.getItem(PREF_KEY) || "{}") || {}; }catch(e){ raw = {}; }
+  PREFS = {};
+  Object.keys(PREF_DEFAULTS).forEach(function(k){ if(raw[k] !== undefined) PREFS[k] = String(raw[k]); });
+}
+function setPref(k, v){
+  PREFS[k] = String(v);
+  try{ localStorage.setItem(PREF_KEY, JSON.stringify(PREFS)); }catch(e){}
+  applyPrefs();
+}
+function osStill(){
+  try{ return matchMedia("(prefers-reduced-motion: reduce)").matches; }catch(e){ return false; }
+}
+// What the motion setting actually comes out as, once "auto" has asked the computer.
+function motionNow(){
+  var m = pref("motion");
+  if(m === "auto") return osStill() ? "low" : "full";
+  return m;
+}
+function applyPrefs(){
+  var r = document.documentElement, m = motionNow();
+  r.classList.toggle("motion-low", m === "low");
+  r.classList.toggle("motion-off", m === "off");
+  r.classList.toggle("plain-brand", pref("brand") === "plain");
+  r.classList.toggle("flat-verdict", pref("verdict") === "flat");
+  r.classList.toggle("no-hints", pref("hints") === "hide");
+  r.classList.toggle("sans-read", pref("read") === "sans");
+  // A class, not an inline property: paintTheme() clears the <html> style attribute
+  // every time a theme is applied, and would take the zoom with it.
+  var z = pref("zoom");
+  r.classList.toggle("zoom-m", z === "1.12");
+  r.classList.toggle("zoom-l", z === "1.25");
+  var fav = document.querySelector('link[rel="icon"]');
+  if(fav) fav.setAttribute("href", pref("brand") === "plain" ? FAV_PLAIN : FAV_MARK);
+}
 function ls(k, fallback){
   try{ return JSON.parse(localStorage.getItem(k) || "null") || fallback; }catch(e){ return fallback; }
 }
@@ -1466,7 +1564,14 @@ function lev(a,b){
   return prev[b.length];
 }
 // -> "exact" | "near" | "no"
+/* "Must be exact" doesn't get its own comparison — it just refuses the near band, so
+   every mode that grades typing agrees about what counts without knowing the setting
+   exists. */
 function grade(given, target){
+  var r = gradeBand(given, target);
+  return (r === "near" && pref("strict") === "on") ? "no" : r;
+}
+function gradeBand(given, target){
   var g = norm(given); if(!g) return "no";
   var alts = String(target||"").split("/").map(norm).filter(Boolean);
   if(!alts.length) alts = [norm(target)];
@@ -2657,8 +2762,8 @@ function optsBar(withFilter){
   // Asked verb+person -> form, so the direction toggle only means something for meanings.
   if(kindOf(deck()) !== "conj" || S.conjMode === "meaning"){
     bar.appendChild(el("div",{class:"seg"},[
-      el("button",{"aria-pressed": S.dir === "t2d" ? "true":"false", text:"Term → Definition", onclick:function(){ S.dir="t2d"; S.session=null; render(); }}),
-      el("button",{"aria-pressed": S.dir === "d2t" ? "true":"false", text:"Definition → Term", onclick:function(){ S.dir="d2t"; S.session=null; render(); }})
+      el("button",{"aria-pressed": S.dir === "t2d" ? "true":"false", text:"Term → Definition", onclick:function(){ S.dir="t2d"; setPref("dir","t2d"); S.session=null; render(); }}),
+      el("button",{"aria-pressed": S.dir === "d2t" ? "true":"false", text:"Definition → Term", onclick:function(){ S.dir="d2t"; setPref("dir","d2t"); S.session=null; render(); }})
     ]));
   }
   if(withFilter){
@@ -2669,7 +2774,7 @@ function optsBar(withFilter){
       el("button",{"aria-pressed": S.filter==="starred"?"true":"false", text:"Starred " + st, onclick:function(){ S.filter="starred"; render(); }}),
       el("button",{"aria-pressed": S.filter==="missed"?"true":"false", text:"Missed " + ms, onclick:function(){ S.filter="missed"; render(); }})
     ]));
-    bar.appendChild(el("button",{class:"btn sm " + (S.shuffle?"":"ghost"), onclick:function(){ S.shuffle = !S.shuffle; S.session = null; render(); }},[icon(I.shuffle,14), S.shuffle ? "Shuffled" : "In order"]));
+    bar.appendChild(el("button",{class:"btn sm " + (S.shuffle?"":"ghost"), onclick:function(){ S.shuffle = !S.shuffle; setPref("shuffle", S.shuffle ? "on" : "off"); S.session = null; render(); }},[icon(I.shuffle,14), S.shuffle ? "Shuffled" : "In order"]));
   }
   return bar;
 }
@@ -2763,6 +2868,20 @@ function applyTheme(id){
   if(S.theme === "custom") saveCustom();
   paintTheme();
   try{ localStorage.setItem(THEME_KEY, S.theme); }catch(e){}
+}
+/* One row per setting: what it is on the left, the choices on the right. Picking one
+   writes it and applies it on the spot — there is no Save, because a setting you have
+   to confirm is a setting you can't try. */
+function setRow(label, note, key, choices){
+  var seg = el("div",{class:"seg"});
+  choices.forEach(function(c){
+    seg.appendChild(el("button",{"aria-pressed": pref(key) === c[0] ? "true" : "false",
+      onclick:function(){ setPref(key, c[0]); render(); }},[c[1]]));
+  });
+  return el("div",{class:"setrow"},[
+    el("div",{class:"setlab"},[ el("b",{text:label}), note ? el("span",{text:note}) : null ]),
+    seg
+  ]);
 }
 function themePicker(){
   var box = el("div",{class:"themes"});
@@ -3111,7 +3230,7 @@ function learnAnswer(c, ok, a){
   s.answer = a;
   render();
   // A clean right answer moves on by itself; anything worth reading waits for you.
-  if(ok && a.result === "exact"){
+  if(ok && a.result === "exact" && pref("advance") === "on"){
     clearTimeout(learnTimer);
     learnTimer = setTimeout(function(){ if(S.session === s && s.answer === a) learnNext(); }, 950);
   }
@@ -5501,7 +5620,7 @@ function answerReview(a){
   render();
   // Only a clean hit moves on by itself. A near miss is exactly the one worth
   // reading, and carrying them off it would take the "I was wrong" with it.
-  if(a.ok && a.result !== "near"){
+  if(a.ok && a.result !== "near" && pref("advance") === "on"){
     clearTimeout(learnTimer);
     learnTimer = setTimeout(function(){ if(S.session === s && s.answer === a) nextReview(); }, 900);
   }
@@ -5988,13 +6107,76 @@ function renderWho(){
     el("h3",{text:"Look"}),
     el("p",{text:"Auto follows whatever your computer is set to. The rest stay put on this device."}),
     themePicker(),
-    themeBuilder()
+    themeBuilder(),
+    setRow("Name in the corner", "The index card and the byline, or just the word.", "brand",
+      [["mark","Mark and byline"],["plain","Plain"]]),
+    setRow("Reading type", "What the terms, definitions and cards are set in.", "read",
+      [["serif","Serif"],["sans","Plain"]]),
+    setRow("Size", "Makes the whole study area bigger. The sidebar stays as it is.", "zoom",
+      [["1","Normal"],["1.12","Large"],["1.25","Larger"]])
+  ]));
+
+  wrap.appendChild(el("div",{class:"panel"},[
+    el("h3",{text:"Motion"}),
+    el("p",{text:"Auto asks your computer. Less keeps the fades and drops the travel — the card swaps instead of turning. None stops everything moving."}),
+    setRow("Animation", pref("motion") === "auto" ? ("Your computer currently asks for " + (osStill() ? "less motion." : "full motion.")) : null, "motion",
+      [["auto","Auto"],["full","Full"],["low","Less"],["off","None"]])
+  ]));
+
+  wrap.appendChild(el("div",{class:"panel"},[
+    el("h3",{text:"Studying"}),
+    el("p",{text:"How a deck behaves when you open it, and how typing is marked."}),
+    setRow("Spelling", "A near miss is a word that is one or two letters out. Counting it keeps a spelling slip from reading as not knowing the word.", "strict",
+      [["off","Near misses count"],["on","Must be exact"]]),
+    setRow("Moving on", "After a clean right answer, Learn and Review go to the next card by themselves.", "advance",
+      [["on","By itself"],["off","Wait for me"]]),
+    setRow("Card order", "How a deck starts. The buttons on a deck still change it for that sitting.", "shuffle",
+      [["on","Shuffled"],["off","In order"]]),
+    setRow("Asked as", "Which side of the card a deck opens on.", "dir",
+      [["t2d","Term → Definition"],["d2t","Definition → Term"]]),
+    setRow("Answer colours", "In Learn, the border round the term takes the verdict's colour — green, amber or red.", "verdict",
+      [["colour","On"],["flat","Off"]]),
+    setRow("Keyboard hints", "The little “press Enter” lines under the questions.", "hints",
+      [["show","Show"],["hide","Hide"]])
+  ]));
+
+  wrap.appendChild(el("div",{class:"panel"},[
+    el("h3",{text:"This device"}),
+    el("p",{text:"Scores, stars and Learn progress live in this browser under the name you are signed in as. Nothing here touches the cards themselves, or anyone else's device."}),
+    el("div",{class:"rowctl",style:"justify-content:flex-start"},[
+      el("button",{class:"btn ghost",onclick:resetSettings},["Put the settings back"]),
+      el("button",{class:"btn danger",onclick:wipeProgress},["Erase my progress"])
+    ])
   ]));
 
   var locked = /(^|[#&?])editor\b/.test(location.hash + location.search);
   if(locked || !S.providers) wrap.appendChild(editorPanel);
   wrap.appendChild(errBox);
   stage.appendChild(wrap);
+}
+
+function resetSettings(){
+  if(!confirm("Put every setting on this page back to the way it started?")) return;
+  PREFS = {};
+  try{ localStorage.removeItem(PREF_KEY); }catch(e){}
+  applyPrefs();
+  S.shuffle = pref("shuffle") !== "off";
+  S.dir = pref("dir") === "d2t" ? "d2t" : "t2d";
+  S.session = null;
+  render(); toast("Settings back to the start");
+}
+/* Scores and stars only. The decks are not touched — they are the shared file, and
+   nothing on this page should be able to reach them. */
+function wipeProgress(){
+  if(!confirm("Erase every score, star and Learn rung stored in this browser for " + ((S.user ? whoName(S.user) : S.who) || "you") + "?\n\nThe cards themselves are not touched. This can't be undone.")) return;
+  S.progress = {}; S.bests = {}; S.learn = {};
+  try{
+    localStorage.removeItem(PKEY());
+    localStorage.removeItem(BKEY());
+    localStorage.removeItem(LKEY());
+  }catch(e){}
+  S.session = null;
+  render(); toast("Progress erased on this device");
 }
 
 /* ============================ connect to GitHub ============================ */
@@ -6239,6 +6421,12 @@ markSeen();
 try{ S.railShut = localStorage.getItem(RAIL_KEY) === "1"; }catch(e){ S.railShut = false; }
 // A phone always starts on the content. The saved preference is the laptop's.
 if(phone()) S.railShut = true;
+loadPrefs();
+applyPrefs();
+S.shuffle = pref("shuffle") !== "off";
+S.dir = pref("dir") === "d2t" ? "d2t" : "t2d";
+// Auto means auto: if the computer's setting changes while the page is open, follow it.
+try{ matchMedia("(prefers-reduced-motion: reduce)").addEventListener("change", function(){ if(pref("motion") === "auto") applyPrefs(); }); }catch(e){}
 try{ S.conjMode = localStorage.getItem(CONJ_KEY) === "meaning" ? "meaning" : "forms"; }catch(e){}
 try{ S.theme = localStorage.getItem(THEME_KEY) || ""; }catch(e){ S.theme = ""; }
 try{ S.custom = JSON.parse(localStorage.getItem(CUSTOM_KEY) || "null"); }catch(e){ S.custom = null; }
