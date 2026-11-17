@@ -160,6 +160,29 @@ Where it appears:
 - `icon-dark.svg` is the kit's dark lockup, kept as an asset for anywhere that needs one
   on a dark ground. Nothing in the page references it.
 
+## Deck types
+
+A deck is one of four shapes, set by **Type** in the editor.
+
+**Cards** is the plain two-sided card: a term and a definition.
+
+**Vocabulary** adds a part of speech to every word, out of a fixed list of nine. That
+unlocks the Parts of speech mode and a third rung in Learn — define it, type it, then
+name what it is — so a vocabulary word isn't mastered until all three are done.
+
+**Categories** is that same question with the list of answers moved out of the code and
+into the deck. You give the dimension a name (**Called**: Process, Rock type, Device)
+and write the buckets yourself, and every card gets filed under one of them. Everything
+the part of speech gets, a category gets: its own mode, the third rung in Learn, a
+column in the editor, a column in a pasted list, and a share of the questions in a
+simulated test. Renaming a bucket rewrites every card already filed under it as you
+type, because a card stores the label rather than an id — which is also what lets a
+deck move between Vocabulary and Categories without losing what was typed.
+
+**Conjugation** is a grid: one table per verb, with the rows named by you and a tense
+across the top. The rows are free text, so it serves any table of forms, not only a
+Spanish verb.
+
 ## Cards you are having another go at
 
 A flashcard you have got wrong and not got right since is outlined in the accent red
