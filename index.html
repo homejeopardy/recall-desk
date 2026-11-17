@@ -2293,9 +2293,15 @@ function renderLearn(){
   var input = null;
   if(!typed){
     var wrap = el("div",{class:"choices"});
+    // "Noun or Verb" is how the answer reads back, but the options are one word each,
+    // so which option is the right one is settled against the list, not the sentence.
+    var rights = s.kind === "pos" ? posRights(c).map(cap) : null;
     s.choices.forEach(function(opt, idx){
       var cls = "choice";
-      if(a){ if(opt === right) cls += " right"; else if(idx === a.picked) cls += " wrong"; }
+      if(a){
+        if(rights ? rights.indexOf(opt) > -1 : opt === right) cls += " right";
+        else if(idx === a.picked) cls += " wrong";
+      }
       wrap.appendChild(el("button",{class:cls, disabled: a ? "disabled" : null, onclick:function(){ learnPick(idx); }},[
         el("span",{class:"key",text:String(idx+1)}), el("span",{text:opt})
       ]));
@@ -2365,10 +2371,17 @@ function learnAnswer(c, ok, a){
     learnTimer = setTimeout(function(){ if(S.session === s && s.answer === a) learnNext(); }, 950);
   }
 }
+/* Both of Learn's pick-one questions come through here: the ordinary one and, on the
+   last rung of a vocab card, the part of speech. It used to insist on "choice", so a
+   part-of-speech question could not be answered at all — every option was dead to a
+   click and to the number keys, and the only way past it was "Don't know?". A word
+   with two parts of speech counts right for either, so that question is judged
+   against the card's own list rather than against the answer side of the card. */
 function learnPick(idx){
-  var s = S.session; if(!s || s.answer || s.kind !== "choice") return;
-  var c = s.queue[s.i], ok = s.choices[idx] === ans(c);
-  learnAnswer(c, ok, {kind:"choice", picked:idx, result: ok ? "exact" : "no"});
+  var s = S.session; if(!s || s.answer || s.kind === "type") return;
+  var c = s.queue[s.i], opt = s.choices[idx];
+  var ok = s.kind === "pos" ? posOk(c, opt) : opt === ans(c);
+  learnAnswer(c, ok, {kind:s.kind, picked:idx, result: ok ? "exact" : "no"});
 }
 function learnType(given){
   var s = S.session; if(!s || s.answer || s.kind !== "type") return;
