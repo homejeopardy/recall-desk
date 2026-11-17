@@ -183,7 +183,9 @@ kbd{font-family:var(--mono);font-size:11px;background:var(--surface-2);border:1p
 /* ---- chrome ---- */
 .app{display:grid;grid-template-columns:var(--rail) 1fr;min-height:100vh;min-height:100dvh;transition:grid-template-columns var(--t-move) var(--ease)}
 .rail{border-right:1px solid var(--rule);background:var(--surface);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;height:100dvh;overflow:hidden;min-width:0;transition:transform var(--t-move) var(--ease),border-color var(--t-move) ease}
-.brand{padding:20px 18px 15px;border-bottom:2px solid var(--ink);display:flex;align-items:baseline;gap:8px;width:100%;text-align:left;border-radius:0}
+.brand{padding:20px 18px 15px;border-bottom:2px solid var(--ink);display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;width:100%;text-align:left;border-radius:0}
+/* Its own line under the name, which is what flex-basis:100% buys in a wrapping row. */
+.brand .byline{flex-basis:100%;font-family:var(--mono);font-size:10px;letter-spacing:.05em;color:var(--ink-faint);margin-top:3px}
 .brand:hover h1{color:var(--bad)}
 .brand h1{transition:color .12s}
 .brand h1{font-family:var(--read);font-size:24px;font-weight:600;letter-spacing:-.02em;line-height:1}
@@ -939,7 +941,7 @@ if(c&&c.css)document.documentElement.style.cssText=c.css+"color-scheme:"+(c.dark
 
 <div class="app">
   <aside class="rail" id="rail">
-    <button class="brand" id="homebtn" title="Home"><h1>Quizlet<em>ish</em></h1><span class="tag">v2</span></button>
+    <button class="brand" id="homebtn" title="Home"><h1>Quizlet<em>ish</em></h1><span class="tag">v2</span><span class="byline">by Nathan Bennett-Crump</span></button>
     <div class="rail-head"><span class="eyebrow">Decks</span><span id="railctl"></span><span id="newdeckslot"></span></div>
     <ul class="decks" id="decks"></ul>
     <div id="soonslot"></div>
@@ -2406,8 +2408,6 @@ function renderHome(){
     ]),
     el("div",{class:"rowctl"},[
       S.canEdit ? el("button",{class:"btn",onclick:function(){ go("edit"); }},[icon(I.edit,15),"Edit cards"]) : el("button",{class:"btn",onclick:function(){ go("edit"); }},[icon(I.cards,15),"Browse all cards"]),
-      isEditor() ? el("button",{class:"btn ghost",title:"Decks students sent in",onclick:function(){ go("subs"); }},[icon(I.cards,15),"Submitted"]) : null,
-      S.canEdit ? el("button",{class:"btn ghost",title:"Write a notice everyone sees once",onclick:function(){ go("news"); }},[icon(I.flag,15),"Announce"]) : null,
       el("button",{class:"btn ghost",title:"Copy a link straight to this deck",onclick:function(){
         var url = deckLink(d);
         if(navigator.clipboard && navigator.clipboard.writeText){
@@ -2903,7 +2903,8 @@ function renderLearn(){
            : "";
   var cls = a.result === "no" ? "no" : a.result === "near" ? "near" : "ok", msg;
   if(a.result === "no"){
-    msg = [ a.skipped ? "The answer is " : "Not quite — the answer is ", el("b",{text:right}), ". ",
+    msg = [ a.undone ? "Counted as wrong — the answer is "
+          : a.skipped ? "The answer is " : "Not quite — the answer is ", el("b",{text:right}), ". ",
             a.requeued ? "It comes back later this round." : "You'll see it again next round." ];
   } else if(a.result === "near"){
     msg = [ "Close enough — the exact wording is ", el("b",{text:right}), "." + note ];
@@ -2914,6 +2915,7 @@ function renderLearn(){
     el("span",{},msg),
     el("span",{class:"rowctl"},[
       a.result === "no" && a.kind === "type" && !a.skipped ? el("button",{class:"btn sm",onclick:learnOverride},["I was right"]) : null,
+      a.kind === "type" && !a.skipped && (a.result === "near" || a.overridden) ? el("button",{class:"btn sm",onclick:learnUndo},["I was wrong"]) : null,
       el("button",{class:"btn sm",onclick:learnNext},[ s.i + 1 >= s.queue.length ? "Finish round" : "Continue", icon(I.chev,14) ])
     ])
   ]));
@@ -2967,6 +2969,19 @@ function learnOverride(){
   if(a.requeued && s.queue[s.queue.length - 1] === c){ s.queue.pop(); delete s.requeued[c.id]; a.requeued = false; }
   var p = prog(d.id, c.id); p.wrong = Math.max(0, p.wrong - 1); p.right++; p.last = "right"; saveLocal();
   a.result = "exact"; a.overridden = true; a.to = lstage(d.id, c.id);
+  render();
+}
+// The mirror of learnOverride: give back the rung a near miss was granted, and put
+// the card back in the round so it comes round again.
+function learnUndo(){
+  var s = S.session, a = s && s.answer;
+  if(!a || a.kind !== "type" || a.skipped || a.result === "no") return;
+  var c = s.queue[s.i], d = deck();
+  setStage(d.id, c.id, 0);
+  if(!s.requeued[c.id]){ s.requeued[c.id] = true; s.queue.push(c); a.requeued = true; }
+  var p = prog(d.id, c.id); p.right = Math.max(0, p.right - 1); p.wrong++; p.last = "wrong"; saveLocal();
+  a.result = "no"; a.overridden = false; a.undone = true; a.to = lstage(d.id, c.id);
+  clearTimeout(learnTimer);          // nothing should carry you off mid-correction
   render();
 }
 function learnNext(){
@@ -3708,11 +3723,15 @@ function renderWrite(){
     input.addEventListener("keydown", function(ev){ if(ev.key === "Enter"){ ev.preventDefault(); submitWrite(c, input.value); } });
   } else {
     var st = s.state, cls = st.result === "no" ? "no" : (st.result === "near" ? "near" : "ok");
-    var msg = st.result === "exact" ? "Correct." : st.result === "near" ? "Close enough — the exact wording is " : "Not quite — the answer is ";
+    var msg = st.result === "exact" ? (st.overridden ? "Counted as correct." : "Correct.")
+            : st.result === "near" ? "Close enough — the exact wording is "
+            : st.undone ? "Counted as wrong — the answer is "
+            : "Not quite — the answer is ";
     var v = el("div",{class:"verdict " + cls},[
       el("span",{},[ msg, st.result === "exact" ? null : el("b",{text:ans(c)}) ]),
       el("span",{class:"rowctl"},[
         st.result === "no" ? el("button",{class:"btn sm",onclick:function(){ overrideWrite(c); }},["I was right"]) : null,
+        (st.result === "near" || st.overridden) ? el("button",{class:"btn sm",onclick:function(){ undoWrite(c); }},["I was wrong"]) : null,
         el("button",{class:"btn sm",onclick:nextWrite},[ s.i + 1 >= s.cards.length ? "See score" : "Next", icon("M9 6l6 6-6 6",14)])
       ])
     ]);
@@ -3730,9 +3749,22 @@ function submitWrite(c, given){
 }
 function overrideWrite(c){
   var s = S.session;
-  s.state.result = "exact"; s.correct++;
+  s.state.result = "exact"; s.state.overridden = true; s.state.undone = false; s.correct++;
   var k = s.missed.indexOf(c); if(k > -1) s.missed.splice(k,1);
   var p = prog(S.deckId, c.id); p.wrong = Math.max(0, p.wrong - 1); p.right++; p.last = "right"; saveLocal();
+  render();
+}
+/* The other half of "I was right". A near miss is counted as correct, and only the
+   person who typed it knows whether they actually had it or were guessing at the
+   shape of the word — so the generous call is theirs to refuse. Undoing the override
+   above goes through here too, which makes both buttons reversible. */
+function undoWrite(c){
+  var s = S.session, st = s.state;
+  if(!st || st.result === "no") return;
+  st.result = "no"; st.overridden = false; st.undone = true;
+  s.correct = Math.max(0, s.correct - 1);
+  if(s.missed.indexOf(c) === -1) s.missed.push(c);
+  var p = prog(S.deckId, c.id); p.right = Math.max(0, p.right - 1); p.wrong++; p.last = "wrong"; saveLocal();
   render();
 }
 function nextWrite(){ var s = S.session; s.i++; s.state = null; render(); }

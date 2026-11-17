@@ -135,6 +135,19 @@ all of it off with one rule rather than a list — but note that the JS helpers 
 too, via `still()`, because a transition the stylesheet has zeroed still needs the end
 value set.
 
+## "I was right" and "I was wrong"
+
+Typing an answer is graded in three bands: exact, near, and no. A near miss is
+counted as correct — and only the person who typed it knows whether they actually had
+it or were guessing at the shape of the word. So the generous call is theirs to refuse:
+a near miss offers **I was wrong**, which takes the mark back, and a wrong one offers
+**I was right**, which gives it. Both appear in **Type the answer** and in Learn.
+
+Each undoes the other, so neither is a trap and the score can't drift — pressing them
+alternately lands back where it started. In Learn, taking a mark back also gives back
+the rung the card was granted and puts it in the queue again, which is the whole point:
+a card you only half-knew should come round once more.
+
 ## The dashboard
 
 With editing unlocked, a **Dashboard** button sits in the top right of every page
