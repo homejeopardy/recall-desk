@@ -183,6 +183,25 @@ deck move between Vocabulary and Categories without losing what was typed.
 across the top. The rows are free text, so it serves any table of forms, not only a
 Spanish verb.
 
+## The word in a sentence
+
+Any card can carry a third side: the word doing its job. **+ example** in the editor
+adds it, and it shows under the answer on the back of a flashcard and after a question
+has been asked.
+
+It also makes a question of its own. **Fill the blank** takes the example, removes the
+word and asks for it back — the thing a definition drill never practises and the quiz
+usually wants. The blank is found by looking for the term in the sentence, so most
+examples need nothing else. Where the word changes shape — *ran* for *run* — put square
+brackets round the piece that should be missing and whatever is inside them becomes the
+answer:
+
+    run    To move quickly on foot.    She [ran] the last block to catch the bus.
+
+Marking is the same as Type the answer, near misses and all, including "I was right"
+and "I was wrong". The mode only appears on decks that have at least one example, and
+says so if an example has been written that the blanker can't find the word in.
+
 ## Cards you are having another go at
 
 A flashcard you have got wrong and not got right since is outlined in the accent red

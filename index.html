@@ -295,6 +295,10 @@ kbd{font-family:var(--mono);font-size:11px;background:var(--surface-2);border:1p
 .face .role{position:absolute;top:12px;left:22px;font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint)}
 .face .star{position:absolute;top:9px;right:16px;padding:6px;border-radius:var(--r);color:var(--ink-faint);line-height:0}
 .face .star[aria-pressed="true"]{color:var(--brass)}
+/* The example, under the answer. The brackets that mark the blank are for the question,
+   not for reading, so they come off here. */
+.exline{margin-top:12px;max-width:42ch;font-family:var(--read);font-size:14px;font-style:italic;line-height:1.5;color:var(--ink-soft)}
+.cloze .q{white-space:pre-line}
 .face .star{transition:background var(--t-tap),color var(--t-quick)}
 .face .star:hover{background:var(--surface-2)}
 .facetext{font-family:var(--read);font-size:29px;line-height:1.36;max-width:33ch;letter-spacing:-.015em;white-space:pre-line}
@@ -1307,7 +1311,7 @@ function folderTree(){                         // depth-first, for indented menu
   return out;
 }
 function indent(depth){ return new Array(depth + 1).join("\u2003"); }
-function cardsOf(d){ return (d && Array.isArray(d.cards)) ? d.cards.filter(function(c){ return (c.term||"").trim() || (c.def||"").trim() || (c.def2||"").trim() || hasForms(c); }) : []; }
+function cardsOf(d){ return (d && Array.isArray(d.cards)) ? d.cards.filter(function(c){ return (c.term||"").trim() || (c.def||"").trim() || (c.def2||"").trim() || (c.ex||"").trim() || hasForms(c); }) : []; }
 // What the study modes actually drill: cards, except conjugation decks, which drill cells.
 function unitsOf(d){
   if(kindOf(d) !== "conj") return cardsOf(d);
@@ -1334,6 +1338,32 @@ function defs(c){
   if(((c && c.def2) || "").trim()) out.push(c.def2);
   return out;
 }
+/* ---- the word in a sentence ----
+   A definition drill never practises the thing a quiz usually asks for: the word doing
+   its job. One more side on the card covers it, and it pays for itself twice — shown
+   under the answer when the answer is shown, and blanked out to make a question of its
+   own.
+
+   The blank is found by looking for the term in the sentence. Where that won't do —
+   an inflected form, a phrase that reads differently in place — square brackets round
+   the missing piece win instead, and whatever is inside them is the answer. */
+function exOf(c){ return String((c && c.ex) || "").trim(); }
+function cloze(c){
+  var s = exOf(c);
+  if(!s) return null;
+  var m = s.match(/\[([^\]]+)\]/);
+  if(m) return m[1].trim() ? {text: s.replace(m[0], "______"), want: m[1].trim()} : null;
+  var t = String((c && c.term) || "").trim();
+  if(!t) return null;
+  var re = new RegExp("\\b" + t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\b", "i");
+  if(re.test(s)) return {text: s.replace(re, "______"), want: t};
+  // A word boundary is an ASCII idea, so a term with an accent on it falls through to
+  // a plain search rather than being told it isn't there.
+  var i = s.toLowerCase().indexOf(t.toLowerCase());
+  if(i < 0) return null;
+  return {text: s.slice(0, i) + "______" + s.slice(i + t.length), want: t};
+}
+function clozable(d){ return cardsOf(d).filter(function(c){ return !!cloze(c); }); }
 function defText(c){
   var list = defs(c);
   return list.length > 1 ? list.map(function(t, i){ return (i + 1) + ". " + t; }).join("\n") : (list[0] || "");
@@ -1446,6 +1476,7 @@ function deckPayload(){
         cards: cardsOf(d).map(function(c){
           var out = {id: c.id, term: c.term || "", def: c.def || ""};
           if((c.def2 || "").trim()) out.def2 = c.def2;        // a second meaning, when there is one
+          if((c.ex || "").trim()) out.ex = c.ex;              // the word in a sentence
           if((c.pos2 || "").trim()) out.pos2 = c.pos2;
           if((c.pos || "").trim()) out.pos = c.pos;          // kept even on a plain deck, so
           if(hasForms(c)){                                    // switching kinds loses nothing
@@ -1662,7 +1693,7 @@ function mergeById(base, mine, theirs, one, name, log){
 }
 function mergeCard(b, m, t, log, where){
   var label = quote(((m.term || t.term || "").trim()) || "a card") + where;
-  var c = mergeFields(b, m, t, ["term","def","def2","pos","pos2"], {id: m.id || t.id}, log, label);
+  var c = mergeFields(b, m, t, ["term","def","def2","pos","pos2","ex"], {id: m.id || t.id}, log, label);
   var keys = {}, clash = false, f = {}, any = false;
   [b.forms, m.forms, t.forms].forEach(function(o){ if(o) Object.keys(o).forEach(function(k){ keys[k] = true; }); });
   Object.keys(keys).forEach(function(k){               // a conjugation table, one form at a time
@@ -2404,6 +2435,7 @@ function render(){
   if(v === "flash") return renderFlash();
   if(v === "quiz") return renderQuiz();
   if(v === "write") return renderWrite();
+  if(v === "cloze") return renderCloze();
   if(v === "match") return renderMatch();
   if(v === "edit") return renderEdit();
   if(v === "who") return renderWho();
@@ -2512,6 +2544,13 @@ function renderHome(){
     !withPos ? (kind === "vocab" ? "No word has a part of speech yet" : "No card has a " + tagLow(d) + " yet")
     : posKinds < 2 ? (kind === "vocab" ? "Every word here is the same part of speech" : "Every card here is the same " + tagLow(d))
     : null]);
+  // Offered only once a deck has an example on it, rather than sitting there greyed
+  // out on every deck that will never use one.
+  var anyEx = kind !== "conj" && cardsOf(d).some(function(c){ return exOf(c); });
+  var czn = anyEx ? clozable(d).length : 0;
+  if(anyEx) tiles.push(["cloze","Fill the blank", I.write,
+    "The sentence with the word taken out. Only the cards that have an example on them.",
+    czn >= 1, czn ? null : "No example has its own word in it \u2014 put [brackets] round the missing piece"]);
   tiles = tiles.concat([
     ["flash","Flashcards", I.cards, "Flip through at your own pace. Star the ones that keep slipping.", np >= 1, np ? null : "No cards in this filter"],
     ["quiz","Multiple choice", I.quiz, "Four options drawn from the deck's own answers. Scored at the end.", np >= 2, np < 2 ? "Needs 2+ cards" : null],
@@ -2766,6 +2805,10 @@ function startMode(mode){
   if(mode === "pos"){
     var pc = cardsOf(deck()).filter(function(c){ return posRights(c).length; });
     S.session = {mode:"pos", cards: S.shuffle ? shuffled(pc) : pc, i:0, picked:null, correct:0, missed:[]};
+  }
+  if(mode === "cloze"){
+    var cz = clozable(deck());
+    S.session = {mode:"cloze", cards: S.shuffle ? shuffled(cz) : cz, i:0, state:null, correct:0, missed:[]};
   }
   if(mode === "table"){
     var vs = cardsOf(deck()).filter(hasForms);
@@ -3611,6 +3654,7 @@ function renderFlash(){
       el("span",{class:"role",text:ANS_LABEL()}), starBtn(),
       reportsOn() ? reportBtn(d, c) : null,
       el("div",{class:"facetext",text:ans(c) || "—"}),
+      exOf(c) ? el("div",{class:"exline",text:exOf(c).replace(/[\[\]]/g, "")}) : null,
       el("div",{class:"hintline",text:"How did that go?"})
     ])
   ]);
@@ -3798,6 +3842,65 @@ function renderWrite(){
     stage.appendChild(el("div",{class:"kbhint",style:"margin-top:12px;font-size:11.5px;color:var(--ink-faint);text-align:center",html:'Press <kbd>Enter</kbd> to continue'}));
   }
 }
+/* ---------------- fill the blank ----------------
+   Type the answer with the sentence instead of the definition. The marking, the two
+   second-thoughts buttons and the score screen are the same ones — only the question
+   and what counts as the answer are different. */
+function renderCloze(){
+  var s = S.session; if(!s) return go("home");
+  if(s.i >= s.cards.length) return renderScore("Fill the blank", s);
+  var c = s.cards[s.i], cz = cloze(c);
+  if(!cz){ s.i++; return render(); }                 // a card edited out from under the round
+  stage.appendChild(modeHead("Fill the blank"));
+  stage.appendChild(el("div",{class:"deskrow"},[
+    el("span",{class:"counter",text:(s.i+1) + " / " + s.cards.length}),
+    el("span",{class:"counter",text:s.correct + " correct"})
+  ]));
+  stage.appendChild(track(s.i/s.cards.length*100));
+  stage.appendChild(el("div",{class:"prompt cloze"},[
+    el("div",{class:"role",text:"Finish the sentence"}),
+    el("div",{class:"q",text:cz.text})
+  ]));
+
+  var input = el("input",{class:"answer",type:"text",placeholder:"The missing word\u2026","aria-label":"The missing word",autocomplete:"off",autocapitalize:"off",autocorrect:"off",spellcheck:"false"});
+  if(s.state){ input.value = s.state.given; input.disabled = true; }
+  stage.appendChild(input);
+
+  if(!s.state){
+    stage.appendChild(el("div",{class:"rowctl",style:"margin-top:12px"},[
+      el("button",{class:"btn ghost",onclick:function(){ submitCloze(c, cz, ""); }},["Skip \u2014 show me"]),
+      el("button",{class:"btn primary",onclick:function(){ submitCloze(c, cz, input.value); }},["Check"])
+    ]));
+    setTimeout(function(){ input.focus(); }, 0);
+    input.addEventListener("keydown", function(ev){ if(ev.key === "Enter"){ ev.preventDefault(); submitCloze(c, cz, input.value); } });
+    return;
+  }
+
+  var st = s.state, cls = st.result === "no" ? "no" : (st.result === "near" ? "near" : "ok");
+  var msg = st.result === "exact" ? (st.overridden ? "Counted as correct." : "Correct.")
+          : st.result === "near" ? "Close enough \u2014 the word is "
+          : st.undone ? "Counted as wrong \u2014 the word is "
+          : "Not quite \u2014 the word is ";
+  stage.appendChild(el("div",{class:"verdict " + cls},[
+    el("span",{},[ msg, st.result === "exact" ? null : el("b",{text:cz.want}) ]),
+    el("span",{class:"rowctl"},[
+      st.result === "no" ? el("button",{class:"btn sm",onclick:function(){ overrideWrite(c); }},["I was right"]) : null,
+      (st.result === "near" || st.overridden) ? el("button",{class:"btn sm",onclick:function(){ undoWrite(c); }},["I was wrong"]) : null,
+      el("button",{class:"btn sm",onclick:nextWrite},[ s.i + 1 >= s.cards.length ? "See score" : "Next", icon("M9 6l6 6-6 6",14)])
+    ])
+  ]));
+  // What the sentence actually says, now that it has been asked.
+  stage.appendChild(el("div",{class:"exline",style:"margin:14px auto 0;text-align:center",text:exOf(c).replace(/[\[\]]/g, "")}));
+  stage.appendChild(el("div",{class:"kbhint",style:"margin-top:12px;font-size:11.5px;color:var(--ink-faint);text-align:center",html:'Press <kbd>Enter</kbd> to continue'}));
+}
+function submitCloze(c, cz, given){
+  var s = S.session;
+  var r = given.trim() ? grade(given, cz.want) : "no";
+  s.state = {given:given, result:r};
+  if(r === "no") s.missed.push(c); else s.correct++;
+  record(c.id, r !== "no");
+  render();
+}
 function submitWrite(c, given){
   var s = S.session;
   var r = given.trim() ? grade(given, ans(c)) : "no";
@@ -3847,8 +3950,8 @@ function renderScore(title, s){
     var ul = el("ul",{class:"missed"});
     s.missed.forEach(function(c){
       ul.appendChild(el("li",{},[
-        el("span",{class:"t",text: s.mode === "pos" ? (c.term || "—") : ask(c)}),
-        el("span",{class:"d",text: s.mode === "pos" ? posText(c) : ans(c)})
+        el("span",{class:"t",text: s.mode === "pos" ? (c.term || "—") : s.mode === "cloze" ? ((cloze(c) || {}).text || ask(c)) : ask(c)}),
+        el("span",{class:"d",text: s.mode === "pos" ? posText(c) : s.mode === "cloze" ? ((cloze(c) || {}).want || "") : ans(c)})
       ]));
     });
     body.appendChild(el("div",{class:"eyebrow",style:"margin-top:24px;text-align:left",text:"Missed this round"}));
@@ -3860,6 +3963,7 @@ function retryMissed(s){
   var again = s.missed.slice();
   if(s.mode === "quiz") S.session = {mode:"quiz", cards:shuffled(again), i:0, picked:null, correct:0, missed:[]};
   else if(s.mode === "pos") S.session = {mode:"pos", cards:shuffled(again), i:0, picked:null, correct:0, missed:[]};
+  else if(s.mode === "cloze") S.session = {mode:"cloze", cards:shuffled(again), i:0, state:null, correct:0, missed:[]};
   else S.session = {mode:"write", cards:shuffled(again), i:0, state:null, correct:0, missed:[]};
   render();
 }
@@ -4084,6 +4188,20 @@ function renderEdit(){
       if(!ro) defCell.appendChild(el("button",{class:"altadd",
         title:"For a word that means two things",
         onclick:function(){ c.def2 = ""; queueSave(d); render(); }},["+ second meaning"]));
+    }
+    // The example sits under whichever of those two shapes the card has.
+    if(typeof c.ex === "string" || exOf(c)){
+      defCell.appendChild(el("div",{class:"alt"},[
+        el("span",{class:"mk",text:"\u201c\u201d"}),
+        mkta("ex","def","Use it in a sentence \u2014 put [brackets] round the word if it changes shape"),
+        ro ? null : el("button",{class:"altdel",title:"Remove the example",
+          "aria-label":"Remove the example sentence of card " + (i+1),
+          onclick:function(){ delete c.ex; queueSave(d); render(); }},[icon(I.trash,13)])
+      ]));
+    } else if(!ro){
+      defCell.appendChild(el("button",{class:"altadd",
+        title:"The word doing its job in a sentence",
+        onclick:function(){ c.ex = ""; queueSave(d); render(); }},["+ example"]));
     }
     rows.appendChild(el("div",{class:"row"},[
       el("span",{class:"n",text:String(i+1)}),
@@ -4857,6 +4975,7 @@ function submitDeck(d, note){
     cards: cardsOf(d).map(function(c){
       var o = {id:c.id, term:c.term||"", def:c.def||""};
       if(c.def2) o.def2 = c.def2;
+      if(c.ex) o.ex = c.ex;
       if(c.pos2) o.pos2 = c.pos2;
       if(c.pos) o.pos = c.pos;
       if(hasForms(c)) o.forms = c.forms;
@@ -5964,6 +6083,7 @@ function normalizeStore(raw){
       cards: (Array.isArray(v.cards) ? v.cards : []).map(function(c){
         var out = {id: c.id || uid(), term: c.term || "", def: c.def || ""};
         if(String(c.def2 || "").trim()) out.def2 = String(c.def2);
+        if(String(c.ex || "").trim()) out.ex = String(c.ex);
         // A vocabulary deck's labels have to be one of the nine. A categories deck's
         // are whatever the teacher wrote, so they are taken as they come.
         var free = v.kind === "cat";
