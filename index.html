@@ -660,7 +660,15 @@ body.editing .stage-head,body.editing .startbar,body.editing .testbar{padding-ri
 /* The rail stays a grid item and its column shrinks to nothing, so the two can be
    animated. Taking it out of the grid instead would drop the stage into column one. */
 .app.shut{grid-template-columns:0 1fr}
-.app.shut .stage{padding-left:92px}
+/* With the rail gone there is nothing left for the page to sit against, so it stops
+   hugging the left edge and centres in what it now has. The only thing that still has
+   to be kept clear is the reopen tab, which is fixed to the left edge: past 1240 the
+   centring already leaves more room than the tab needs, and under it the old padding
+   does the job. */
+.app.shut .stage{margin-inline:auto;padding-left:34px}
+@media (min-width:861px) and (max-width:1240px){ .app.shut .stage{padding-left:92px;padding-right:92px} }
+/* Stops at 861 because below that the rail is a drawer over the page, not a
+   column beside it, and the tab goes with it. */
 .app.shut .rail{transform:translateX(-100%);border-right-color:transparent}
 /* Always present so it can slide; pushed out of the way and made unclickable instead
    of being display:none, which cannot be transitioned. */
