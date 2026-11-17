@@ -160,39 +160,6 @@ Where it appears:
 - `icon-dark.svg` is the kit's dark lockup, kept as an asset for anywhere that needs one
   on a dark ground. Nothing in the page references it.
 
-## Deck types
-
-A deck is one of four shapes, set by **Type** in the editor.
-
-**Cards** is the plain two-sided card: a term and a definition.
-
-**Vocabulary** adds a part of speech to every word, out of a fixed list of nine. That
-unlocks the Parts of speech mode and a third rung in Learn — define it, type it, then
-name what it is — so a vocabulary word isn't mastered until all three are done.
-
-**Categories** is that same question with the list of answers moved out of the code and
-into the deck. You give the dimension a name (**Called**: Process, Rock type, Device)
-and write the buckets yourself, and every card gets filed under one of them. Everything
-the part of speech gets, a category gets: its own mode, the third rung in Learn, a
-column in the editor, a column in a pasted list, and a share of the questions in a
-simulated test. Renaming a bucket rewrites every card already filed under it as you
-type, because a card stores the label rather than an id — which is also what lets a
-deck move between Vocabulary and Categories without losing what was typed.
-
-**Conjugation** is a grid: one table per verb, with the rows named by you and a tense
-across the top. The rows are free text, so it serves any table of forms, not only a
-Spanish verb.
-
-**Order** is a sequence: the order the cards sit in the editor is the answer. It needs
-no field of its own, which is why a deck can be turned into one and back with nothing
-to convert — but it does need a way to move a row, so an order deck's rows get up and
-down arrows, and the focus follows the card so it can be walked up the list without
-reaching for the mouse. **Put them in order** gives them back shuffled and asks you to
-rebuild it. A twenty-event timeline asked all at once is a memory test rather than an
-ordering one, so it comes in sets of about six, each a run of the real sequence. Tap to
-place, tap again to take back — a drag would be the obvious gesture and the wrong one:
-fiddly on a phone and impossible from a keyboard.
-
 ## The word in a sentence
 
 Any card can carry a third side: the word doing its job. **+ example** in the editor
@@ -497,6 +464,40 @@ entirely when there is no second meaning, so nothing changes for the decks that 
 **Copy as text** puts both meanings in the one definition column, numbered. Pasting that
 back in reads them as a single definition — the paste format is still three columns.
 
+## Settings
+
+Everything lives on the sign-in page. They are saved as one object in
+`recalldesk.prefs.v1` and applied as classes and a variable on `<html>`, so changing one
+takes effect immediately and nothing has to be re-rendered. Anything missing from the
+saved object falls back to its default, so a setting added later never has to migrate
+what is already there.
+
+**Look** — the eight themes and the colour builder, plus: whether the sidebar shows the
+index-card mark and the byline or just the word (this swaps the tab icon back to the
+plain card it had before the brand kit too); serif or plain reading type; and a size,
+which zooms the study area and leaves the sidebar alone.
+
+**Motion** — Auto, Full, Less or None. Auto asks the computer, and follows it if it
+changes while the page is open. Less keeps the fades and drops the travel: the card
+swaps instead of turning. None stops everything. These rules used to sit behind
+`@media (prefers-reduced-motion:reduce)`, which made the computer's setting the only way
+to reach them; the same declarations now sit behind a class, so the computer is the
+default for a choice rather than the whole of it.
+
+**Studying** — whether a near miss counts (one or two letters out; counting it keeps a
+spelling slip from reading as not knowing the word), whether Learn and Review move on by
+themselves after a clean right answer, how a deck starts (shuffled or in order, and which
+side it asks from — the buttons on a deck still change it for that sitting), the answer
+colours in Learn, and the keyboard hints.
+
+**This device** — put the settings back, or erase every score, star and Learn rung stored
+in this browser. Neither touches the cards: those are the shared file, and nothing on
+this page can reach them.
+
+"Must be exact" doesn't get its own comparison. It refuses the near band inside
+`grade()`, so every mode that marks typing agrees about what counts without knowing the
+setting exists.
+
 ## Deck types
 
 Set this with the **Type** menu in the deck editor. It changes what you can type in and
@@ -515,6 +516,25 @@ nouns, verbs and adjectives never offers "preposition" — so the choices stay p
 and the deck sets its own difficulty. A deck using only one part of speech has nothing to
 tell apart, so the question is dropped: the mode is greyed out and Learn goes back to two
 rungs.
+
+**Categories** is that same question with the list of answers moved out of the code and
+into the deck. You give the dimension a name (**Called**: Process, Rock type, Device)
+and write the buckets yourself, and every card gets filed under one of them. Everything
+the part of speech gets, a category gets: its own mode, the third rung in Learn, a
+column in the editor, a column in a pasted list, and a share of the questions in a
+simulated test. Renaming a bucket rewrites every card already filed under it as you
+type, because a card stores the label rather than an id — which is also what lets a
+deck move between Vocabulary and Categories without losing what was typed.
+
+**Order** is a sequence: the order the cards sit in the editor is the answer. It needs
+no field of its own, which is why a deck can be turned into one and back with nothing
+to convert — but it does need a way to move a row, so an order deck's rows get up and
+down arrows, and the focus follows the card so it can be walked up the list without
+reaching for the mouse. **Put them in order** gives them back shuffled and asks you to
+rebuild it. A twenty-event timeline asked all at once is a memory test rather than an
+ordering one, so it comes in sets of about six, each a run of the real sequence. Tap to
+place, tap again to take back — a drag would be the obvious gesture and the wrong one:
+fiddly on a phone and impossible from a keyboard.
 
 **Conjugation** — one verb per card, with a table of forms. The deck sets the tense and
 the rows (yo, tú, él/ella/usted, nosotros, vosotros, ellos/ellas/ustedes by default;
