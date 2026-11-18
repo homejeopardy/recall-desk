@@ -365,6 +365,12 @@ kbd{font-family:var(--mono);font-size:11px;background:var(--surface-2);border:1p
 .flat-verdict .answer.got:focus,.flat-verdict .answer.near:focus,.flat-verdict .answer.redo:focus{border-color:var(--ink)}
 .no-hints .kbhint{display:none}
 .sans-read{--read:var(--ui)}
+/* Every corner in the app comes off these two dials, so squaring them is the whole
+   setting. The two pills say 999px outright, because a pill is a shape rather than a
+   corner; the avatar and the status dot stay round — a squared-off 6px dot reads as a
+   bug, not a style. */
+:root.square{--r:0px;--r-lg:0px}
+.square .deskbtn,.square .reopen{border-radius:0}
 /* Zoom rather than a font-size scale, because the app's sizes are in pixels and the
    point is for the whole study surface to grow together. The sidebar and the two
    fixed buttons sit outside .stage, so they keep their own size. */
@@ -1328,6 +1334,7 @@ var PREF_DEFAULTS = {
   brand:"mark",         // mark | plain
   zoom:"1",             // 1 | 1.12 | 1.25
   read:"serif",         // serif | sans
+  corners:"round",      // round | square
   verdict:"colour",     // colour | flat
   hints:"show",         // show | hide
   advance:"on",         // on | off   — move on by itself after a clean right answer
@@ -1365,6 +1372,7 @@ function applyPrefs(){
   r.classList.toggle("flat-verdict", pref("verdict") === "flat");
   r.classList.toggle("no-hints", pref("hints") === "hide");
   r.classList.toggle("sans-read", pref("read") === "sans");
+  r.classList.toggle("square", pref("corners") === "square");
   // A class, not an inline property: paintTheme() clears the <html> style attribute
   // every time a theme is applied, and would take the zoom with it.
   var z = pref("zoom");
@@ -6112,6 +6120,8 @@ function renderWho(){
       [["mark","Mark and byline"],["plain","Plain"]]),
     setRow("Reading type", "What the terms, definitions and cards are set in.", "read",
       [["serif","Serif"],["sans","Plain"]]),
+    setRow("Corners", "Square is how this looked before the rounding went in.", "corners",
+      [["round","Rounded"],["square","Square"]]),
     setRow("Size", "Makes the whole study area bigger. The sidebar stays as it is.", "zoom",
       [["1","Normal"],["1.12","Large"],["1.25","Larger"]])
   ]));
@@ -6142,7 +6152,9 @@ function renderWho(){
 
   wrap.appendChild(el("div",{class:"panel"},[
     el("h3",{text:"This device"}),
-    el("p",{text:"Scores, stars and Learn progress live in this browser under the name you are signed in as. Nothing here touches the cards themselves, or anyone else's device."}),
+    el("p",{text: S.user
+      ? "Your scores, stars and Learn progress follow your account between devices. The settings above are this browser's own — they don't travel with you."
+      : "Scores, stars and Learn progress are stored in this browser, under the name you are signed in as. So are the settings above. Signing in with an account carries the progress between devices; the settings stay here either way."}),
     el("div",{class:"rowctl",style:"justify-content:flex-start"},[
       el("button",{class:"btn ghost",onclick:resetSettings},["Put the settings back"]),
       el("button",{class:"btn danger",onclick:wipeProgress},["Erase my progress"])
@@ -6166,9 +6178,20 @@ function resetSettings(){
   render(); toast("Settings back to the start");
 }
 /* Scores and stars only. The decks are not touched — they are the shared file, and
-   nothing on this page should be able to reach them. */
+   nothing on this page should be able to reach them.
+
+   When there is an account behind this, clearing the browser is not erasing anything:
+   the next sign-in pulls it all back down and merges it in. So the account's own copy
+   goes too, and the queued push is cancelled first — otherwise the 1.5s debounce would
+   upload the scores again on its way out. */
 function wipeProgress(){
-  if(!confirm("Erase every score, star and Learn rung stored in this browser for " + ((S.user ? whoName(S.user) : S.who) || "you") + "?\n\nThe cards themselves are not touched. This can't be undone.")) return;
+  var signedIn = !!(sb && S.user);
+  var who = (S.user ? whoName(S.user) : S.who) || "you";
+  if(!confirm("Erase every score, star and Learn rung for " + who + "?\n\n"
+    + (signedIn ? "This clears them on your account as well, so they will not come back on your other devices.\n\n" : "They are stored in this browser only.\n\n")
+    + "The cards themselves are not touched. This can't be undone.")) return;
+  clearTimeout(syncTimer);
+  pendingDecks = {};
   S.progress = {}; S.bests = {}; S.learn = {};
   try{
     localStorage.removeItem(PKEY());
@@ -6176,7 +6199,11 @@ function wipeProgress(){
     localStorage.removeItem(LKEY());
   }catch(e){}
   S.session = null;
-  render(); toast("Progress erased on this device");
+  render();
+  if(!signedIn) return toast("Progress erased on this device");
+  sb.from("progress").delete().eq("user_id", S.user.id).then(function(r){
+    toast(r && r.error ? "Erased here, but the account's copy wouldn't clear" : "Progress erased, here and on your account");
+  }, function(){ toast("Erased here, but the account's copy wouldn't clear"); });
 }
 
 /* ============================ connect to GitHub ============================ */

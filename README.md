@@ -474,8 +474,15 @@ what is already there.
 
 **Look** — the eight themes and the colour builder, plus: whether the sidebar shows the
 index-card mark and the byline or just the word (this swaps the tab icon back to the
-plain card it had before the brand kit too); serif or plain reading type; and a size,
-which zooms the study area and leaves the sidebar alone.
+plain card it had before the brand kit too); serif or plain reading type; square
+corners instead of rounded; and a size, which zooms the study area and leaves the
+sidebar alone.
+
+Square corners are two numbers: every corner in the app comes off `--r` and `--r-lg`,
+so the setting zeroes those. The two pills — the Dashboard button and the phone's
+Decks tab — say `999px` outright and are squared by name, because a pill is a shape
+rather than a corner. The avatar and the status dot stay round; a squared-off 6px dot
+reads as a bug, not a style.
 
 **Motion** — Auto, Full, Less or None. Auto asks the computer, and follows it if it
 changes while the page is open. Less keeps the fades and drops the travel: the card
@@ -490,9 +497,16 @@ themselves after a clean right answer, how a deck starts (shuffled or in order, 
 side it asks from — the buttons on a deck still change it for that sitting), the answer
 colours in Learn, and the keyboard hints.
 
-**This device** — put the settings back, or erase every score, star and Learn rung stored
-in this browser. Neither touches the cards: those are the shared file, and nothing on
-this page can reach them.
+**This device** — put the settings back, or erase every score, star and Learn rung.
+Neither touches the cards: those are the shared file, and nothing on this page can
+reach them.
+
+**The settings do not follow an account.** They are this browser's, like the theme —
+signing in on a school Chromebook doesn't drag your size and motion choices onto it,
+and changing them there doesn't change them at home. Progress is the opposite: when
+you're signed in it syncs, so erasing it has to clear the account's copy as well, or
+the next sign-in pulls it all back and merges it in. The queued push is cancelled
+first — otherwise the 1.5s debounce would upload the scores again on its way out.
 
 "Must be exact" doesn't get its own comparison. It refuses the near band inside
 `grade()`, so every mode that marks typing agrees about what counts without knowing the
